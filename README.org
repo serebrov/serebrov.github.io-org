@@ -1,0 +1,40 @@
+#+TITLE: Blog
+
+A static blog made from org files with the Emacs HTML exporter (=ox-html=).
+A small JavaScript file adds the reader features in the browser.
+
+* Layout
+| Path         | Content                                                     |
+|--------------+-------------------------------------------------------------|
+| =posts/=     | One org file per post. Images and videos go in =posts/images/=. |
+| =static/=    | =blog.css= and =blog.js=, copied to every build.            |
+| =publish.el= | The export settings, the =video:= link type, and the build command. |
+| =public/=    | The build output. You can put it on any static host.        |
+
+* Requirements
+- Emacs with Org 9.8 or later.
+- The =htmlize= package from MELPA. The build finds it in the package directory of your Emacs (=~/.emacs.d/elpa/=).
+
+* Commands
+| Command        | Result                                           |
+|----------------+--------------------------------------------------|
+| =make build=   | Export the posts that changed to =public/=.      |
+| =make rebuild= | Export all posts again.                          |
+| =make serve=   | Build, then serve =public/= on http://localhost:8000. |
+| =make clean=   | Remove =public/= and the export cache.           |
+
+In Emacs, load =publish.el= and run =M-x blog-publish=. With =C-u=, it exports all posts again.
+
+* Write a post
+1. Add =posts/YYYY-MM-DD-slug.org= with =#+TITLE=, =#+DATE=, and =#+DESCRIPTION=.
+2. Run =make serve= and open the post from the index page.
+
+The index page (=index.html=) lists the posts, newest first, by =#+DATE=.
+
+* Page features
+- Folding :: Click a heading to fold its section. Add the tag =:folded:= to a heading to close it when the page opens.
+- Section links :: Each heading gets an id from its title, for example =#code-blocks=. Set =CUSTOM_ID= to use a different id.
+- Code :: htmlize colors the code at build time with the Emacs major mode of the language. The colors for each face (=.org-keyword=, =.org-string=, and more) are in =static/blog.css=. Each block has a copy button.
+- Code results :: The build does not run code. For a block with =:exports both=, the =#+RESULTS:= that are in the file go to the page.
+- Images :: A link to an image file, for example =[[file:images/diagram.svg]]=, shows the image. Add =#+CAPTION:= above it for a caption.
+- Video :: =[[video:images/clip.mp4]]= or =[[video:https://example.com/clip.mp4]]= shows a video player.

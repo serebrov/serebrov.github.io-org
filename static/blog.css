@@ -1,0 +1,87 @@
+/* Page style for pages that ox-html exports. */
+
+:root {
+  --text: #1f2328;
+  --muted: #6e7781;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+}
+
+body {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  font: 17px/1.65 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--text);
+}
+
+a { color: var(--link); }
+h1.title { margin-bottom: 0.2rem; }
+.subtitle { color: var(--muted); margin-top: 0; }
+
+/* Table of contents */
+#table-of-contents {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  margin: 1.5rem 0;
+  font-size: 0.95em;
+}
+#table-of-contents h2 { font-size: 1rem; margin: 0.3rem 0; }
+#table-of-contents ul { padding-left: 1.2rem; margin: 0.2rem 0; }
+
+/* Folding sections (see setupFolding in blog.js) */
+.fold-toggle { cursor: pointer; }
+.fold-toggle::before {
+  content: "\25BE";
+  display: inline-block;
+  width: 1.1em;
+  color: var(--muted);
+}
+.is-folded > .fold-toggle::before { content: "\25B8"; }
+.is-folded > :not(.fold-toggle) { display: none; }
+
+.tag { float: right; font-size: 0.7em; color: var(--muted); font-weight: normal; }
+.tag .folded { display: none; }
+
+/* Code */
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; }
+:not(pre) > code { background: var(--code-bg); padding: 0.1em 0.3em; border-radius: 4px; }
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  overflow-x: auto;
+}
+
+/* Code colors: htmlize outputs one "org-<face>" class per Emacs face. */
+.org-keyword, .org-builtin { color: #cf222e; }
+.org-string { color: #0a3069; }
+.org-doc, .org-comment, .org-comment-delimiter { color: #6e7781; font-style: italic; }
+.org-function-name { color: #8250df; }
+.org-variable-name, .org-constant { color: #0550ae; }
+.org-type, .org-preprocessor { color: #953800; }
+.code-block { position: relative; }
+.copy-button {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  opacity: 0;
+}
+.code-block:hover .copy-button, .copy-button:focus { opacity: 1; }
+
+/* Images, videos, tables */
+img, video { max-width: 100%; height: auto; }
+.figure { text-align: center; margin: 1.5rem 0; }
+.figure p:last-child { color: var(--muted); font-size: 0.9em; }
+table { border-collapse: collapse; margin: 1rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.3rem 0.7rem; }
+blockquote { border-left: 4px solid var(--border); margin-left: 0; padding-left: 1rem; color: var(--muted); }
