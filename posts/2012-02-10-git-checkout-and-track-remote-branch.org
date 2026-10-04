@@ -2,7 +2,7 @@
 #+DATE: <2012-02-10>
 #+TYPE: note
 #+FILETAGS: :git:
-#+DESCRIPTION: how to checkout and track the remote branch
+#+DESCRIPTION: How to checkout and track the remote branch.
 
 Note: in recent =git= versions, it is enough to do =git pull= and
 =git checkout feature= to checkout and start tracking the remote branch.

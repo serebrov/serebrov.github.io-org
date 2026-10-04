@@ -1,0 +1,117 @@
+#+TITLE: git - your branch and 'origin/xxx' have diverged error
+#+DATE: <2012-02-13>
+#+TYPE: note
+#+FILETAGS: :git:
+#+DESCRIPTION: Reasons for branch to be diverged and solutions.
+
+Git error:
+
+#+begin_example
+Your branch and 'origin/xxx' have diverged,
+and have 1 and 1 different commit(s) each, respectively.
+#+end_example
+
+The error is caused by two independent commits - one (or more) on the
+local branch copy and other - on the remote branch copy (for example,
+commit by another person to the same branch).
+
+Another case for the error is =git rebase= (error is expected, see
+below).
+
+The history looks like this:
+
+#+begin_example
+    ... o ---- o ---- A ---- B  origin/branch_xxx (upstream work)
+                       \
+                        C  branch_xxx (your work)
+#+end_example
+
+The solution depends on what has actually happened, the reason why the
+upstream state has changed. If someone else is also working on the same
+branch, the good way to solve it is to rebase the commit =C= on top of
+the remote state:
+
+#+begin_src sh
+git rebase origin/branch_xxx
+#+end_src
+
+The history after the rebase will look like this:
+
+#+begin_example
+    ... o ---- o ---- A ---- B  origin/branch_xxx (upstream work)
+                              \
+                               C`  branch_xxx (your work)
+#+end_example
+
+Another way to fix the issue is to merge the upstream branch state to
+local:
+
+#+begin_src sh
+git merge origin/branch_xxx
+#+end_src
+
+The history after will look like this:
+
+#+begin_example
+    ... o ---- o ---- A ---- C ---- B  --- [merge commit]
+#+end_example
+
+* The same git error after rebase:
+:PROPERTIES:
+:CUSTOM_ID: the-same-git-error-after-rebase
+:END:
+This happens if you rebase the branch which was previously pushed to the
+origin repository, for example, we start with a state like this:
+
+#+begin_example
+    ... o ---- o ---- A ---- B  master, origin/master
+                       \
+                        C  branch_xxx, origin/branch_xxx
+#+end_example
+
+Now we want to rebase branch_xxx against the master branch:
+
+#+begin_src shell
+git checkout master
+git pull
+git checkout branch_xxx
+git rebase master
+#+end_src
+
+Now local state of the =mybranch= and =origin/mybranch= state will
+diverge. This is expected as rebase rewrites history, so after it you'll
+have different local and remote state:
+
+#+begin_example
+    ... o ---- o ---- A ---------------------- B  master, origin/master
+                       \                        \
+                        C  origin/branch_xxx     C` branch_xxx
+#+end_example
+
+#+begin_src shell
+git status
+#+end_src
+
+#+begin_example
+On branch branch
+Your branch and 'origin/branch' have diverged,
+and have 1 and 1 different commits each, respectively.
+  (use "git pull" to merge the remote branch into yours)
+#+end_example
+
+If you absolutely sure this is your case then you can force Git to push
+your changes:
+
+#+begin_src shell
+git push -f origin branch_xxx
+#+end_src
+
+* Links
+:PROPERTIES:
+:CUSTOM_ID: links
+:END:
+[[http://stackoverflow.com/questions/34918268/should-i-rebase-master-onto-a-branch-thats-been-pushed/34946769#34946769][Should I rebase master onto a branch that's been pushed?]]
+
+[[http://stackoverflow.com/questions/2452226/master-branch-and-origin-master-have-diverged-how-to-undiverge-branches][Stackoverflow - master branch and 'origin/master' have diverged, how to 'undiverge' branches'?]]
+
+[[http://stackoverflow.com/questions/11563319/git-rebase-basics][Stackoverflow - git rebase basics]]
