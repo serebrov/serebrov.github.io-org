@@ -22,8 +22,13 @@
   (package-initialize)
   (require 'htmlize))
 
-(defconst blog-root (file-name-directory (or load-file-name buffer-file-name))
-  "Directory that contains this file.")
+(eval-and-compile
+  (defconst blog-root
+    (file-name-directory
+     (or load-file-name (bound-and-true-p byte-compile-current-file) buffer-file-name))
+    "Directory that contains this file."))
+
+(require 'blog-tags (expand-file-name "blog-tags" blog-root))
 
 (defun blog-path (name)
   "Return NAME expanded against `blog-root'."
@@ -45,20 +50,27 @@ after the next rebuild without a reload of this file."
     (buffer-string)))
 
 (defun blog-page-section (file)
-  "Return the menu section of the page made from FILE: \"posts\" or \"archive\"."
-  (if (or (file-in-directory-p file (blog-path "posts/archive"))
-          (string= (file-name-nondirectory file) "archive.org"))
-      "archive"
-    "posts"))
+  "Return the menu section of the page made from FILE.
+The value is \"posts\", \"archive\", or \"tags\"."
+  (cond ((or (file-in-directory-p file (blog-path "posts/archive"))
+             (string= (file-name-nondirectory file) "archive.org"))
+         "archive")
+        ((file-in-directory-p file (blog-path "tags")) "tags")
+        (t "posts")))
+
+(defconst blog-section-pages '("index.org" "archive.org" "tags/index.org")
+  "Source files of the pages that the menu links go to, relative to `blog-root'.")
 
 (defun blog-header (info)
   "Return the site header for the page that INFO describes.
 The menu link with the data-section of the page gets aria-current:
-\"page\" on the index pages (the link goes to this page), and
-\"true\" on posts (the link goes to the section of the post)."
+\"page\" on the pages that the menu links go to, and \"true\" on other
+pages of the section (posts and pages of single tags)."
   (let* ((file (plist-get info :input-file))
          (section (format "data-section=\"%s\"" (blog-page-section file)))
-         (current (if (file-equal-p (file-name-directory file) blog-root) "page" "true")))
+         (current (if (member (file-relative-name file blog-root) blog-section-pages)
+                      "page"
+                    "true")))
     (string-replace section
                     (format "%s aria-current=\"%s\"" section current)
                     (blog-read-layout "header.html"))))
@@ -98,18 +110,29 @@ build.  This runs on the export copy of the buffer, not on the file."
            (org-entry-put nil "CUSTOM_ID"
                           (if (= count 1) slug (format "%s-%d" slug count)))))))))
 
-(defun blog-sitemap-entry (entry _style project)
-  "Return the index page line for the post ENTRY of PROJECT.
+(defun blog-post-entry (file project html-dir)
+  "Return the post list line for the post FILE of PROJECT.
 The line is a description list item: the post title is the term, and
-the date and #+DESCRIPTION are the definition.  The index page is at
-the site root, and the posts are in html/."
-  (let ((date (format-time-string "%F" (org-publish-find-date entry project)))
-        (description (org-publish-find-property entry :description project 'html)))
-    (format "[[file:html/%s][%s]] :: @@html:<time datetime=\"%s\">%s</time>@@ %s"
-            (file-name-with-extension entry "html")
-            (org-publish-find-title entry project)
+the date and #+DESCRIPTION are the definition.  HTML-DIR is the path
+from the list page to the post pages, for example \"html/\"."
+  (let ((date (format-time-string "%F" (org-publish-find-date file project)))
+        (description (org-publish-find-property file :description project 'html)))
+    (format "[[file:%s%s][%s]] :: @@html:<time datetime=\"%s\">%s</time>@@ %s"
+            html-dir
+            (file-name-with-extension (file-name-nondirectory file) "html")
+            (org-publish-find-title file project)
             date date
             (string-replace "\n" " " (or description "")))))
+
+(defun blog-sitemap-entry (entry _style project)
+  "Return the index page line for the post ENTRY of PROJECT.
+The index pages are at the site root, and the posts are in html/."
+  (blog-post-entry entry project "html/"))
+
+(defun blog-tag-entry (file _style project)
+  "Return the tag page line for the post FILE of PROJECT.
+The tag pages are in tags/TAG/, and the posts are in html/."
+  (blog-post-entry file project "../../html/"))
 
 (defun blog-sitemap (title list)
   "Return the org text of an index page with TITLE and the post LIST.
@@ -120,6 +143,28 @@ not recursive.  `org-publish-sitemap-default' is not used, because its
           "#+ATTR_HTML: :class post-list\n"
           (mapconcat (lambda (item) (concat "- " (car item))) (cdr list) "\n")
           "\n"))
+
+(defun blog-post-files ()
+  "Return a (FILE . PROJECT) pair for each post of the post projects."
+  (let ((projects (blog-projects)))
+    (mapcan (lambda (name)
+              (let ((project (assoc name projects)))
+                (mapcar (lambda (file) (cons file project))
+                        (directory-files (plist-get (cdr project) :base-directory)
+                                         t "\\`[^.].*\\.org\\'"))))
+            '("blog-posts" "blog-archive"))))
+
+(defun blog-write-tag-pages (_project-plist)
+  "Write the org files of the tag pages to tags/ before the tags project."
+  (blog-tags-write (blog-path "tags") (blog-tags-collect (blog-post-files))
+                   #'blog-sitemap #'blog-tag-entry))
+
+(defun blog-add-post-tags (body backend info)
+  "Add links to the tag pages at the end of BODY of a post.
+INFO is the export plist, BACKEND is the export backend."
+  (when (and (org-export-derived-backend-p backend 'html)
+             (file-in-directory-p (plist-get info :input-file) (blog-path "posts")))
+    (concat body (blog-tags-links (plist-get info :filetags)))))
 
 (defconst blog-page-options
   `(:base-extension "org"
@@ -170,6 +215,12 @@ the URLs are /html/<file name>.html, the same as on the old Hugo site."
      :include ("index.org" "archive.org")
      :publishing-directory ,(blog-path "public")
      ,@blog-page-options)
+    ("blog-tags"
+     :base-directory ,(blog-path "tags")
+     :recursive t
+     :publishing-directory ,(blog-path "public/tags")
+     :preparation-function blog-write-tag-pages
+     ,@blog-page-options)
     ("blog-media"
      :base-directory ,(blog-path "posts")
      :base-extension "png\\|jpe?g\\|gif\\|svg\\|webp\\|mp4\\|webm"
@@ -187,7 +238,7 @@ the URLs are /html/<file name>.html, the same as on the old Hugo site."
      :base-extension "css\\|js"
      :publishing-directory ,(blog-path "public/static")
      :publishing-function org-publish-attachment)
-    ("blog" :components ("blog-posts" "blog-archive" "blog-index"
+    ("blog" :components ("blog-posts" "blog-archive" "blog-index" "blog-tags"
                          "blog-media" "blog-files" "blog-static"))))
 
 (defun blog-publish (&optional force)
@@ -199,6 +250,8 @@ the URLs are /html/<file name>.html, the same as on the old Hugo site."
         (org-export-use-babel nil)
         (org-export-before-parsing-functions
          (cons #'blog-add-heading-ids org-export-before-parsing-functions))
+        (org-export-filter-body-functions
+         (cons #'blog-add-post-tags org-export-filter-body-functions))
         (org-export-filter-final-output-functions
          (cons #'blog-lazy-images org-export-filter-final-output-functions))
         (make-backup-files nil))

@@ -56,6 +56,12 @@ h1.title { margin-bottom: 0.2rem; }
 .post-list dt { margin-top: 1.2rem; font-weight: 600; }
 .post-list dd { margin: 0.2rem 0 0; color: var(--muted); }
 .post-list time { margin-right: 0.5rem; font-variant-numeric: tabular-nums; }
+
+/* Tags (see blog-tags.el) */
+.tag-cloud { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 1.1rem; padding: 0; list-style: none; }
+.tag-cloud a { text-decoration: none; }
+.post-tags { margin-top: 2.5rem; color: var(--muted); font-size: 0.95em; }
+.post-tags a { margin-right: 0.4rem; }
 .subtitle { color: var(--muted); margin-top: 0; }
 
 /* Table of contents */

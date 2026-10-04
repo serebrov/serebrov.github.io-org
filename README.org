@@ -9,9 +9,10 @@ A small JavaScript file adds the reader features in the browser.
 | =posts/=     | One org file per post. Images and videos go in =posts/images/=. |
 | =posts/archive/= | Old posts. They are not on the index page.              |
 | =posts/files/= | Downloadable files (scripts, configuration files) that posts link to. |
-| =layout/=    | =header.html= and =footer.html=: the site header (logo, name, menu) and footer of every page. The build marks the menu link of the current section (=data-section= "posts" or "archive") with =aria-current=. |
+| =layout/=    | =header.html= and =footer.html=: the site header (logo, name, menu) and footer of every page. The build marks the menu link of the current section (=data-section= "posts", "archive", or "tags") with =aria-current=. |
 | =static/=    | =blog.css= and =blog.js=, copied to every build.            |
 | =publish.el= | The export settings, the =video:= link type, and the build command. |
+| =blog-tags.el= | The tag cloud, the tag pages, and the tag links on posts. |
 | =public/=    | The build output. You can put it on any static host.        |
 
 * URLs
@@ -25,6 +26,8 @@ The site must be at the root of its domain (for example https://serebrov.github.
 | =posts/files/<file>=           | =/html/files/<file>=           |
 | =index.org= (made by the build) | =/= (=index.html=)            |
 | =archive.org= (made by the build) | =/archive.html=             |
+| =tags/index.org= (made by the build) | =/tags/= (tag cloud)     |
+| =tags/<tag>/index.org= (made by the build) | =/tags/<tag>/=     |
 
 The =/html/<name>.html= URLs are the same as on the old Hugo site. Thus the file name of a post sets its URL. Do not rename a published post. Posts and archive posts go to the same directory, so their file names must be different.
 
@@ -46,8 +49,14 @@ In Emacs, load =publish.el= and run =M-x blog-publish=. With =C-u=, it exports a
 
 =make build= exports only the org files that changed. After you change =layout/= or =publish.el=, run =make rebuild= to update all pages.
 
+To convert multiple files from markdown to org:
+
+#+begin_src shell
+for mdf in $(ls *.md); do pandoc -f markdown -t org -o ${mdf%.*}.org $mdf; done;
+#+end_src
+
 * Write a post
-1. Add =posts/YYYY-MM-DD-slug.org= with =#+TITLE=, =#+DATE=, and =#+DESCRIPTION=.
+1. Add =posts/YYYY-MM-DD-slug.org= with =#+TITLE=, =#+DATE=, =#+DESCRIPTION=, and =#+FILETAGS=.
 2. Run =make serve= and open the post from the index page.
 
 The index page (=index.html=) lists the posts in =posts/=, newest first, by =#+DATE=.
@@ -59,3 +68,4 @@ The index page (=index.html=) lists the posts in =posts/=, newest first, by =#+D
 - Code results :: The build does not run code. For a block with =:exports both=, the =#+RESULTS:= that are in the file go to the page.
 - Images :: A link to an image file, for example =[[file:images/diagram.svg]]=, shows the image. Add =#+CAPTION:= above it for a caption. =M-x yank-media= pastes an image from the clipboard to =posts/images/= and inserts this link (see =posts/.dir-locals.el=).
 - Video :: =[[video:images/clip.mp4]]= or =[[video:https://example.com/clip.mp4]]= shows a video player.
+- Tags :: Write the tags of a post as =#+FILETAGS: :git:aws:=, with colons. The export does not split tags at spaces, so =#+FILETAGS: git aws= is one tag "git aws". The end of each post links to its tag pages. The =/tags/= page shows all tags; the font size grows with the number of posts. Each tag page lists the posts and archive posts with this tag, newest first. The build makes all tag pages again on each run.
