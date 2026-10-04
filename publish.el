@@ -100,10 +100,26 @@ build.  This runs on the export copy of the buffer, not on the file."
 
 (defun blog-sitemap-entry (entry _style project)
   "Return the index page line for the post ENTRY of PROJECT.
-The index page is at the site root, and the posts are in html/."
-  (format "[[file:html/%s][%s]]"
-          (file-name-with-extension entry "html")
-          (org-publish-find-title entry project)))
+The line is a description list item: the post title is the term, and
+the date and #+DESCRIPTION are the definition.  The index page is at
+the site root, and the posts are in html/."
+  (let ((date (format-time-string "%F" (org-publish-find-date entry project)))
+        (description (org-publish-find-property entry :description project 'html)))
+    (format "[[file:html/%s][%s]] :: @@html:<time datetime=\"%s\">%s</time>@@ %s"
+            (file-name-with-extension entry "html")
+            (org-publish-find-title entry project)
+            date date
+            (string-replace "\n" " " (or description "")))))
+
+(defun blog-sitemap (title list)
+  "Return the org text of an index page with TITLE and the post LIST.
+LIST is flat, (unordered (ENTRY) ...), because the post projects are
+not recursive.  `org-publish-sitemap-default' is not used, because its
+`org-list-to-org' call removes the HTML snippets of `blog-sitemap-entry'."
+  (concat "#+TITLE: " title "\n\n"
+          "#+ATTR_HTML: :class post-list\n"
+          (mapconcat (lambda (item) (concat "- " (car item))) (cdr list) "\n")
+          "\n"))
 
 (defconst blog-page-options
   `(:base-extension "org"
@@ -136,6 +152,7 @@ the URLs are /html/<file name>.html, the same as on the old Hugo site."
      :sitemap-title "Posts"
      :sitemap-sort-files anti-chronologically
      :sitemap-format-entry blog-sitemap-entry
+     :sitemap-function blog-sitemap
      ,@blog-page-options)
     ("blog-archive"
      :base-directory ,(blog-path "posts/archive")
@@ -145,6 +162,7 @@ the URLs are /html/<file name>.html, the same as on the old Hugo site."
      :sitemap-title "Archive"
      :sitemap-sort-files anti-chronologically
      :sitemap-format-entry blog-sitemap-entry
+     :sitemap-function blog-sitemap
      ,@blog-page-options)
     ("blog-index"
      :base-directory ,blog-root

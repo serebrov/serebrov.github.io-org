@@ -51,6 +51,11 @@ a { color: var(--link); }
 #postamble p { margin: 0; }
 
 h1.title { margin-bottom: 0.2rem; }
+
+/* Post lists on the index pages (see blog-sitemap-entry in publish.el) */
+.post-list dt { margin-top: 1.2rem; font-weight: 600; }
+.post-list dd { margin: 0.2rem 0 0; color: var(--muted); }
+.post-list time { margin-right: 0.5rem; font-variant-numeric: tabular-nums; }
 .subtitle { color: var(--muted); margin-top: 0; }
 
 /* Table of contents */
