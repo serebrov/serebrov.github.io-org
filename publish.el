@@ -30,9 +30,11 @@
   (expand-file-name name blog-root))
 
 (defconst blog-html-head
-  (concat "<link rel=\"stylesheet\" href=\"static/blog.css\">\n"
-          "<script defer src=\"static/blog.js\"></script>")
-  "The <head> tags that every page shares.")
+  (concat "<link rel=\"stylesheet\" href=\"/static/blog.css\">\n"
+          "<script defer src=\"/static/blog.js\"></script>")
+  "The <head> tags that every page shares.
+The paths are absolute because the site is at the root of its domain
+and pages are in more than one directory.")
 
 (defun blog-video-export (path _desc backend _info)
   "Export a video:PATH link as an HTML5 video element when BACKEND is HTML."
@@ -65,31 +67,61 @@ build.  This runs on the export copy of the buffer, not on the file."
            (org-entry-put nil "CUSTOM_ID"
                           (if (= count 1) slug (format "%s-%d" slug count)))))))))
 
+(defun blog-sitemap-entry (entry _style project)
+  "Return the index page line for the post ENTRY of PROJECT.
+The index page is at the site root, and the posts are in html/."
+  (format "[[file:html/%s][%s]]"
+          (file-name-with-extension entry "html")
+          (org-publish-find-title entry project)))
+
+(defconst blog-page-options
+  `(:base-extension "org"
+    :publishing-function org-html-publish-to-html
+    :with-toc t
+    :section-numbers nil
+    :headline-levels 6
+    :html-doctype "html5"
+    :html-html5-fancy t
+    :html-head-include-default-style nil
+    :html-head-include-scripts nil
+    :html-head ,blog-html-head
+    :html-postamble nil
+    :html-validation-link nil)
+  "Export options that all pages share.")
+
 (defun blog-projects ()
-  "Return the `org-publish-project-alist' for the blog."
+  "Return the `org-publish-project-alist' for the blog.
+Posts and archive posts go to one flat directory, public/html/, so that
+the URLs are /html/<file name>.html, the same as on the old Hugo site."
   `(("blog-posts"
      :base-directory ,(blog-path "posts")
-     :base-extension "org"
-     :publishing-directory ,(blog-path "public")
-     :publishing-function org-html-publish-to-html
+     :publishing-directory ,(blog-path "public/html")
      :auto-sitemap t
-     :sitemap-filename "index.org"
+     :sitemap-filename "../index.org"
      :sitemap-title "Posts"
      :sitemap-sort-files anti-chronologically
-     :with-toc t
-     :section-numbers nil
-     :headline-levels 6
-     :html-doctype "html5"
-     :html-html5-fancy t
-     :html-head-include-default-style nil
-     :html-head-include-scripts nil
-     :html-head ,blog-html-head
-     :html-postamble nil
-     :html-validation-link nil)
+     :sitemap-format-entry blog-sitemap-entry
+     ,@blog-page-options)
+    ("blog-archive"
+     :base-directory ,(blog-path "posts/archive")
+     :publishing-directory ,(blog-path "public/html")
+     ,@blog-page-options)
+    ("blog-index"
+     :base-directory ,blog-root
+     :exclude "."
+     :include ("index.org")
+     :publishing-directory ,(blog-path "public")
+     ,@blog-page-options)
     ("blog-media"
      :base-directory ,(blog-path "posts")
      :base-extension "png\\|jpe?g\\|gif\\|svg\\|webp\\|mp4\\|webm"
-     :publishing-directory ,(blog-path "public")
+     :publishing-directory ,(blog-path "public/html")
+     :publishing-function org-publish-attachment
+     :recursive t)
+    ("blog-files"
+     :base-directory ,(blog-path "posts/files")
+     :base-extension any
+     :publishing-directory ,(blog-path "public/html/files")
      :publishing-function org-publish-attachment
      :recursive t)
     ("blog-static"
@@ -97,7 +129,8 @@ build.  This runs on the export copy of the buffer, not on the file."
      :base-extension "css\\|js"
      :publishing-directory ,(blog-path "public/static")
      :publishing-function org-publish-attachment)
-    ("blog" :components ("blog-posts" "blog-media" "blog-static"))))
+    ("blog" :components ("blog-posts" "blog-archive" "blog-index"
+                         "blog-media" "blog-files" "blog-static"))))
 
 (defun blog-publish (&optional force)
   "Publish the blog to public/.  With FORCE, export all files again."

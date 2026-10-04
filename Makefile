@@ -16,4 +16,4 @@ serve: build  ## Build, then serve public/ on http://localhost:$(PORT)
 	python3 -m http.server $(PORT) -d public
 
 clean:  ## Remove the build output and the export cache
-	rm -rf public .cache posts/index.org
+	rm -rf public .cache index.org
