@@ -1,0 +1,37 @@
+#+TITLE: jQuery - check minimal required version
+#+DATE: <2012-01-24>
+#+TAGS: jquery note
+#+DESCRIPTION: How to make sure that right jQuery version is available.
+
+To check whether jQuery is loaded to the page and verify minimum
+version:
+
+#+begin_example
+if (typeof jQuery == 'undefined' ||
+!/[1-9]\.[3-9].[1-9]/.test($.fn.jquery)
+) {
+    throw('jQuery version 1.3.1 or above is required');
+}
+#+end_example
+
+#+begin_html
+  <!-- more -->
+#+end_html
+
+Here a regular expression determines a required jQuery version -
+
+#+begin_example
+/[X-9]\.[Y-9].[Z-9]/
+#+end_example
+
+For example, for 1.3.1 use
+
+#+begin_example
+/[1-9]\.[3-9].[1-9]/
+#+end_example
+
+and for 1.2.3 use
+
+#+begin_example
+/[1-9]\.[2-9].[3-9]/
+#+end_example
