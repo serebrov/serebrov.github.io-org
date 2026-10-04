@@ -9,6 +9,7 @@ A small JavaScript file adds the reader features in the browser.
 | =posts/=     | One org file per post. Images and videos go in =posts/images/=. |
 | =posts/archive/= | Old posts. They are not on the index page.              |
 | =posts/files/= | Downloadable files (scripts, configuration files) that posts link to. |
+| =layout/=    | =header.html= and =footer.html=: the site header (logo, name, menu) and footer of every page. |
 | =static/=    | =blog.css= and =blog.js=, copied to every build.            |
 | =publish.el= | The export settings, the =video:= link type, and the build command. |
 | =public/=    | The build output. You can put it on any static host.        |
@@ -23,6 +24,7 @@ The site must be at the root of its domain (for example https://serebrov.github.
 | =posts/images/<file>=          | =/html/images/<file>=          |
 | =posts/files/<file>=           | =/html/files/<file>=           |
 | =index.org= (made by the build) | =/= (=index.html=)            |
+| =archive.org= (made by the build) | =/archive.html=             |
 
 The =/html/<name>.html= URLs are the same as on the old Hugo site. Thus the file name of a post sets its URL. Do not rename a published post. Posts and archive posts go to the same directory, so their file names must be different.
 
@@ -41,6 +43,8 @@ In a post, link to another post with a relative path, for example =./2015-05-20-
 | =make clean=   | Remove =public/= and the export cache.           |
 
 In Emacs, load =publish.el= and run =M-x blog-publish=. With =C-u=, it exports all posts again.
+
+=make build= exports only the org files that changed. After you change =layout/= or =publish.el=, run =make rebuild= to update all pages.
 
 * Write a post
 1. Add =posts/YYYY-MM-DD-slug.org= with =#+TITLE=, =#+DATE=, and =#+DESCRIPTION=.

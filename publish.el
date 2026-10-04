@@ -36,6 +36,15 @@
 The paths are absolute because the site is at the root of its domain
 and pages are in more than one directory.")
 
+(defun blog-layout (name)
+  "Return a function that returns the HTML of layout/NAME.
+The export calls it for each page, so changes to the file show
+after the next rebuild without a reload of this file."
+  (lambda (_info)
+    (with-temp-buffer
+      (insert-file-contents (blog-path (concat "layout/" name)))
+      (buffer-string))))
+
 (defun blog-video-export (path _desc backend _info)
   "Export a video:PATH link as an HTML5 video element when BACKEND is HTML."
   (when (org-export-derived-backend-p backend 'html)
@@ -85,7 +94,11 @@ The index page is at the site root, and the posts are in html/."
     :html-head-include-default-style nil
     :html-head-include-scripts nil
     :html-head ,blog-html-head
-    :html-postamble nil
+    :html-preamble ,(blog-layout "header.html")
+    :html-postamble ,(blog-layout "footer.html")
+    :html-divs ((preamble "header" "preamble")
+                (content "main" "content")
+                (postamble "footer" "postamble"))
     :html-validation-link nil)
   "Export options that all pages share.")
 
@@ -114,7 +127,7 @@ the URLs are /html/<file name>.html, the same as on the old Hugo site."
     ("blog-index"
      :base-directory ,blog-root
      :exclude "."
-     :include ("index.org", "archive.org")
+     :include ("index.org" "archive.org")
      :publishing-directory ,(blog-path "public")
      ,@blog-page-options)
     ("blog-media"

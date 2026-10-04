@@ -17,6 +17,38 @@ body {
 }
 
 a { color: var(--link); }
+
+/* Site header and footer (layout/header.html, layout/footer.html) */
+#preamble {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.site-logo img { display: block; width: 3rem; height: 3rem; border-radius: 50%; }
+.site-info { flex: 1; line-height: 1.35; }
+.site-title { color: var(--text); font-weight: 600; font-size: 1.1rem; text-decoration: none; }
+.site-desc { margin: 0; color: var(--muted); font-size: 0.9rem; }
+@media (max-width: 600px) {
+  .site-menu { flex-basis: 100%; }
+}
+.site-menu, .site-contacts { display: flex; gap: 1rem; }
+.site-menu a, .site-contacts a { text-decoration: none; }
+#postamble {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+#postamble p { margin: 0; }
+
 h1.title { margin-bottom: 0.2rem; }
 .subtitle { color: var(--muted); margin-top: 0; }
 
