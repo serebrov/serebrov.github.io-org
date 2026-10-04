@@ -9,7 +9,7 @@ A small JavaScript file adds the reader features in the browser.
 | =posts/=     | One org file per post. Images and videos go in =posts/images/=. |
 | =posts/archive/= | Old posts. They are not on the index page.              |
 | =posts/files/= | Downloadable files (scripts, configuration files) that posts link to. |
-| =layout/=    | =header.html= and =footer.html=: the site header (logo, name, menu) and footer of every page. |
+| =layout/=    | =header.html= and =footer.html=: the site header (logo, name, menu) and footer of every page. The build marks the menu link of the current section (=data-section= "posts" or "archive") with =aria-current=. |
 | =static/=    | =blog.css= and =blog.js=, copied to every build.            |
 | =publish.el= | The export settings, the =video:= link type, and the build command. |
 | =public/=    | The build output. You can put it on any static host.        |

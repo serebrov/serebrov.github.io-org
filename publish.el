@@ -36,14 +36,36 @@
 The paths are absolute because the site is at the root of its domain
 and pages are in more than one directory.")
 
-(defun blog-layout (name)
-  "Return a function that returns the HTML of layout/NAME.
-The export calls it for each page, so changes to the file show
+(defun blog-read-layout (name)
+  "Return the HTML of layout/NAME.
+The export reads the file for each page, so changes to it show
 after the next rebuild without a reload of this file."
-  (lambda (_info)
-    (with-temp-buffer
-      (insert-file-contents (blog-path (concat "layout/" name)))
-      (buffer-string))))
+  (with-temp-buffer
+    (insert-file-contents (blog-path (concat "layout/" name)))
+    (buffer-string)))
+
+(defun blog-page-section (file)
+  "Return the menu section of the page made from FILE: \"posts\" or \"archive\"."
+  (if (or (file-in-directory-p file (blog-path "posts/archive"))
+          (string= (file-name-nondirectory file) "archive.org"))
+      "archive"
+    "posts"))
+
+(defun blog-header (info)
+  "Return the site header for the page that INFO describes.
+The menu link with the data-section of the page gets aria-current:
+\"page\" on the index pages (the link goes to this page), and
+\"true\" on posts (the link goes to the section of the post)."
+  (let* ((file (plist-get info :input-file))
+         (section (format "data-section=\"%s\"" (blog-page-section file)))
+         (current (if (file-equal-p (file-name-directory file) blog-root) "page" "true")))
+    (string-replace section
+                    (format "%s aria-current=\"%s\"" section current)
+                    (blog-read-layout "header.html"))))
+
+(defun blog-footer (_info)
+  "Return the site footer."
+  (blog-read-layout "footer.html"))
 
 (defun blog-video-export (path _desc backend _info)
   "Export a video:PATH link as an HTML5 video element when BACKEND is HTML."
@@ -94,8 +116,8 @@ The index page is at the site root, and the posts are in html/."
     :html-head-include-default-style nil
     :html-head-include-scripts nil
     :html-head ,blog-html-head
-    :html-preamble ,(blog-layout "header.html")
-    :html-postamble ,(blog-layout "footer.html")
+    :html-preamble blog-header
+    :html-postamble blog-footer
     :html-divs ((preamble "header" "preamble")
                 (content "main" "content")
                 (postamble "footer" "postamble"))

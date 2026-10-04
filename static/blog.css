@@ -36,6 +36,7 @@ a { color: var(--link); }
 }
 .site-menu, .site-contacts { display: flex; gap: 1rem; }
 .site-menu a, .site-contacts a { text-decoration: none; }
+.site-menu a[aria-current] { color: var(--text); font-weight: 600; }
 #postamble {
   display: flex;
   flex-wrap: wrap;
