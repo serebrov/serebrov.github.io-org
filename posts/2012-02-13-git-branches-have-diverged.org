@@ -1,10 +1,12 @@
-#+TITLE: git - your branch and 'origin/xxx' have diverged error
+#+TITLE: git: your branch and 'origin/xxx' have diverged error
 #+DATE: <2012-02-13>
 #+TYPE: note
 #+FILETAGS: :git:
 #+DESCRIPTION: Reasons for branch to be diverged and solutions.
 
-Git error:
+* Problem: Your branch and =origin/branch= have diverged
+
+The Git error looks like this:
 
 #+begin_example
 Your branch and 'origin/xxx' have diverged,

@@ -1,17 +1,17 @@
-#+TITLE: git - checkout and track remote branch
+#+TITLE: git: checkout and track remote branch
 #+DATE: <2012-02-10>
 #+TYPE: note
 #+FILETAGS: :git:
 #+DESCRIPTION: How to checkout and track the remote branch.
 
 Note: in recent =git= versions, it is enough to do =git pull= and
-=git checkout feature= to checkout and start tracking the remote branch.
+=git checkout branch-name= to checkout and start tracking the remote branch.
 
 Before, it was necessary to use the =-t= (=--track=) flag to do that:
 
 #+begin_src sh
-#creates and checks out "feature" branch that tracks "origin/feature"
-$ git checkout -t origin/feature
+#creates and checks out "branch-name" branch that tracks "origin/branch-name"
+$ git checkout -t origin/branch-name
 #+end_src
 
 Relevant part from the [[https://git-scm.com/docs/git-checkout#Documentation/git-checkout.txt-emgitcheckoutemltbranchgt][checkout docs]]:
@@ -24,5 +24,6 @@ git checkout [<branch>]
 If is not found but there does exist a tracking
 branch in exactly one remote (call it <remote>) with a matching name and
 --no-guess is not specified, treat as equivalent to
+
 $ git checkout -b <branch> --track <remote>/<branch>
 #+end_quote

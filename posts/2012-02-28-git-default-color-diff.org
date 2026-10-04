@@ -1,32 +1,33 @@
-#+TITLE: git - colored output (diff, branch, etc) by default
+#+TITLE: git: colored output (diff, branch, etc) by default
 #+DATE: <2012-02-28>
 #+TYPE: note
 #+FILETAGS: :git:
 #+DESCRIPTION: How to enable colors for git output.
 
-To have colored git commands output, use the following command:
+* Git me some colors!
 
-#+begin_src sh
+To have a more colorful git ouptput, use the following command:
+
+#+begin_src shell
 git config color.ui true
 #+end_src
 
 or (globally)
 
-#+begin_src sh
+#+begin_src shell
 git config --global color.ui true
 #+end_src
 
 Alternatively, you can set color for individual git commands.
 
-#+begin_src sh
+#+begin_src shell
 git config color.branch auto
 git config color.diff auto
 git config color.interactive auto
 git config color.status auto
 #+end_src
 
-See also color.* options in the
-[[http://schacon.github.com/git/git-config.html][git config docs]].
+See also color.* options in the [[http://schacon.github.com/git/git-config.html][git config docs]].
 
 * Links
 :PROPERTIES:
