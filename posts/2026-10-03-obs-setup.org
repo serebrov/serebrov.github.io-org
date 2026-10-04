@@ -1,6 +1,3 @@
-:PROPERTIES:
-:ID:       879B1728-D3D3-4F72-936F-37A542D56137
-:END:
 #+TITLE: OBS Setup
 #+SUBTITLE: A sample post that shows each page feature
 #+DATE: <2026-09-25 Fri>
