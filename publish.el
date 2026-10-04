@@ -105,6 +105,11 @@ the URLs are /html/<file name>.html, the same as on the old Hugo site."
     ("blog-archive"
      :base-directory ,(blog-path "posts/archive")
      :publishing-directory ,(blog-path "public/html")
+     :auto-sitemap t
+     :sitemap-filename "../archive.org"
+     :sitemap-title "Archive"
+     :sitemap-sort-files anti-chronologically
+     :sitemap-format-entry blog-sitemap-entry
      ,@blog-page-options)
     ("blog-index"
      :base-directory ,blog-root
