@@ -1,7 +1,7 @@
 #+TITLE: Hello from org-mode
 #+SUBTITLE: A sample post that shows each page feature
 #+DATE: <2026-09-25 Fri>
-#+AUTHOR: Boris Serebrov
+#+AUTHOR: Borys Serebrov
 #+DESCRIPTION: A sample post: folding sections, code, images, video, and tables.
 
 This post is the test page for the blog. Each section shows one feature.

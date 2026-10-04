@@ -36,5 +36,5 @@ The index page (=index.html=) lists the posts, newest first, by =#+DATE=.
 - Section links :: Each heading gets an id from its title, for example =#code-blocks=. Set =CUSTOM_ID= to use a different id.
 - Code :: htmlize colors the code at build time with the Emacs major mode of the language. The colors for each face (=.org-keyword=, =.org-string=, and more) are in =static/blog.css=. Each block has a copy button.
 - Code results :: The build does not run code. For a block with =:exports both=, the =#+RESULTS:= that are in the file go to the page.
-- Images :: A link to an image file, for example =[[file:images/diagram.svg]]=, shows the image. Add =#+CAPTION:= above it for a caption.
+- Images :: A link to an image file, for example =[[file:images/diagram.svg]]=, shows the image. Add =#+CAPTION:= above it for a caption. =M-x yank-media= pastes an image from the clipboard to =posts/images/= and inserts this link (see =posts/.dir-locals.el=).
 - Video :: =[[video:images/clip.mp4]]= or =[[video:https://example.com/clip.mp4]]= shows a video player.
