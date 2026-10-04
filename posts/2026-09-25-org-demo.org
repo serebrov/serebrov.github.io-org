@@ -1,5 +1,5 @@
-#+TITLE: Hello from org-mode
-#+SUBTITLE: A sample post that shows each page feature
+#+TITLE: Org mode demo
+#+SUBTITLE: Demo to show how various org mode blocks are rendered.
 #+DATE: <2026-09-25 Fri>
 #+TYPE: post
 #+FILETAGS: :org:
@@ -27,7 +27,7 @@ for post in sorted(Path("posts").glob("*.org")):
   (format "Hello, %s!" name))
 #+END_SRC
 
-#+BEGIN_SRC sh
+#+BEGIN_SRC shell
 make serve
 #+END_SRC
 

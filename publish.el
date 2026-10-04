@@ -35,7 +35,10 @@
   (expand-file-name name blog-root))
 
 (defconst blog-html-head
-  (concat "<link rel=\"stylesheet\" href=\"/static/blog.css\">\n"
+  (concat "<link rel=\"stylesheet\" href=\"/static/org_css/normalize.css\">\n"
+          "<link rel=\"stylesheet\" href=\"/static/org_css/htmlize.css\">\n"
+          "<link rel=\"stylesheet\" href=\"/static/org_css/org.css\">\n"
+          "<link rel=\"stylesheet\" href=\"/static/blog.css\">\n"
           "<script defer src=\"/static/blog.js\"></script>")
   "The <head> tags that every page shares.
 The paths are absolute because the site is at the root of its domain
@@ -254,7 +257,8 @@ without TAGS, the projects only give the post files."
        :base-directory ,(blog-path "static")
        :base-extension "css\\|js"
        :publishing-directory ,(blog-path "public/static")
-       :publishing-function org-publish-attachment)
+       :publishing-function org-publish-attachment
+       :recursive t)
       ("blog" :components ("blog-posts" "blog-archive" "blog-index" "blog-tags"
                            "blog-media" "blog-files" "blog-static")))))
 

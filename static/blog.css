@@ -26,6 +26,7 @@ a { color: var(--link); }
   gap: 0.5rem 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border);
+  margin: 0;
 }
 .site-logo img { display: block; width: 3rem; height: 3rem; border-radius: 50%; }
 .site-info { flex: 1; line-height: 1.35; }
@@ -42,7 +43,7 @@ a { color: var(--link); }
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 0.5rem 1rem;
-  margin-top: 3rem;
+  margin: 3rem 0 0;
   padding-top: 1rem;
   border-top: 1px solid var(--border);
   color: var(--muted);
@@ -69,7 +70,15 @@ a { color: var(--link); }
   .sidebar { grid-column: 2; grid-row: 2; margin-top: 1.5rem; padding-top: 0; border-top: none; }
 }
 
-h1.title { margin-bottom: 0.2rem; }
+h2,h3,h4,h5,h6 {
+  /* color: #A5573E; */
+  color: #000000;
+}
+h1.title {
+  text-align: left;
+  margin-bottom: 0.2rem;
+}
+.subtitle { text-align: left; }
 
 /* Post lists on the index pages (see blog-sitemap-entry in publish.el) */
 .post-list dt { margin-top: 1.2rem; font-weight: 600; }
@@ -111,12 +120,21 @@ h1.title { margin-bottom: 0.2rem; }
 /* Code */
 code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; }
 :not(pre) > code { background: var(--code-bg); padding: 0.1em 0.3em; border-radius: 4px; }
-pre {
+pre { overflow-x: auto; }
+
+/* Code boxes: source (.org-src-container) and example (pre.example) blocks.
+Override org.css style to have the gray background and no shadow. */
+.org-src-container, pre.example {
   background: var(--code-bg);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 0.8rem 1rem;
-  overflow-x: auto;
+  box-shadow: none;
+}
+.org-src-container { padding: 0.1rem 1rem; }
+.org-src-container > pre { margin: 0.5em 0; font-size: inherit; }
+pre.example {
+  font-size: var(--code-size);
+  padding: 0.5em 1rem;
 }
 
 /* Code colors: htmlize outputs one "org-<face>" class per Emacs face. */
@@ -126,10 +144,11 @@ pre {
 .org-function-name { color: #8250df; }
 .org-variable-name, .org-constant { color: #0550ae; }
 .org-type, .org-preprocessor { color: #953800; }
-.code-block { position: relative; }
+/* Copy button (see setupCopyButtons in blog.js).  At the bottom, because
+   org.css puts the language label at the top right corner. */
 .copy-button {
   position: absolute;
-  top: 0.4rem;
+  bottom: 0.4rem;
   right: 0.4rem;
   font-size: 0.75rem;
   padding: 0.15rem 0.5rem;
@@ -139,12 +158,16 @@ pre {
   cursor: pointer;
   opacity: 0;
 }
-.code-block:hover .copy-button, .copy-button:focus { opacity: 1; }
+.org-src-container:hover .copy-button, .copy-button:focus { opacity: 1; }
 
 /* Images, videos, tables */
 img, video { max-width: 100%; height: auto; }
 .figure { text-align: center; margin: 1.5rem 0; }
 .figure p:last-child { color: var(--muted); font-size: 0.9em; }
-table { border-collapse: collapse; margin: 1rem 0; }
+table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  border: none;
+}
 th, td { border: 1px solid var(--border); padding: 0.3rem 0.7rem; }
 blockquote { border-left: 4px solid var(--border); margin-left: 0; padding-left: 1rem; color: var(--muted); }

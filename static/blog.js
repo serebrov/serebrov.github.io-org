@@ -34,13 +34,15 @@ function revealHashTarget() {
   target.scrollIntoView();
 }
 
-/** Put a button over each org source block that copies its text. */
+/**
+ * Put a button into each org source block that copies its code.
+ * The button goes into the .org-src-container that ox-html makes, so the
+ * <pre> stays a direct child of it (org.css draws the language label
+ * with .org-src-container>pre:before).
+ */
 function setupCopyButtons() {
-  document.querySelectorAll('pre.src').forEach((pre) => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'code-block';
-    pre.replaceWith(wrapper);
-
+  document.querySelectorAll('.org-src-container').forEach((container) => {
+    const pre = container.querySelector('pre');
     const button = document.createElement('button');
     button.className = 'copy-button';
     button.textContent = 'Copy';
@@ -49,7 +51,7 @@ function setupCopyButtons() {
       button.textContent = 'Copied';
       setTimeout(() => (button.textContent = 'Copy'), 1500);
     });
-    wrapper.append(pre, button);
+    container.append(button);
   });
 }
 
