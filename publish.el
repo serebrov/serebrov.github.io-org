@@ -144,19 +144,19 @@ not recursive.  `org-publish-sitemap-default' is not used, because its
           (mapconcat (lambda (item) (concat "- " (car item))) (cdr list) "\n")
           "\n"))
 
-(defun blog-post-files ()
-  "Return a (FILE . PROJECT) pair for each post of the post projects."
-  (let ((projects (blog-projects)))
-    (mapcan (lambda (name)
-              (let ((project (assoc name projects)))
-                (mapcar (lambda (file) (cons file project))
-                        (directory-files (plist-get (cdr project) :base-directory)
-                                         t "\\`[^.].*\\.org\\'"))))
-            '("blog-posts" "blog-archive"))))
+(defun blog-post-files (projects)
+  "Return a (FILE . PROJECT) pair for each post of the post PROJECTS."
+  (mapcan (lambda (name)
+            (let ((project (assoc name projects)))
+              (mapcar (lambda (file) (cons file project))
+                      (directory-files (plist-get (cdr project) :base-directory)
+                                       t "\\`[^.].*\\.org\\'"))))
+          '("blog-posts" "blog-archive")))
 
-(defun blog-write-tag-pages (_project-plist)
-  "Write the org files of the tag pages to tags/ before the tags project."
-  (blog-tags-write (blog-path "tags") (blog-tags-collect (blog-post-files))
+(defun blog-write-tag-pages (project-plist)
+  "Write the org files of the tag pages to tags/ before the tags project.
+The tags are the :blog-tags property of PROJECT-PLIST."
+  (blog-tags-write (blog-path "tags") (plist-get project-plist :blog-tags)
                    #'blog-sitemap #'blog-tag-entry))
 
 (defun blog-add-post-tags (body backend info)
@@ -166,7 +166,20 @@ INFO is the export plist, BACKEND is the export backend."
              (file-in-directory-p (plist-get info :input-file) (blog-path "posts")))
     (concat body (blog-tags-links (plist-get info :filetags)))))
 
-(defconst blog-page-options
+(defun blog-add-sidebar (output backend info)
+  "Add the sidebar after the <main> element of OUTPUT.
+The sidebar is the :blog-sidebar property of INFO.  The /tags/ page
+has no sidebar, because its content is the same tag cloud."
+  (let ((sidebar (plist-get info :blog-sidebar)))
+    (when (and sidebar
+               (org-export-derived-backend-p backend 'html)
+               (not (string= (file-relative-name (plist-get info :input-file) blog-root)
+                             "tags/index.org")))
+      (string-replace "</main>" (concat "</main>\n" sidebar) output))))
+
+(defun blog-page-options (sidebar)
+  "Return the export options that all pages share.
+SIDEBAR is the HTML of the sidebar, or nil for no sidebar."
   `(:base-extension "org"
     :publishing-function org-html-publish-to-html
     :with-toc t
@@ -182,79 +195,84 @@ INFO is the export plist, BACKEND is the export backend."
     :html-divs ((preamble "header" "preamble")
                 (content "main" "content")
                 (postamble "footer" "postamble"))
-    :html-validation-link nil)
-  "Export options that all pages share.")
+    :html-validation-link nil
+    :blog-sidebar ,sidebar))
 
-(defun blog-projects ()
+(defun blog-projects (&optional tags)
   "Return the `org-publish-project-alist' for the blog.
 Posts and archive posts go to one flat directory, public/html/, so that
-the URLs are /html/<file name>.html, the same as on the old Hugo site."
-  `(("blog-posts"
-     :base-directory ,(blog-path "posts")
-     :publishing-directory ,(blog-path "public/html")
-     :auto-sitemap t
-     :sitemap-filename "../index.org"
-     :sitemap-title "Posts"
-     :sitemap-sort-files anti-chronologically
-     :sitemap-format-entry blog-sitemap-entry
-     :sitemap-function blog-sitemap
-     ,@blog-page-options)
-    ("blog-archive"
-     :base-directory ,(blog-path "posts/archive")
-     :publishing-directory ,(blog-path "public/html")
-     :auto-sitemap t
-     :sitemap-filename "../../archive.org"
-     :sitemap-title "Archive"
-     :sitemap-sort-files anti-chronologically
-     :sitemap-format-entry blog-sitemap-entry
-     :sitemap-function blog-sitemap
-     ,@blog-page-options)
-    ("blog-index"
-     :base-directory ,blog-root
-     :exclude "."
-     :include ("index.org" "archive.org")
-     :publishing-directory ,(blog-path "public")
-     ,@blog-page-options)
-    ("blog-tags"
-     :base-directory ,(blog-path "tags")
-     :recursive t
-     :publishing-directory ,(blog-path "public/tags")
-     :preparation-function blog-write-tag-pages
-     ,@blog-page-options)
-    ("blog-media"
-     :base-directory ,(blog-path "posts")
-     :base-extension "png\\|jpe?g\\|gif\\|svg\\|webp\\|mp4\\|webm"
-     :publishing-directory ,(blog-path "public/html")
-     :publishing-function org-publish-attachment
-     :recursive t)
-    ("blog-files"
-     :base-directory ,(blog-path "posts/files")
-     :base-extension any
-     :publishing-directory ,(blog-path "public/html/files")
-     :publishing-function org-publish-attachment
-     :recursive t)
-    ("blog-static"
-     :base-directory ,(blog-path "static")
-     :base-extension "css\\|js"
-     :publishing-directory ,(blog-path "public/static")
-     :publishing-function org-publish-attachment)
-    ("blog" :components ("blog-posts" "blog-archive" "blog-index" "blog-tags"
-                         "blog-media" "blog-files" "blog-static"))))
+the URLs are /html/<file name>.html, the same as on the old Hugo site.
+TAGS from `blog-tags-collect' are for the tag pages and the sidebar;
+without TAGS, the projects only give the post files."
+  (let ((page-options (blog-page-options (and tags (blog-tags-sidebar tags)))))
+    `(("blog-posts"
+       :base-directory ,(blog-path "posts")
+       :publishing-directory ,(blog-path "public/html")
+       :auto-sitemap t
+       :sitemap-filename "../index.org"
+       :sitemap-title "Posts"
+       :sitemap-sort-files anti-chronologically
+       :sitemap-format-entry blog-sitemap-entry
+       :sitemap-function blog-sitemap
+       ,@page-options)
+      ("blog-archive"
+       :base-directory ,(blog-path "posts/archive")
+       :publishing-directory ,(blog-path "public/html")
+       :auto-sitemap t
+       :sitemap-filename "../../archive.org"
+       :sitemap-title "Archive"
+       :sitemap-sort-files anti-chronologically
+       :sitemap-format-entry blog-sitemap-entry
+       :sitemap-function blog-sitemap
+       ,@page-options)
+      ("blog-index"
+       :base-directory ,blog-root
+       :exclude "."
+       :include ("index.org" "archive.org")
+       :publishing-directory ,(blog-path "public")
+       ,@page-options)
+      ("blog-tags"
+       :base-directory ,(blog-path "tags")
+       :recursive t
+       :publishing-directory ,(blog-path "public/tags")
+       :preparation-function blog-write-tag-pages
+       :blog-tags ,tags
+       ,@page-options)
+      ("blog-media"
+       :base-directory ,(blog-path "posts")
+       :base-extension "png\\|jpe?g\\|gif\\|svg\\|webp\\|mp4\\|webm"
+       :publishing-directory ,(blog-path "public/html")
+       :publishing-function org-publish-attachment
+       :recursive t)
+      ("blog-files"
+       :base-directory ,(blog-path "posts/files")
+       :base-extension any
+       :publishing-directory ,(blog-path "public/html/files")
+       :publishing-function org-publish-attachment
+       :recursive t)
+      ("blog-static"
+       :base-directory ,(blog-path "static")
+       :base-extension "css\\|js"
+       :publishing-directory ,(blog-path "public/static")
+       :publishing-function org-publish-attachment)
+      ("blog" :components ("blog-posts" "blog-archive" "blog-index" "blog-tags"
+                           "blog-media" "blog-files" "blog-static")))))
 
 (defun blog-publish (&optional force)
   "Publish the blog to public/.  With FORCE, export all files again."
   (interactive "P")
-  (let ((org-publish-project-alist (blog-projects))
-        (org-publish-timestamp-directory (blog-path ".cache/"))
-        (org-html-htmlize-output-type 'css)
-        (org-export-use-babel nil)
-        (org-export-before-parsing-functions
-         (cons #'blog-add-heading-ids org-export-before-parsing-functions))
-        (org-export-filter-body-functions
-         (cons #'blog-add-post-tags org-export-filter-body-functions))
-        (org-export-filter-final-output-functions
-         (cons #'blog-lazy-images org-export-filter-final-output-functions))
-        (make-backup-files nil))
+  (let* ((org-publish-timestamp-directory (blog-path ".cache/"))
+         (tags (blog-tags-collect (blog-post-files (blog-projects))))
+         (org-publish-project-alist (blog-projects tags))
+         (org-html-htmlize-output-type 'css)
+         (org-export-use-babel nil)
+         (org-export-before-parsing-functions
+          (cons #'blog-add-heading-ids org-export-before-parsing-functions))
+         (org-export-filter-body-functions
+          (cons #'blog-add-post-tags org-export-filter-body-functions))
+         (org-export-filter-final-output-functions
+          (append '(blog-lazy-images blog-add-sidebar) org-export-filter-final-output-functions))
+         (make-backup-files nil))
     (org-publish "blog" force)))
 
 (provide 'publish)
