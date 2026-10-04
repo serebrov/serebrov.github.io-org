@@ -1,0 +1,141 @@
+#+TITLE: vim: how to paste the same text multiple times
+#+DATE: <2012-04-03>
+#+TYPE: note
+#+FILETAGS: :vim:
+#+DESCRIPTION: Vim: how to paste multiple times, for example, replace multiple occurrences of a word with the clipboard content.
+
+* Problem: I can paste only once!!!
+
+Vim's clipboard works in a way that what you delete also gets saved into the
+clipboard same as when you copy (yank) something.
+
+This is often convenient as you don't lose what you've deleted.
+
+But on the other hand it means that when you paste something over another text
+you get what was deleted into the clipboard and you'll be surprised the
+next time you try to paste.
+
+The "standard" solution is to paste with ="0p=:
+ * The ="0= is the most recent copy (yank) register (see =:help registers=).
+ * The ="0p= tells vim to paste from ="0= (instead of the default "unnamed" register).
+ * This way we explicitly tell it: insert what I copied and not what I deleted.
+
+#+BEGIN_QUOTE
+Fun fact: "yank" means "copy" in vim and it means "paste" in emacs.
+#+END_QUOTE
+
+For example, let's say we want to copy the =new_value=, to clipboard and then
+replace one or more occurrences of the =old_value= with it. We can use
+=:%s/new_value/old_value/g= for that, but sometimes it is more convenient
+to go over the text and do replacements manually.
+
+A possible way to do replace multiple word occurrences in =vim= is:
+
+- Yank inner word: =yiw= (the =new_value= is now in the default register =""=)
+- Move cursor to another word (the =old_value=)
+- Select it and paste over: =viwp= (=viw= - visual inner word, =p= - paste)
+
+Now the problem: go to the next =old_value= and do =viwp= again.
+We paste the previously deleted =old_value=, so nothing happens!
+
+In more detail, what happens during the copy/paste process is:
+
+- Deleting (=diw=), changing (=ciw=) and yanking (=yiw=) text copies the affected text to the
+  unnamed register (=""=).
+- Yanking text also copies the text to the register ="0=.
+- We yank inner word: =yiw= (the =new_value=), it is now in =""= and ="0=
+- We move cursor to another word (the =old_value=)
+- We select the =old_value= and paste over: =viwp=, the deleted
+  =old_value= is in =""= and the =new_value= is still in the ="0=
+- Next time we use =p=, it pastes =old_value= since =p= uses =""=
+  register by default (but we can instruct =p= to use the ="0= register
+  with ="0p=)
+
+As I mentioned above, you would have to go with ="0p= in this case to make
+sure you are pasting the =new_value=.
+
+A better fix is to redefine =p= like this:
+
+#+BEGIN_SRC vimscript
+xnoremap p pgvy
+#+END_SRC
+
+This preserves the "save deleted text to the clipboard" behavior in most
+cases, for example if we do =dw= to delete =old_value=, then we can still
+paste it with =p=.
+
+This is because the =xnoremap= only changes =p= in "Visual mode"
+(see =:help mapmode-x=). And the meaning of =pgvy= is:
+- =p= - paste the =new_value= (and =old_value= gets to clipboard)
+- =gv= - re-select what we've just pasted (=new_value=)
+- =y= - copy what we've just pasted (the =new_value=)
+
+So now the =new_value= is in the clipboard again and we can paste it.
+
+* Solution
+:PROPERTIES:
+:CUSTOM_ID: solution
+:END:
+
+A good solution for Vim (as described above) is:
+
+#+BEGIN_SRC vimscript
+xnoremap p pgvy
+#+END_SRC
+
+Slightly counter-intuitive, but the different paste behavior in visual
+mode vs normal mode is natural:
+- Normal mode: you do =diw= or =ciw= and you usually type the replacement (no pasting in this case)
+- Visual mode: you usually paste over and the purpose of visual selection is to define what to replace
+
+So the =xnoremap p pgvy= works well because it only redefines the visual mode behavior.
+
+With this mapping, we can still use Vim's standard behavior if needed by
+using =gp= instead of =p= (=gp= is almost the same as p, with cursor
+left after the pasted text instead of the last char of it).
+
+A solution for Emacs =evil= mode is this:
+
+#+BEGIN_SRC emacs-lisp
+    ;; By default, evil emulates Vim behavior, we need to disable it
+    ;; so we can comfortably paste multiple times in visual mode.
+    (setq evil-kill-on-visual-paste nil)
+#+END_SRC
+
+* Alternatives (that don't work so well)
+
+Another solution that seems simple is to have a =xnoremap p "0p= that
+would always use the ="0= register when pasting in visual mode.
+
+But there is a negative side-effect: when we delete something
+explicitly, it gets into =""=, but not into ="0=, so the next ="0p=
+in visual mode will not work.
+
+For example:
+ * select and copy =irrelevant_value= with =yiw=
+   * =""= has =irrelevant_value=, ="0= has =irrelevant_value=
+ * delete =deleted_value= with =dw=
+   * =""= has =deleted_value=, ="0= has =irrelevant_value=
+ * select =old_value= and paste with =viw"0p=
+   * note: it is just =viwp= if we have the =xnoremap p "0p= mapping
+
+Result: the =irrelevant_value= is pasted.
+Expected: the =deleted_value=.
+
+One more solution is to use a named register:
+ * Yank the =new_value= into a specific register (=a= in this case): ="ayiw=
+ * Move the cursor to the =old_value=, select it with =viw=
+ * Paste the contents of the =a= register over the selected text: ="ap=
+
+This works, but it requires extra effort to remember to use the register.
+
+I recommend the =xnoremap p pgvy= mapping, as it works well and I did not
+find any drawbacks while using it.
+
+* Links
+:PROPERTIES:
+:CUSTOM_ID: links
+:END:
+[[http://vim.wikia.com/wiki/Replace_a_word_with_yanked_text][vim.wikia.com]]
+
+[[https://stackoverflow.com/questions/7163947/paste-multiple-times][Stackoverflow: Paste multiple times]]
