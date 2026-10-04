@@ -1,6 +1,7 @@
 #+TITLE: Hello from org-mode
 #+SUBTITLE: A sample post that shows each page feature
 #+DATE: <2026-09-25 Fri>
+#+TYPE: post
 #+FILETAGS: :org:
 #+DESCRIPTION: A sample post: folding sections, code, images, video, and tables.
 

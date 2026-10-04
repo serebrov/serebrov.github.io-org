@@ -1,6 +1,7 @@
 #+TITLE: jQuery - check minimal required version
 #+DATE: <2012-01-24>
-#+FILETAGS: :jquery:note:
+#+TYPE: note
+#+FILETAGS: :jquery:
 #+DESCRIPTION: How to make sure that right jQuery version is available.
 
 To check whether jQuery is loaded to the page and verify minimum
