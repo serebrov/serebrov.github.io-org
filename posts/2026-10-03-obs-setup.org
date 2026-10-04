@@ -1,8 +1,8 @@
 #+TITLE: OBS Setup
-#+SUBTITLE: A sample post that shows each page feature
+#+SUBTITLE: OBS Setup for MacOS
 #+DATE: <2026-09-25 Fri>
 #+AUTHOR: Boris Serebrov
-#+DESCRIPTION: A sample post: folding sections, code, images, video, and tables.
+#+DESCRIPTION: OBS Setup for MacOS to manage audio and record Google Meet / Zoom meetings.
 
 * Purpose
 
