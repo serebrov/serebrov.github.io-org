@@ -1,6 +1,6 @@
 #+TITLE: git - checkout and track remote branch
 #+DATE: <2012-02-10>
-#+FILETAGS: git note
+#+FILETAGS: :git:note:
 #+DESCRIPTION: how to checkout and track the remote branch
 
 Note: in recent =git= versions, it is enough to do =git pull= and

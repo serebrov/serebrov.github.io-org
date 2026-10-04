@@ -1,7 +1,7 @@
 #+TITLE: OBS Setup
 #+SUBTITLE: OBS Setup for MacOS
 #+DATE: <2026-10-03>
-#+FILETAGS: obs mac
+#+FILETAGS: :obs:mac:
 #+DESCRIPTION: OBS Setup for MacOS to manage audio and record Google Meet / Zoom meetings.
 
 * Purpose
