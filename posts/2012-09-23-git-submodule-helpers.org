@@ -1,0 +1,110 @@
+#+TITLE: git: submodule helpers
+#+DATE: <2012-09-23>
+#+TYPE: note
+#+FILETAGS: :git:
+#+DESCRIPTION: Git: useful commands to work with submodules
+
+* Get a list of commits inside a submodule
+:PROPERTIES:
+:CUSTOM_ID: get-a-list-of-commits-inside-a-submodule
+:END:
+Submodules are identified by SHA-1 hashes so you may need to get a list
+of them. Run the following inside the submodule folder (or inside the
+separate submodule repository):
+
+#+begin_src shell
+git log --oneline
+
+5bd722f commit 5
+b5c1524 commit 4
+2444bfa commit 3
+e0eadd5 commit 2
+c180c5a commit 1
+702fc8a commit 0
+#+end_src
+
+* View current submodule commit
+:PROPERTIES:
+:CUSTOM_ID: view-current-submodule-commit
+:END:
+
+#+begin_src shell
+git submodule status
+
+5bd722fa26dcdd64128392aa28e08849fe37f111 sub (heads/master)
+#+end_src
+
+* Compare a submodule state with another branch
+:PROPERTIES:
+:CUSTOM_ID: compare-a-submodule-state-with-another-branch
+:END:
+
+If we are on a branch and want to compare the =sub= submodule state
+with =master=, we can use =git diff= like this:
+
+#+begin_src shell
+git diff master -- sub
+
+diff --git a/sub b/sub
+index 702fc8a..5bd722f 160000
+--- a/sub
++++ b/sub
+@@ -1 +1 @@
+-Subproject commit 702fc8a7edcdf5ceba9929958bd6cd7f000eb369
++Subproject commit 5bd722fa26dcdd64128392aa28e08849fe37f111
+#+end_src
+
+Where =-Subproject commit= is another (=master=) branch state and
+=+Subproject commit= is a current branch state.
+
+* View changes in submodule state on the current branch
+
+To view submodule state changes, we can use =git log -p=
+for the submodule folder (the =sub= in the example below):
+
+#+begin_src shell
+git log -p sub
+
+commit 261aa4bdb6944c77fc98e52748d656e56969ba6a
+Author: name
+Date:   Thu Sep 13 15:20:48 2012 +0300
+accidental sub switch to commit 5
+diff --git a/sub b/sub
+index b5c1524..5bd722f 160000
+--- a/sub
++++ b/sub
+@@ -1 +1 @@
+-Subproject commit b5c15241fe40f122d5225e5c76457802de3ad605
++Subproject commit 5bd722fa26dcdd64128392aa28e08849fe37f111
+
+commit 073aaf160706d705c6c95ab21327388cd6683486
+Author: name
+Date:   Thu Sep 13 14:58:41 2012 +0300
+sub commit 4
+diff --git a/sub b/sub
+index 2444bfa..b5c1524 160000
+--- a/sub
++++ b/sub
+@@ -1 +1 @@
+-Subproject commit 2444bfa760b5d3cc974658bd18482f9679f52b69
++Subproject commit b5c15241fe40f122d5225e5c76457802de3ad605
+
+...
+#+end_src
+
+Where =-Subproject commit= is a previous submodule state and
+=+Subproject commit= is a new submodule state.
+
+* Links
+:PROPERTIES:
+:CUSTOM_ID: links
+:END:
+[[https://git.wiki.kernel.org/index.php/GitSubmoduleTutorial][GitSubmoduleTutorial]]
+
+[[http://git-scm.com/book/en/Git-Tools-Submodules][Pro Git: 6.6 Git Tools - Submodules]]
+
+[[http://stackoverflow.com/questions/1979167/git-submodule-update][Stackoverflow: git submodule update]]
+
+[[http://speirs.org/blog/2009/5/11/understanding-git-submodules.html][Understanding Git Submodules]]
+
+[[http://longair.net/blog/2010/06/02/git-submodules-explained/][git Submodules Explained]]

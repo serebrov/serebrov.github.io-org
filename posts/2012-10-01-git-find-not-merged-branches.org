@@ -1,0 +1,42 @@
+#+TITLE: git: find not merged branches
+#+DATE: <2012-10-01>
+#+TYPE: note
+#+FILETAGS: :git:
+#+DESCRIPTION: Git: how to find branches that have not been merged yet.
+
+To find branches that were not merged with master, use the =--no-merged= flag:
+
+#+begin_src shell
+  # or git branch -a --no-merged master
+  git branch -a --no-merged
+#+end_src
+
+Branches that were merged with =feature=:
+
+#+begin_src shell
+git branch -a --merged feature
+#+end_src
+
+Branches that were merged not with =feature=:
+
+#+begin_src shell
+git branch -a --no-merged feature
+#+end_src
+
+* Reference
+:PROPERTIES:
+:CUSTOM_ID: reference
+:END:
+
+The [[http://www.kernel.org/pub/software/scm/git/docs/git-branch.html][git-branch(1)]] command:
+
+- with =--contains= flag shows only the branches that contain the named
+  commit (in other words, the branches whose tip commits are descendants
+  of the named commit).
+- with =--merged= shows only branches merged into the named commit
+  (i.e. the branches whose tip commits are reachable from the named
+  commit) will be listed.
+- with =--no-merged= shows only branches not merged into the named
+  commit will be listed
+- if the =<commit>= argument is missing, it defaults to HEAD (i.e. the tip of the
+  current branch).

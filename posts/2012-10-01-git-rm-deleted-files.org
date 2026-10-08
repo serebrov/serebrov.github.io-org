@@ -1,0 +1,23 @@
+#+TITLE: git: remove deleted files from git
+#+DATE: <2012-04-03>
+#+TYPE: note
+#+FILETAGS: :git:
+#+DESCRIPTION: Git: how to remove already deleted files from git control.
+
+We can use =git rm file-name= for one file, but we can also tell git to remove all
+missing files.
+
+To remove files that were already deleted on the file system but still tracked with git,
+run =git add= with =-u= flag:
+
+#+begin_src shell
+git status
+D abc.c
+
+git add -u
+#+end_src
+
+This tells git to automatically stage tracked files, including the deletion of
+the previously tracked files.
+
+[[http://stackoverflow.com/questions/1402776/how-do-i-commit-all-deleted-files-in-git][Stackoverflow: How do I commit all deleted files in Git?]]
