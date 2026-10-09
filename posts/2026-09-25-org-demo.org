@@ -61,3 +61,55 @@ Nested sections fold too.
 #+BEGIN_QUOTE
 Everything is text, and that is powerful.
 #+END_QUOTE
+
+* Config preview (custom)
+
+#+HTML_HEAD_EXTRA: <script defer src="/static/config-preview.js"></script>
+
+The custom popup is implemented in a separate javascript file that can be included like this:
+
+#+begin_example
+    #+HTML_HEAD_EXTRA: <script defer src="/static/config-preview.js"></script>
+
+    [[file:files/cwl-setup.config][cwl-setup.config, click to preview in popup]]
+#+end_example
+
+Here is a live example:
+[[file:files/cwl-setup.config][cwl-setup.config, click to preview in popup]]
+
+File can also be displayed in the HTML =<details>= tag:
+
+#+begin_details
+#+begin_summary
+cwl-setup.config ([[file:files/cwl-setup.config][download]])
+#+end_summary
+#+include: "files/cwl-setup.config" src yaml
+#+end_details
+
+* HTML Export
+
+The =#+begin_export html= and =#+end_export= allow inserting HTML snippets that
+will be added to the HTML after org export:
+
+#+begin_example
+#+begin_export html
+<div class="demo-popup">
+    <div class="close">close</div>
+    <div class="download"><a href="">Download (<span class="name"></span>)</a></div>
+    <div class="popup-content"></div>
+</div>
+
+<style type="text/css">
+  .demo-popup { display: none; }
+</style>
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+        console.log("The DOM is fully parsed and ready!");
+        // document.addEventListener("click", () => {
+        //    document.querySelector('.demo-popup').style.display = 'block'
+        // });
+    });
+</script>
+#+end_export
+#+end_example

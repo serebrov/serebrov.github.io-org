@@ -1,18 +1,17 @@
----
-title: Elastic Beanstalk - python application server structure and celery installation
-date: 2015-04-02
-tags: [aws, eb, python, celery, zeromq]
-type: note
-url: "/html/2015-04-02-elastic-beanstalk-python.html"
----
+#+TITLE: Elastic Beanstalk: python application server structure and celery setup
+#+DATE: <2015-04-02>
+#+TYPE: note
+#+FILETAGS: :aws:
+#+DESCRIPTION: What is on the Elastic Beanstalk server for python app and how to install Celery
 
-Elastic beanstalk python application is deployed under `/opt/python/`.
+* Elastic Beanstalk Server Setup
+
+Python application is deployed under =/opt/python/= on the Elastic Beanstalk EC2 instance.
 The application is running under Apache web server.
-<!-- more -->
 
-Source folder structure is this:
+The source folder structure is this:
 
-```
+#+begin_example
 bin
   httpdlaunch - a tool script to set environment variables and launch httpd
 bundle        - dir with app source code, used during updates
@@ -22,45 +21,52 @@ current       - symlink to the recent source code version under bundle
 etc           - supervisord config
 log           - supervisord logs
 run           - virtual environments
-```
+#+end_example
 
-Apache logs, deployment logs and system messages log are under `/var/log`.
+Apache logs, deployment logs and system messages log are under =/var/log=.
 
-Another important directory is `/opt/elasticbeanstalk` - here there are EB tool scripts and app server restart hooks.
+Another important directory is =/opt/elasticbeanstalk= - here there are
+EB tool scripts and app server restart hooks.
 
-Apache is managed by [supervisord](http://supervisord.org/), to check the status run this command:
+Apache is managed by [[http://supervisord.org/][supervisord]], to check the status run this command:
 
-```bash
+#+begin_src shell
 sudo /usr/local/bin/supervisorctl -c /opt/python/etc/supervisord.conf status
-```
+#+end_src
 
 And you can restart apache like this:
 
-```bash
+#+begin_src shell
 sudo /usr/local/bin/supervisorctl -c /opt/python/etc/supervisord.conf restart httpd
-```
+#+end_src
 
-### How to launch python application manually
+* How to launch python application manually
+:PROPERTIES:
+:CUSTOM_ID: how-to-launch-python-application-manually
+:END:
 
-I have a [flask](http://flask.pocoo.org/) application and usually it is started as `python application.py`.
-To run it on the server instance you need to init virtual environment and set environment variables first:
+I have a [[http://flask.pocoo.org/][flask]] application and usually it is started as =python application.py=.
+To run it on the server instance you need to init virtual environment and set
+environment variables first:
 
-```bash
+#+begin_src shell
 source /opt/python/run/venv/bin/activate && source /opt/python/current/env
-```
+#+end_src
 
 Now you can start the application manually:
 
-```bash
+#+begin_src shell
 cd /opt/python/current/app
 python application.py
-```
+#+end_src
 
-Or start flask shell with `flask shell`.
+Or start flask shell with =flask shell=.
 
-### How to install celery
-
-[Celery](http://www.celeryproject.org/) is a distributed task queue.
+* How to install Celery
+:PROPERTIES:
+:CUSTOM_ID: how-to-install-celery
+:END:
+[[http://www.celeryproject.org/][Celery]] is a distributed task queue.
 
 Our requirements are the following:
 
@@ -69,7 +75,7 @@ Our requirements are the following:
 
 The final project structure will be this:
 
-```
+#+begin_example
   .ebextensions/               - elastic beanstalk configs
     myapp.config               - main config
     deploy.sh                  - deployment script, launched from main config
@@ -82,23 +88,27 @@ The final project structure will be this:
   celery.py                    - celery application
   application.py               - main application
   requirements.txt             - project requirements for pip
-```
+#+end_example
 
-First, add the following line to the requirements.txt in the root folder of your project (these requirements will be installed with pip automatically):
+First, add the following line to the =requirements.txt= in the root folder
+of your project (these requirements will be installed with pip automatically):
 
-```
+#+begin_example
 ...
 Celery==3.1.17
-```
+#+end_example
 
-Note that the version number can be different, 3.1.17 is just an actual version at the moment of writing.
+Note that the version number can be different, 3.1.17 is just an actual
+version at the moment of writing.
 
-Then create a main celery application file. In my case, this is `celery.py` file in the root folder.
-Here I don't describe the celery application file content - do whatever you need from celery here.
+Then create a main celery application file. In my case, this is
+=celery.py= file in the root folder. Here I don't describe the celery
+application file content - do whatever you need from celery here.
 
-Now modify the elasticbeanstalk config (.elasticbeanstalk/myapp.config) to include the deployment script:
+Now modify the elasticbeanstalk config (=.elasticbeanstalk/myapp.config=)
+to include the deployment script:
 
-```bash
+#+begin_src yaml
 container_commands:
   004-start-container-commands:
     command: logger "Start deploy script" -t "DEPLOY"
@@ -108,16 +118,20 @@ container_commands:
     command: .ebextensions/deploy.sh 2>&1 | /usr/bin/logger -t "DEPLOY" ; test ${PIPESTATUS[0]} -eq 0
   200-end-container-commands:
     command: logger "End container commands" -t "DEPLOY"
-```
+#+end_src
 
 Here we configure ElasticBeanstalk to launch the custom deployment script.
 
-In general I find the approach with shell script for beanstalk configuration to be much more convenient than the standard way to put shell script code to the text config file.
-More details about this method can be found in the great [Innocuous looking Evil Devil](http://www.hudku.com/blog/innocuous-looking-evil-devil/) article. Check also [related posts](http://www.hudku.com/blog/tag/elastic-beanstalk).
+In general I find the approach with the shell script for beanstalk
+configuration to be much more convenient than the standard way to put
+shell script code to the yaml config file.
 
-This deployment script `.ebextensions/deploy.sh`:
+More details about this method can be found in the great [[http://www.hudku.com/blog/innocuous-looking-evil-devil/][Innocuous looking Evil Devil]] article.
+Check also [[http://www.hudku.com/blog/tag/elastic-beanstalk][related posts]].
 
-```bash
+This deployment script =.ebextensions/deploy.sh=:
+
+#+begin_src shell
 #!/usr/bin/env bash
 set -e
 
@@ -148,23 +162,27 @@ supervisorctl -c /opt/python/etc/supervisord.conf reread
 supervisorctl -c /opt/python/etc/supervisord.conf update
 # Start/Restart celeryd through supervisord
 supervisorctl -c /opt/python/etc/supervisord.conf restart celeryd
-```
+#+end_src
 
-A small inconvenience with supervisord is that configuration for all apps managed by supervisord should be inside the main supervisord.conf file or additional configs should be included into it.
-So in any case we need to modify the main supervisord config.
-The script above does this by adding the following lines to it:
+A small inconvenience with supervisord is that configuration for all
+apps managed by supervisord should be inside the main supervisord.conf
+file or additional configs should be included into it. So in any case we
+need to modify the main supervisord config. The script above does this
+by adding the following lines to it:
 
-```
+#+begin_example
 [include]
 ; it is possible to include multiple files, names should be separated by space
 files=celeryd.conf
-```
+#+end_example
 
-The `celeryd.conf` is copied into the same folder where supervisord.conf resides.
+The =celeryd.conf= is copied into the same folder where =supervisord.conf=
+resides.
 
-The `.ebextensions/utils.sh` script contains additional functions used by deployment script:
+The =.ebextensions/utils.sh= script contains additional functions used
+by deployment script:
 
-```bash
+#+begin_src shell
 #!/usr/bin/env bash
 set -e
 
@@ -231,11 +249,12 @@ script_add_line() {
         echo "Modification ${add_text} added to ${target_file}"
     fi
 }
-```
+#+end_src
 
-The celeryd.conf in `.ebextensions/files/celeryd.conf` is a supervisord config:
+The celeryd.conf in =.ebextensions/files/celeryd.conf= is a supervisord
+config:
 
-```ini
+#+begin_src ini
 [program:celeryd]
 command=/opt/python/current/app/scripts/celeryd
 
@@ -260,11 +279,12 @@ killasgroup=true
 ; if rabbitmq is supervised, set its priority higher
 ; so it starts first
 ; priority=998
-```
+#+end_src
 
-Restart hook `.ebextensions/files/99_restart_services.sh` restarts celery application when application server is reloaded or restarted:
+Restart hook =.ebextensions/files/99_restart_services.sh= restarts
+celery application when application server is reloaded or restarted:
 
-```bash
+#+begin_src shell
 #!/bin/bash
 
 set -xe
@@ -276,11 +296,12 @@ if [[ $? ]]; then
 fi
 
 eventHelper.py --msg "Application server successfully restarted." --severity INFO
-```
+#+end_src
 
-Finally the script under `scripts/celeryd` is used to set environment variables, activate virtual environment and run celery application:
+Finally the script under =scripts/celeryd= is used to set environment
+variables, activate virtual environment and run celery application:
 
-```bash
+#+begin_src shell
 #!/bin/bash
 
 source /opt/python/current/env
@@ -291,33 +312,38 @@ cd /opt/python/current/app
 # See also: http://sortedaffairs.tumblr.com/post/49113594655/managing-virtualenv-apps-with-supervisor
 #
 exec /opt/python/run/venv/bin/celery worker -A tasks --loglevel=INFO
-```
+#+end_src
 
-Actually we configured Elastic Beanstalk to run and manage an additional application.
-The same approach can be used for any kind of application, not necessarily celery - it can be any other application even written in other than python language.
+Actually we configured Elastic Beanstalk to run and manage an additional
+application. The same approach can be used for any kind of application,
+not necessarily celery - it can be any other application even written in
+other than python language.
 
-### Bonus: how to install ZeroMQ library
-
+* Bonus: how to install ZeroMQ library
+:PROPERTIES:
+:CUSTOM_ID: bonus-how-to-install-zeromq-library
+:END:
 To install ZeroMQ python library add it to requirements.txt:
 
-```
+#+begin_example
 Flask==0.9
 boto==2.34.0
 ...
 pyzmq==13.0.2
-```
+#+end_example
 
-Installation process also includes a compilation phase and you can get an error like this:
+Installation process also includes a compilation phase and you can get
+an error like this:
 
-```
+#+begin_example
 gcc: error trying to exec 'cc1plus': execvp: No such file or directory
-```
+#+end_example
 
 To solve this problem, add following packages into the elasticbeanstalk config:
 
-```yaml
+#+begin_src yaml
   packages:
     yum:
       gcc: []
       gcc-c++: []
-```
+#+end_src
