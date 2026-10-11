@@ -41,11 +41,11 @@ function setupLinkClick(link) {
   link.addEventListener('click', (event) => {
     event.preventDefault();
     showPreview(link.href);
-  })
-};
+  });
+}
 
 // For 2015-05-20-cloudwatch-setup.org post
 document.querySelectorAll('a[href$="config"]').forEach(setupLinkClick);
 // For 2016-06-10-scaleway-docker-deployment.org post
-document.querySelectorAll('a[href$="sh"]').forEach(setupLinkClick);
+document.querySelectorAll('a[href$=".sh"]').forEach(setupLinkClick);
 document.querySelectorAll('a[href$="msmtprc"]').forEach(setupLinkClick);

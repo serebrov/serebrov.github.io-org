@@ -1,0 +1,407 @@
+#+TITLE: Simple Git Workflow
+#+DATE: <2016-07-03>
+#+TYPE: post
+#+FILETAGS: :git:
+#+DESCRIPTION: Git Workflows for the Team
+
+* Simple Git Workflow: V2
+
+I have a [[*Simple Git Workflow: V1][V1]] git workflow below and I think it is more widespread and common now,
+includes the develop server as pre-production environment to test changes.
+
+It also has a downside: in a slightly larger team (more than 3 people) the
+=develop= branch becomes a bottleneck and/or a pile of various accumulated
+changes that become a risk on its own (larger upgrade has higher risk of
+breaking production) and a source of delays (should we push develop to
+production now or wait for feature X to be completed? it is almost ready...).
+
+What is the solution? A simplification: remove develop and deploy all changes
+directly to production! What? Yes, that is right, just push to production.
+
+A few things to make it safe:
+- Automated tests suite with a good coverage
+- Every bug fix is supported by a test to prevent regressions
+- A process: the developer is responsible for testing and proving that the change is working after deployment (video recording, screenshots, etc)
+- Infrastructure: simple way to deploy and rollback changes, monitoring to detect major problems quickly
+
+With that in place, the git flow becomes:
+- The =master= branch is deployed on production server.
+- New branches are created from =master= and merged to =master= after local testing and code review.
+- Merged changes are automatically deployed to production.
+- Developers test and post "proof of completion" to confirm that the update is working.
+
+That's it... I think it does not need a diagram, but here is one just for the case:
+
+#+begin_example
+    ... -- o -------------- o --------------- o --- ... ----- master = production
+           \               / \               /
+            o ---- o ---- o   o --- o ----- o
+            (task 1 branch)   (task 2 branch)
+#+end_example
+
+* Simple Git Workflow: V1
+
+This is the original version, with =production=, =develop=, =master= branches.
+
+Looking back, it is not that simple, but this may be a good approach if you
+need safety over everything else (convenience, development speed, etc).
+
+The main purpose of this workflow is to have a reliable, but simple to
+use git workflow. It is simple enough to be used by git beginners and
+minimizes possibility of mistakes (compared to advanced flows which use
+rebase and related git features to achieve clean history).
+
+The main idea of this workflow is that we create a new branch for every
+task and one developer works on this branch until the task is finished.
+Once done, the work from the branch is merged back to the master branch.
+
+Special branches are =master=, =develop= and =production=:
+
+- =master= - integration branch, it is never modified directly, we only
+  merge finished work from tasks branches
+- =develop= - branch to test changes before we update production, it is
+  never modified directly, only periodically updated from the =master=
+  branch
+- =production= - production state, it is never modified directly, only
+  updated from the =develop= before we deploy new version to the
+  production
+
+#+begin_example
+    ... o ---- o ---- o --- o - ... ----------------------- o ---- production
+                                                           /
+    ... o ---- o ---- o --- o - ... ----------- o - ... - o ------ develop
+                                               /
+    ... -- o -------------- o --------------- o --- ... ---------- master
+           \               / \               /
+            o ---- o ---- o   o --- o ----- o
+            (task 1 branch)   (task 2 branch)
+#+end_example
+
+Task branches should be short-living, each task should take a few hours
+or, at maximum, a few days to complete. So usually it should not be
+necessary to merge updates back from master to the task branch.
+
+General git guidelines:
+
+- Always write meaningful commit messages, never leave them empty
+- Commit often
+- Give meaningful names to branches
+- Always check =git= command output to make sure there are no errors
+
+** The Simple Git Workflow
+:PROPERTIES:
+:CUSTOM_ID: the-simple-git-workflow
+:END:
+*** 1) Select a Task to Work on
+:PROPERTIES:
+:CUSTOM_ID: select-a-task-to-work-on
+:END:
+I assume that you have the task description in some project management
+system like [[http://www.redmine.org/][Redmine]] or [[https://trello.com/][Trello]].
+
+*** 2) Check If Working Copy Is Clean
+:PROPERTIES:
+:CUSTOM_ID: check-if-working-copy-is-clean
+:END:
+Check if there are no uncommitted changes:
+
+#+begin_src shell
+  git status
+#+end_src
+
+#+begin_example
+  On branch master
+  Your branch is up-to-date with 'origin/some_branch'.
+  nothing to commit, working directory clean
+#+end_example
+
+Note: if there are uncommitted changes, you can try to go on with
+following steps; in the case when switching to another branch is not
+safe, git will stop with error message (your changes will not be lost).
+An alternative is to use the
+[[https://git-scm.com/book/en/v1/Git-Tools-Stashing][git stash]] command
+to temporary save your changes into the special =stash= area, you can
+restore these changes later with =git stash pop=.
+
+*** 3) Switch to the Master Branch and Update the Code
+:PROPERTIES:
+:CUSTOM_ID: switch-to-the-master-branch-and-update-the-code
+:END:
+#+begin_src shell
+  git checkout master
+  git pull
+#+end_src
+
+#+begin_example
+  remote: Counting objects: 1, done.
+  remote: Total 1 (delta 0), reused 0 (delta 0), pack-reused 1
+  Unpacking objects: 100% (1/1), done.
+  From github.com:tapway/tapway-data
+     f3ba979..68822fb  master     -> origin/master
+  Updating f3ba979..68822fb
+  Fast-forward
+   docs/api.md | 5 +++++
+   1 file changed, 5 insertions(+)
+#+end_example
+
+Note: It is not necessary to do =git checkout master= if you are already
+on =master=, but if you are a beginner, it is better to stick to the
+defined steps to avoid mistakes.
+
+If there are no remote code changes, the output will look like this:
+
+#+begin_src shell
+  git pull
+#+end_src
+
+#+begin_example
+  Already up-to-date.
+#+end_example
+
+*** 4) Create the New Branch for the New Task
+:PROPERTIES:
+:CUSTOM_ID: create-the-new-branch-for-the-new-task
+:END:
+
+I prefer =XXXX-my-task-description= naming convention for branches,
+where =XXXX= is a task ID in the project management system and
+=my-task-description= is a short task definition.
+
+For example, =1234-user-login= (a task to add user login page) or
+=2345-fix-facebook-signup= (a task to fix issue with Facebook sign-up).
+
+#+begin_src shell
+  git checkout -b XXXX-my-task-description
+#+end_src
+
+Note: it is safe to create the new branch, even if you already have some
+changes.
+
+Push the new branch to the server and track (-u) changes between local
+and remote branches:
+
+#+begin_src shell
+  git push -u origin HEAD
+#+end_src
+
+*** 5) Work on the Task
+:PROPERTIES:
+:CUSTOM_ID: work-on-the-task
+:END:
+Do some changes, check the code state:
+
+#+begin_src shell
+  git status
+#+end_src
+
+Add new / changed files, this will add all the changed and new files:
+
+#+begin_src shell
+  git add .
+#+end_src
+
+To add only specific files, use =git add file_name.ext= command.
+
+If there are some files you don't want to add under git control
+permanently, create or update the [[https://git-scm.com/docs/gitignore][.gitignore]] file and put file
+names or file patterns to ignore into it.
+
+*** 6) Commit Your Changes and Push to the Remote Repository
+:PROPERTIES:
+:CUSTOM_ID: commit-your-changes-and-push-to-the-remote-repository
+:END:
+Check that changes are staged for commit:
+
+#+begin_src shell
+    git status
+#+end_src
+
+#+begin_example
+   On branch my-task
+   Your branch is up-to-date with 'origin/my-task'.
+   Changes to be committed:
+     (use "git reset HEAD <file>..." to unstage)
+
+       new file:   content/2016-07-03-simple-git-workflow.md
+       modified:   index.html
+       modified:   sitemap.xml
+#+end_example
+
+Commit the changes:
+
+#+begin_src shell
+  git commit -m "The description of the changes made"
+#+end_src
+
+At the moment you added your changes to the local repository.
+
+Now push these changes to the remote repository:
+
+#+begin_src shell
+  git push origin HEAD
+#+end_src
+
+*** 7) Repeat Steps 5-6 as You Work on the Task
+:PROPERTIES:
+:CUSTOM_ID: repeat-steps-5-6-as-you-work-on-the-task
+:END:
+Do as many commits and pushes as you need while working on the task.
+
+** How to Merge Finished Work to Master Branch with github.com
+:PROPERTIES:
+:CUSTOM_ID: how-to-merge-finished-work-to-master-branch-with-github.com
+:END:
+When the task is done, we need to merge it back to =master= branch. This
+can be done using github =pull request= feature:
+
+- Each feature is developed on the separate branch (as described above)
+- Once branch is finished the developer creates pull request (in the github.com UI):
+- Make sure you committed and pushed all changes to github
+- Make sure the automatic tests suite (you really should have it) has passed successfully
+- Select the branch you work on (dropdown at the top)
+- Click the green =Compare, review, create a pull request= button (on the left of the branches dropdown)
+- Review changes and if everything looks ok click =Create pull request= button
+- Note: at this point changes are not merged yet. Now we have a pull request which can be reviewed by other developers and discussed. It is possible to update it with some fixes (just commit some changes on the same branch and push them)
+- When the pull request is approved it can be merged to =master= branch:
+- Click =Merge pull requests= button and confirm merge
+- Note: github will not allow to merge the branch if there are conflicts. In this case you need to merge changes from master branch to your current branch, fix the conflicts and then push your branch to the server again.
+
+Similar technique can be used not only with github, but with other git
+servers too (for example, bitbucket).
+
+** How to Merge Finished Work to Master Branch Manually
+:PROPERTIES:
+:CUSTOM_ID: how-to-merge-finished-work-to-master-branch-manually
+:END:
+Once the work is finished on the branch, the change can be reviewed
+manually.
+
+=1)= Make sure the automatic tests suite has passed successfully on the
+   branch, check that everything is committed and pushed:
+
+#+begin_src shell
+    git status
+#+end_src
+
+=2)= Switch to the master branch and update it:
+
+#+begin_src shell
+    git checkout master
+    git pull
+#+end_src
+
+=3)= Merge the task branch
+
+#+begin_src shell
+    git merge my-task-description
+#+end_src
+
+If there are conflicts between the task branch changes and master branch
+changes, git will show the notification and suggest to fix the
+conflicts.
+
+I recommend using [[http://kdiff3.sourceforge.net/][kdiff3]] as a merge tool. Install it and run =git mergetool= to
+review and resolve conflicts.
+
+=4)= Push changes to the server
+
+#+begin_src shell
+    git push origin head
+#+end_src
+
+** How to Update develop / production Branches
+:PROPERTIES:
+:CUSTOM_ID: how-to-update-develop-production-branches
+:END:
+The =develop= branch is a code state which is a candidate for next
+production update. This branch is only updated from =master= branch:
+
+#+begin_src shell
+    # checkout master and pull remote changes if any
+    git checkout master
+    git pull
+
+    # checkout develop and pull remote changes if any
+    git checkout develop
+    git pull
+
+    # merge master changes to develop
+    git merge master
+    git push origin HEAD
+#+end_src
+
+Once testing on the =develop= branch is done, it can be merged to the =production= branch:
+
+#+begin_src shell
+    # checkout develop and pull remote changes if any
+    git checkout develop
+    git pull
+
+    # checkout production and pull remote changes if any
+    git checkout production
+    git pull
+
+    # merge develop changes to production
+    git merge develop
+    git push origin HEAD
+#+end_src
+
+** Alternative git Scenarios
+:PROPERTIES:
+:CUSTOM_ID: alternative-git-scenarios
+:END:
+*** Work on the Branch Created by Someone Else
+:PROPERTIES:
+:CUSTOM_ID: work-on-the-branch-created-by-someone-else
+:END:
+Note: while it is possible for several developers to work on the same
+branch at the same time, it is better to avoid this and create separate
+branch for each developer.
+
+So this is for the case when someone created the branch, but did not
+finish the work and passed the task to you. This also can be useful to
+review other developer's work locally.
+
+#+begin_src shell
+    # check current state, make sure everything is committed
+    git status
+
+    # get recent changes from the server
+    git pull
+
+    # check out and track remote branch created by someone else
+    git checkout -t origin/the-branch-name
+
+    # work on the branch as described in the main scenario
+#+end_src
+
+*** Merge Changes from Another Branch
+:PROPERTIES:
+:CUSTOM_ID: merge-changes-from-another-branch
+:END:
+Sometimes you may need to merge code from some other branch.
+
+For example to stay in sync with master branch or to get changes from
+some other branch which is not finished yet.
+
+Usually it is better to avoid such merges because this makes your
+current branch history confusing. It is not clear from the first sight
+what was done on the current branch and what was merged from other
+branches, so it complicates the code review once the work is finished.
+
+Here we merge changes from =master= to our current task branch:
+
+#+begin_src shell
+    # check current state, make sure everything is committed
+    git status
+
+    # check out the branch you want to merge from (for example, master)
+    git checkout master
+    # get recent changes from the server
+    git pull
+
+    # switch back to your branch
+    git checkout my-branch-name
+    # merge changes from master to your branch
+    git merge master
+#+end_src
