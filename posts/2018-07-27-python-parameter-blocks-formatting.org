@@ -1,60 +1,60 @@
----
-title: Formatting Parameter Blocks in Python
-date: 2018-07-27
-tags: [python]
-type: post
-url: "/html/2018-07-27-python-parameter-blocks-formatting.html"
----
+#+TITLE: Formatting Parameter Blocks in Python
+#+DATE: <2018-07-27>
+#+TYPE: note
+#+FILETAGS: :python:
+#+DESCRIPTION: Ways to format function parameters in Python.
 
-There are two ways [recommended in pep-8](https://www.python.org/dev/peps/pep-0008/#indentation) to format the blocks with long parameter lists in Python:
+There are two ways [[https://www.python.org/dev/peps/pep-0008/#indentation][recommended in pep-8]] to format the blocks with long parameter lists in Python:
 
-```python
+#+begin_src python
 # Arguments start on the next line
 foo = long_function_name(
     var_one, var_two,
     var_three, var_four)
-```
+#+end_src
 
-Another way is:
+Another way is this:
 
-```python
+#+begin_src python
 # Arguments start on the same line
 foo = long_function_name(var_one, var_two,
                          var_three, var_four)
-```
+#+end_src
 
 I always prefer the first option and the other one is problematic for a few reasons.
-<!-- more -->
 
 For example, if you have two blocks with such indentation, the indent will be jumping:
 
-```python
+#+begin_src python
 # Two functions formatted in such way don't look good, indent is jumping
 foo = long_function_name(var_one, var_two,
                          var_three, var_four)
 bar = another_func(var_one, var_two,
                    var_three, var_four)
-```
+#+end_src
 
-Another reason is that the indentation will be broken if you, for example, rename the function or make it a class method:
+Another reason is that the indentation will be broken if you, for
+example, rename the function or make it a class method:
 
-```python
+#+begin_src python
 foo = long_function_name(var_one, var_two,
                          var_three, var_four)
 
-# After renaming the function (or the `foo` variable), we need to fix the indentation on following lines
+# After renaming the function (or the `foo` variable),
+# we need to fix the indentation on following lines.
 foo = renamed_long_function_name(var_one, var_two,
                          var_three, var_four)
 
 foo = self.long_function_name(var_one, var_two,
                          var_three, var_four)
-```
+#+end_src
 
-Now, besides the rename / refactoring we need to also fix the indentation in following lines.
+Now, besides the rename / refactoring we need to also fix the
+indentation in following lines.
 
 While the first way of formatting works well in these cases:
 
-```python
+#+begin_src python
 # Two functions near each other, indentation is not jumping
 foo = long_function_name(
     var_one, var_two,
@@ -75,6 +75,8 @@ foo = renamed_long_function_name(
 foo = self.long_function_name(
     var_one, var_two,
     var_three, var_four)
-```
+#+end_src
 
-Along with more convenience during the development, this also results in better diffs, so it will make the code review process easier for a reviewer.
+Along with more convenience during the development, this also results in
+better diffs, so it will make the code review process easier for a
+reviewer.

@@ -1,6 +1,6 @@
 #+TITLE: Org mode demo
 #+SUBTITLE: Demo to show how various org mode blocks are rendered.
-#+DATE: <2026-09-25 Fri>
+#+DATE: <2000-09-25>
 #+TYPE: post
 #+FILETAGS: :org:
 #+DESCRIPTION: A sample post: folding sections, code, images, video, and tables.
