@@ -1,0 +1,27 @@
+#+TITLE: git: kdiff3 as difftool and mergetool
+#+DATE: <2023-06-11>
+#+TYPE: note
+#+FILETAGS: :git:
+#+DESCRIPTION: Git: How to configure Kdiff3 as a merge and conflict resolution tool.
+
+To use kdiff3 as your diff tool and merge tool in git, run the following commands:
+
+#+begin_src shell
+git config --global mergetool.kdiff3.cmd 'kdiff3 "$BASE" "$LOCAL" "$REMOTE" -o "$MERGED"'
+git config --global merge.tool kdiff3
+git config --global difftool.kdiff3.cmd 'kdiff3 "$LOCAL" "$REMOTE"'
+git config --global diff.tool kdiff3
+#+end_src
+
+Alternatively, edit the =~/.gitconfig= and add settings there:
+
+#+begin_example
+[mergetool "kdiff3"]
+    cmd = kdiff3 $LOCAL $REMOTE $BASE -o $MERGED
+[diff "kdiff3"]
+    cmd = kdiff3 $LOCAL $REMOTE
+[merge]
+    tool = kdiff3
+[diff]
+    tool = kdiff3
+#+end_example

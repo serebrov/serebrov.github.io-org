@@ -1,24 +1,26 @@
----
-title: "Google Colab notebook - input and output, OpenAI TTS API"
-date: 2023-11-09
-tags: [google-colab, ai, tts]
-type: note
-url: "/html/2023-11-09-google-colab-input-and-output-openai-tts.html"
----
+#+TITLE: Google Colab notebook: input and output, OpenAI TTS API
+#+DATE: <2023-11-09>
+#+TYPE: note
+#+FILETAGS: :tts:
+#+DESCRIPTION: How to run the OpenAI TTS API in the Google Colab notebook
 
-# Running OpenAI TTS API in Google Colab
-
-The example below runs OpenAI TTS API in a Google Colab notebook.
-The process involves some input and output:
+* Running OpenAI TTS API in Google Colab
+:PROPERTIES:
+:CUSTOM_ID: running-openai-tts-api-in-google-colab
+:END:
+The example below runs OpenAI TTS API in a Google Colab notebook. The
+process involves some input and output:
 - Prompt the user for API key
 - Run the API method
 - Save result into a file
 
 I have a notebook with two cells.
 
-## First: Setup cell
-
-```python
+** First: Setup cell
+:PROPERTIES:
+:CUSTOM_ID: first-setup-cell
+:END:
+#+begin_src python
 # @title Notebook Setup
 # @markdown Please, run this cell first. You'll be prompted for your OpenAI API Keys.
 # @markdown https://platform.openai.com/api-keys
@@ -30,15 +32,15 @@ from openai import OpenAI
 # Prompt for API key and create a client
 api_key = getpass('OpenAI API Key: ')
 client = OpenAI(api_key=api_key)
-```
+#+end_src
 
-For input we use [getpass](https://docs.python.org/3/library/getpass.html).
+For input we use [[https://docs.python.org/3/library/getpass.html][getpass]].
 
-<!-- more -->
-
-## Second: Main cell
-
-```python
+** Second: Main cell
+:PROPERTIES:
+:CUSTOM_ID: second-main-cell
+:END:
+#+begin_src python
 # @markdown This cell can be run multiple times to generate audio samples. All results will be saved to your Google Drive in the OpenAI_TTS_Samples folder.
 
 import io
@@ -82,11 +84,10 @@ for voice in voices:
 
   # Display files in the notebook as <audio> element
   display(speech_file_name, Audio(speech_file_path, autoplay=False))
-```
+#+end_src
 
-Here we use Google Colab's [`drive` library](https://colab.research.google.com/notebooks/io.ipynb#scrollTo=u22w3BFiOveA) to save files to Google Drive and the [display](https://ipython.readthedocs.io/en/stable/api/generated/IPython.display.html) function.
+Here we use Google Colab's [[https://colab.research.google.com/notebooks/io.ipynb#scrollTo=u22w3BFiOveA][=drive= library]] to save files to Google Drive and the [[https://ipython.readthedocs.io/en/stable/api/generated/IPython.display.html][display]] function.
 
 Resources:
-
-* [Welcome To Colaboratory](https://colab.research.google.com/)
-* [External data: Local Files, Drive, Sheets, and Cloud Storage](https://colab.research.google.com/notebooks/io.ipynb)
+- [[https://colab.research.google.com/][Welcome To Colaboratory]]
+- [[https://colab.research.google.com/notebooks/io.ipynb][External data: Local Files, Drive, Sheets, and Cloud Storage]]

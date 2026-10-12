@@ -1,0 +1,74 @@
+#+TITLE: Testing FastAPI CORS settings
+#+DATE: <2023-12-16>
+#+TYPE: note
+#+FILETAGS: :python:
+#+DESCRIPTION: How to test FastAPI CORS settings.
+
+* Testing FastAPI CORS Settings
+:PROPERTIES:
+:CUSTOM_ID: testing-fastapi-cors-settings
+:END:
+
+Configuring [[https://fastapi.tiangolo.com/][FastAPI]] [[https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS][CORS]] settings is only half of work and here is how we can test
+=allow_origins= (the [[https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin][Access-Control-Allow-Origin]]) and =allow_credentials=
+(the [[https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials][Access-Control-Allow-Credentials]] header) [[https://fastapi.tiangolo.com/tutorial/cors/][parameters]].
+
+In my case, we wanted to make sure that we do not need the =allow_credentials=True=.
+
+From the [[https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials][docs]] it looks like this is the case when we want to send cookies or auth
+headers from the server (which we do not do), although in our case we
+send auth headers from the client (the API auth token).
+
+According to the docs, it should work like this:
+
+- On the client set [[https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials][Request.credentials]] to =include= (we do not do this and the default is =same-origin=)
+- On the server: return cookies or auth headers (we do not do this) and add =Access-Control-Allow-Credentials= header
+
+If we do only =1= and server does not set =Access-Control-Allow-Credentials= the request will not be returned to
+the javascript code.
+
+I tested this using a mini-app:
+
+#+begin_src python
+"""
+Run the app like this:
+uvicorn test_app:app  --reload --host 0.0.0.0 --port 8000
+
+Test it like this (in the browser console):
+headers = new Headers()
+headers.append('Authorization', 'Basic' + btoa("user:test_pw"))
+options = { method: 'GET', headers: headers }
+await fetch("http://127.0.0.1:8000", options)
+"""
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    # allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/")
+async def main():
+    return {"message": "Hello World"}
+#+end_src
+
+It works with =allow_credentials= line commented out:
+
+#+caption: CORS test
+[[file:images/2023-12-cors_test.png]]
+
+I am testing this on the StackOverflow [[https://stackoverflow.com/questions/65635346/how-can-i-enable-cors-in-fastapi][page]], so the request goes from “stackoverflow.com” and is a CORS request.
+
+If I comment out the =allow_origins=origins= line in the mini-app config, I get an error:
+
+#+caption: CORS test error
+[[file:images/2023-12-cors_test_error.png]]

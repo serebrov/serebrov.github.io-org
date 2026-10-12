@@ -1,27 +1,25 @@
----
-title: "bash - how to run command in a loop until it fails"
-date: 2023-07-20
-tags: [bash]
-type: note
-url: "/html/2023-07-20-bash-how-to-run-command-until-it-fails.html"
----
+#+TITLE: Shell: loop the command until it fails
+#+DATE: <2023-07-20>
+#+TYPE: note
+#+FILETAGS: :shell:
+#+DESCRIPTION: How to run the shell command in a loop until the command fails with an error.
 
-I want to debug a flaky test and run it multiple times until the test runner returns non-zero code.
+I want to debug a flaky test and run it multiple times until the test
+runner returns non-zero code.
 
 Here is how to do that with a one-liner:
 
-```bash
+#+begin_src shell
 # Put the command to run into a variable, for convenience
 CMD="npm run test:unit -- tests/unit/MyTest.spec.ts -t \"'my test case'\""
 # Run it multiple times until it fails
 cnt=1; while eval $CMD; do echo "Command succeeded, attempt $cnt"; ((cnt++)); done
-```
+#+end_src
 
-<!-- more -->
+Alternatively, create a script to run the command, it might be more
+useful if there is a sequence of commands to run:
 
-Alternatively, create a script to run the command, it might be more useful if there is a sequence of commands to run:
-
-```bash
+#+begin_src shell
 #!/bin/bash
 
 while true; do
@@ -34,4 +32,4 @@ while true; do
     break
   fi
 done
-```
+#+end_src
