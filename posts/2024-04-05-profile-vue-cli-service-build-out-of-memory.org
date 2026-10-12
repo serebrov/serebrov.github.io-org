@@ -1,25 +1,25 @@
----
-title: "Vue CLI Service Build Out of Memory Error"
-date: 2024-04-05
-tags: [vue]
-type: note
-url: "/html/2024-04-05-profile-vue-cli-service-build-out-of-memory.html"
----
+#+TITLE: Vue CLI Service: Out of Memory Error during Build
+#+DATE: <2024-04-05>
+#+TYPE: note
+#+FILETAGS: :vue:
+#+DESCRIPTION: Solving the problem with Vue Cli build failing with out of memory error.
 
-# Solving the Vue app build out-of-memory error
+If you encounter an out-of-memory error during the frontend build, you
+can increase the memory limit for the node process by setting the
+=NODE_OPTIONS= environment variable:
 
-If you encounter an out-of-memory error during the frontend build, you can increase the memory limit for the node process by setting the `NODE_OPTIONS` environment variable:
-
-```bash
+#+begin_src shell
 export NODE_OPTIONS=--max_old_space_size=8192
 npm run build -- --mode production
-```
+#+end_src
 
-Note that it should be enough to build the frontend application with the default memory limit. Increasing the limit is a temporary measure to be able to [profile and debug the build process](./2024-04-05-profile-vue-cli-service-build.html).
+Note that it should be enough to build the frontend application with the
+default memory limit. Increasing the limit is a temporary measure to be
+able to [[./2024-04-05-profile-vue-cli-service-build.html][profile and debug the build process]].
 
 The error may look like this:
 
-```
+#+begin_example
 npm run build -- --mode production
 ...
 
@@ -35,4 +35,4 @@ npm run build -- --mode production
 FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
  1: 0x10372cc45 node::Abort() (.cold.1) [/Users/phn/.nvm/versions/node/v18.17.1/bin/node]
  2: ...
-```
+#+end_example

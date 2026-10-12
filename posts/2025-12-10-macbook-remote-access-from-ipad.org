@@ -1,28 +1,29 @@
----
-title: "MacBook - Remote Access from iPad"
-date: 2025-12-10
-tags: [mac]
-type: note
-url: "/html/2025-12-10-macbook-remote-access-from-ipad.html"
----
+#+TITLE: MacBook: Remote Access from iPad
+#+DATE: <2025-12-10>
+#+TYPE: note
+#+FILETAGS: :mac:
+#+DESCRIPTION: Some ways to remotely access MacBook from iPad
 
 There are a few solutions to have remote access from iPad to MacBook:
-* [Chrome remote desktop](https://remotedesktop.google.com/?pli=1)
-* [Teamviewer](https://www.teamviewer.com/)
-* [Jump desktop](https://jumpdesktop.com/)
-* SSH, Mac screen sharing app
-* Some other options
+- [[https://remotedesktop.google.com/?pli=1][Chrome remote desktop]]
+- [[https://www.teamviewer.com/][Teamviewer]]
+- [[https://jumpdesktop.com/][Jump desktop]]
+- SSH, Mac screen sharing app
+- Some other options
 
-I'll start with the simplest - Teamviewer and Jump Desktop.
+I'll start with the simplest: Teamviewer and Jump Desktop.
 
-<!-- more -->
+* Teamviewer and Jump Desktop
+:PROPERTIES:
+:CUSTOM_ID: teamviewer-and-jump-desktop
+:END:
 
-# Teamviewer and Jump Desktop
-
-Both [Teamviewer](https://www.teamviewer.com/) and [Jump Desktop](https://jumpdesktop.com/) work well and the setup is easy:
-* Install the iPad app (Jump Desktop app is $15, but it is one-time payment)
-* Install and run the Mac app
-* Connect from the iPad app to Mac
+Both [[https://www.teamviewer.com/][Teamviewer]] and [[https://jumpdesktop.com/][Jump Desktop]] work well and the setup is
+easy:
+- Install the iPad app (Jump Desktop app is $15, but it is
+one-time payment)
+- Install and run the Mac app
+- Connect from the iPad app to Mac
 
 Some notes on teamviewer vs jump desktop
 - jump desktop has several input modes: standard, locked screen, pen, trackpad, direct touch (I ended up mostly using the trackpad mode)
@@ -45,12 +46,14 @@ Some notes on teamviewer vs jump desktop
 - Teamviewer has an annoying issue with screen blinking and scaling for a split second
   - not sure why, maybe it reconnects to the host or something
 
-# Chrome remote desktop
-
+* Chrome remote desktop
+:PROPERTIES:
+:CUSTOM_ID: chrome-remote-desktop
+:END:
 Overall it works, but less convenient than Teamviewer or Jump Desktop.
 
 Setup:
-- Go to [https://remotedesktop.google.com/access](https://remotedesktop.google.com/access)
+- Go to [[https://remotedesktop.google.com/access]]
 - Install on Mac, give all the permissions (accessibility, screen recording)
 - On the "access" tab - allow access, set pin code
 - Open the URL above on iPad, connect to Mac
@@ -75,19 +78,31 @@ Related links:
 - https://www.macworld.com/article/671212/how-to-remote-access-a-mac-from-an-ipad-for-free.html
 - https://www.tomsguide.com/how-to/how-to-remote-control-your-mac-from-your-iphone-or-ipad
 
-# NoMachine
+* NoMachine
+:PROPERTIES:
+:CUSTOM_ID: nomachine
+:END:
+I did not try it, but [[https://www.nomachine.com/getting-started-with-nomachine-for-ios][NoMachine for iOS]] should also work.
+As far as I understand, NoMachine uses a different approach from other remote access software,
+having a peer-to-peer network to discover devices.
 
-I did not try it, but [NoMachine for iOS](https://www.nomachine.com/getting-started-with-nomachine-for-ios) should also work. As far as I understand, NoMachine uses a different approach from other remote access software, having a peer-to-peer network to discover devices.
+* VNC
+:PROPERTIES:
+:CUSTOM_ID: vnc
+:END:
+I also did not try this, but theoretically, if there is a good VNC
+client for iOS, it could be used as a remote access solution to connect
+to the VNC server running on Mac.
 
-# VNC
+* SSH, screen share app
+:PROPERTIES:
+:CUSTOM_ID: ssh-screen-share-app
+:END:
+Mac has a few tools that seem to be for the mac-to-mac remote
+management, but maybe some of these can also be utilized to connect from
+iPad (I did not try this):
+- [[https://support.apple.com/guide/mac-help/share-the-screen-of-another-mac-mh14066/mac][Mac screenshare app]]
+- [[https://support.apple.com/en-gb/guide/mac-help/mchlp1066/mac][Remote login feature]] that allows SSH connections
+- [[https://support.apple.com/en-in/guide/mac-help/mh11851/mac][Apple Remote Management]].
 
-I also did not try this, but theoretically, if there is a good VNC client for iOS, it could be used as a remote access solution to connect to the VNC server running on Mac.
-
-# SSH, screen share app
-
-Mac has a few tools that seem to be for the mac-to-mac remote management, but maybe some of these can also be utilized to connect from iPad (I did not try this):
-- [Mac screenshare app](https://support.apple.com/guide/mac-help/share-the-screen-of-another-mac-mh14066/mac)
-- [Remote login feature](https://support.apple.com/en-gb/guide/mac-help/mchlp1066/mac) that allows SSH connections
-- [Apple Remote Management](https://support.apple.com/en-in/guide/mac-help/mh11851/mac).
-
-Related [video](https://www.youtube.com/watch?v=bSLBkZB5o1o).
+Related [[https://www.youtube.com/watch?v=bSLBkZB5o1o][video]].

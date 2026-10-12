@@ -1,21 +1,27 @@
----
-title: "Tmux: how to run the same command in multiple panes"
-date: 2024-01-30
-tags: [tmux]
-type: note
-url: "/html/2024-01-30-tmux-run-same-command-in-multiple-panes.html"
----
+#+TITLE: Tmux: run multiple commands in tmux panes
+#+DATE: <2024-01-30>
+#+TYPE: note
+#+FILETAGS: :shell:
+#+DESCRIPTION: Tmux: how to run the same command in multiple panes
 
-# Why run the same command in multiple tmux panes?
+* Why run the same command in multiple tmux panes?
+:PROPERTIES:
+:CUSTOM_ID: why-run-the-same-command-in-multiple-tmux-panes
+:END:
 
-Sometimes it can be convenient as a quick way to run some command in parallel on the server. We can still see the output, detach from tmux and disconnect
-and reconnect later and attach to the tmux session to see the result.
+Sometimes it can be convenient as a quick way to run some command in
+parallel on the server. We can still see the output, detach from tmux
+and disconnect and reconnect later and attach to the tmux session to see
+the result.
 
-# How to run the same command in multiple panes?
+* How to run the same command in multiple panes?
+:PROPERTIES:
+:CUSTOM_ID: how-to-run-the-same-command-in-multiple-panes
+:END:
 
 To run the same command in multiple panes, we can use a script like this:
 
-```bash
+#+begin_src shell
 #!/bin/bash
 
 SESS='generation-jobs'
@@ -38,15 +44,16 @@ tmux set-window-option -t $SESS:1 synchronize-panes on
 tmux send-keys -t $SESS "$CMD" Enter
 # Attach to session named "$SESS"
 tmux attach -t $SESS
-```
+#+end_src
 
 It will work like this:
 
-{{< video src="2024-01-30-tmux-run-same-command-in-multiple-panes.mp4" type="video/mp4">}}
+[[video:images/2024-01-30-tmux-run-same-command-in-multiple-panes.mp4]]
 
-Here is also a variation of the script that allows to add more panes to the existing session:
+Here is also a variation of the script that allows to add more panes to
+the existing session:
 
-```
+#+begin_src shell
 #!/bin/bash
 
 SESS='generation-jobs'
@@ -85,9 +92,11 @@ done
 
 # Attach to session named "$SESS"
 tmux attach -t $SESS
-```
+#+end_src
 
-# Related Links
-
-[AskUbuntu: Open 8 panes of TMUX and go to different directory in each one , and run a command in each pane?](https://askubuntu.com/questions/1320470/open-8-panes-of-tmux-and-go-to-different-directory-in-each-one-and-run-a-comma)
-[StackOverflow: TMUX: no space for new pane](https://stackoverflow.com/questions/68362719/tmux-no-space-for-new-pane)
+* Related Links
+:PROPERTIES:
+:CUSTOM_ID: related-links
+:END:
+[[https://askubuntu.com/questions/1320470/open-8-panes-of-tmux-and-go-to-different-directory-in-each-one-and-run-a-comma][AskUbuntu: Open 8 panes of TMUX and go to different directory in each one , and run a command in each pane?]]
+[[https://stackoverflow.com/questions/68362719/tmux-no-space-for-new-pane][StackOverflow: TMUX: no space for new pane]]
