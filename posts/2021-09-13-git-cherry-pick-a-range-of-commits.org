@@ -1,0 +1,19 @@
+#+TITLE: git: cherry-pick a range of commits
+#+DATE: <2021-09-13>
+#+TYPE: note
+#+FILETAGS: :git:
+#+DESCRIPTION: Git: How to cherry-pick a range of commits
+
+To cherry pick a range of commits to another branch, we can use the
+=START^..END= commit range syntax, where =START= is the first commit in
+the range and =END= is the last commit:
+
+#+begin_src shell
+git cherry-pick START^..END
+#+end_src
+
+* References
+:PROPERTIES:
+:CUSTOM_ID: references
+:END:
+[[https://stackoverflow.com/a/1994491/4612064][How to cherry-pick a range of commits and merge them into another branch?]]

@@ -1,0 +1,81 @@
+#+TITLE: git: move files to another repository
+#+DATE: <2021-09-13>
+#+TYPE: note
+#+FILETAGS: :git:
+#+DESCRIPTION: Git: How to move files with history from one repository to another.
+
+Git allows joining unrelated repositories via remotes which, in turn,
+allows moving files and change history between them.
+
+Some cases when this might be needed:
+
+- Extract part of a big repository into a separate repository,
+  preserving change history
+- Splitting big repository to a set of smaller repositories
+- Merge smaller repository into a bigger one (merge in library from the
+  external repository)
+
+Preserving the history has an important effect: after we do the change,
+for example, extract a part of a bigger repository into a separate
+repository, we can continue moving changes between them (merge updates
+from the big repository to the small one and back).
+
+Below, I am assuming the first case (extract part of the big
+repository), other cases can be implemented with a similar technique.
+
+* Setup
+:PROPERTIES:
+:CUSTOM_ID: setup
+:END:
+Assuming we have a source (upstream) repository and we want to extract a
+top-level =/lib= folder into a separate repository, first, create a
+destination repository:
+
+#+begin_src shell
+mkdir dest-repo
+cd dest-repo
+git init
+#+end_src
+
+Add a main repository as remote and checkout master branch:
+
+#+begin_src shell
+git remote add -f upstream git@github.com:myaccount/main.git
+git checkout -b upstream_master upstream/master
+git subtree split --prefix=lib/ -b upstream_lib
+#+end_src
+
+What we do above is: add the source (upstream) repository as a remote,
+checkout its =master= branch to the destination repository and then use
+=git subtree split= to create =upstream_master_lib= branch containing
+only =/lib= folder with all the change history.
+
+Now we can merge the upstream files and history from the =/lib= folder
+to the target =master= branch:
+
+#+begin_src shell
+git checkout master
+git merge upstream_lib
+git push origin HEAD
+#+end_src
+
+* Update from upstream
+:PROPERTIES:
+:CUSTOM_ID: update-from-upstream
+:END:
+Pull recent upstream repository master branch and re-split it to a new
+branch:
+
+#+begin_src shell
+git checkout upstream_master
+git pull
+git subtree split --prefix=lib/ -b upstream_lib_YYYY.MM.DD
+#+end_src
+
+Merge the update:
+
+#+begin_src shell
+git checkout master
+git merge upstream_lib_YYYY.MM.DD
+git push origin HEAD
+#+end_src

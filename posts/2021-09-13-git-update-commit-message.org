@@ -1,0 +1,70 @@
+#+TITLE: git: update commit message
+#+DATE: <2021-09-13>
+#+TYPE: note
+#+FILETAGS: :git:
+#+DESCRIPTION: Git: Some ways to update the commit message
+
+* Simple: Change Last Commit Message
+:PROPERTIES:
+:CUSTOM_ID: simple-change-last-commit-message
+:END:
+To change the last commit message, use =commit= with =--amend= flag:
+
+#+begin_quote
+Careful: =commit --amend= will rewrite history, do not use on public branches.
+#+end_quote
+
+#+begin_src shell
+git commit --amend
+#+end_src
+
+It will open an editor and change the commit message, changes will be
+applied after saving the file and closing the editor.
+
+* Advanced: Change Any Commit Message or Multiple Commit Messages
+:PROPERTIES:
+:CUSTOM_ID: advanced-change-any-commit-message-or-multiple-commit-messages
+:END:
+Besides other things, interactive rebase allows editing commit messages:
+
+#+begin_src shell
+git rebase -i HEAD~3
+#+end_src
+
+#+begin_example
+  pick SHA-A commit message
+  pick SHA-B commit message
+  pick SHA-C commit message
+#+end_example
+
+Do not change commit messages just yet, only change =pick= in the first
+column to =r= (or full =reword=):
+
+#+begin_example
+pick SHA-A commit message
+r SHA-B commit message
+r SHA-C commit message
+#+end_example
+
+Here we schedule commit message update for =SHA-B= and =SHA-C= commits.
+After the file is saved, git will open the editor once more for each of
+the marked commits where we can edit the commit message.
+
+* Alternative: Cherry Pick Commits and Update Messages
+:PROPERTIES:
+:CUSTOM_ID: alternative-cherry-pick-commits-and-update-messages
+:END:
+This might be useful if we want to pick some commits from the branch and
+update commit messages:
+
+#+begin_src shell
+# create the new branch
+git checkout -b new-branch
+
+# for every commit to pick
+git cherry-pick commit-sha
+git commit --amend
+#+end_src
+
+So we cherry pick needed commits and then edit commit messages with
+=commit --amend=.
