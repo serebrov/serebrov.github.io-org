@@ -1,0 +1,34 @@
+#+TITLE: Angular.js: POST data to PHP
+#+DATE: <2013-05-24>
+#+TYPE: note
+#+FILETAGS: :php:js:
+#+DESCRIPTION: How to read Angular.js POST requests in PHP, on the server side or by sending form-encoded data from the client.
+
+By default angular.js sends all data in json. So if you do a POST request to PHP code then the =$_POST= superglobal will not be populated.
+
+This can be solved in two ways - on the client side or on the server side.
+
+* Server-side solution
+
+On the server you can parse input and then decode data from json:
+
+#+begin_src php
+$data = file_get_contents("php://input");
+$postData = json_decode($data);
+#+end_src
+
+* Client-side solution
+
+On the client side the data can be sent in a way PHP expects it:
+
+#+begin_src js
+$http({
+    url:url
+    data : $.param(data),
+    method : 'POST',
+    headers : {'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}
+}).success(callback);
+#+end_src
+
+Here we set the =Content-Type= header and encode data using jQuery's [[http://api.jquery.com/jQuery.param/][=$.param=]].
+This also can be done for all requests as described [[http://stackoverflow.com/questions/12190166/angularjs-any-way-for-http-post-to-send-request-parameters-instead-of-json][on stackoverflow]].

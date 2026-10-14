@@ -136,7 +136,7 @@ restore these changes later with =git stash pop=.
   remote: Counting objects: 1, done.
   remote: Total 1 (delta 0), reused 0 (delta 0), pack-reused 1
   Unpacking objects: 100% (1/1), done.
-  From github.com:tapway/tapway-data
+  From github.com:org/myrepo-data
      f3ba979..68822fb  master     -> origin/master
   Updating f3ba979..68822fb
   Fast-forward

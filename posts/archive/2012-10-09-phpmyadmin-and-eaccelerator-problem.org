@@ -1,0 +1,17 @@
+#+TITLE: phpMyAdmin and eAccelerator problem
+#+DATE: <2012-10-09>
+#+TYPE: note
+#+FILETAGS: :php:
+#+DESCRIPTION: How to fix the empty response error in phpMyAdmin by disabling eAccelerator in .htaccess.
+
+Error when trying to access phpmyadmin (in Chrome):
+
+#+begin_quote
+Error 324 (=net::ERR_EMPTY_RESPONSE=): The server closed the connection without sending any data.
+#+end_quote
+
+The easiest fix I found is to disable eaccelerator in =.htaccess= (create it in the phpmyadmin root folder and add this line):
+
+#+begin_example
+php_flag eaccelerator.enable 0
+#+end_example

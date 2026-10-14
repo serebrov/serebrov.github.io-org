@@ -1,0 +1,166 @@
+#+TITLE: AWS OpsWorks: set up MongoDB EBS volume backups
+#+DATE: <2014-12-30>
+#+TYPE: note
+#+FILETAGS: :aws:
+#+DESCRIPTION: How to set up automated MongoDB EBS volume snapshots on OpsWorks with a Chef recipe, cron and aws-snapshot-tool.
+
+I described how to set up [[file:2014-12-19-aws-opsworks-mongo-and-nodejs.org][mongodb on EC2 using OpsWorks]] and here is how to set up mongo data backups.
+
+In my case all mongo data is stored on the same EBS volume so I just need to make a volume snapshot. The relevant part from the [[http://docs.mongodb.org/ecosystem/tutorial/backup-and-restore-mongodb-on-amazon-ec2/][mongodb docs]]:
+
+#+begin_quote
+Backup with --journal
+
+The journal file allows for roll forward recovery.
+The journal files are located in the dbpath
+directory so will be snapshotted at the same time as the database files.
+If the dbpath is mapped to a single EBS volume then proceed to Backup
+the Database Files.
+If the dbpath is mapped to multiple EBS volumes, then in order to guarantee
+the stability of the file-system you will need to Flush and Lock
+the Database.
+NOTE
+Snapshotting with the journal is only possible if the journal resides
+on the same volume as the data files, so that one snapshot operation
+captures the journal state and data file state atomically.
+#+end_quote
+
+This is my case - I have all data on the same EBS volume and =journal= option is [[http://docs.mongodb.org/v2.2/reference/mongod/#cmdoption--journal][enabled by default]] for MongoDB 2.0 and higher on 64-bit systems. In other cases it is necessary to [[http://docs.mongodb.org/ecosystem/tutorial/backup-and-restore-mongodb-on-amazon-ec2/#flush-and-lock-the-database][flush and lock the database]]. This method is supported by the [[https://github.com/alestic/ec2-consistent-snapshot][ec2-consistent-snapshot tool]].
+
+My solution is based on the modified version of [[https://github.com/evannuil/aws-snapshot-tool][aws-snapshot-tool]]. I wanted a completely automated setup where I don't need to take manual steps like assigning tags to the volumes I need to backup.
+
+The process I have now does this:
+
+- There is a special =ec2-backup= chef recipe which I assign to the instance (or instances) whose volumes I need to backup
+- This recipe is added to the mongodb layer in OpsWorks, so every mongo instance will have it
+- The recipe assigns =MakeSnapshot=True= tag to the instance
+- Recipe also sets up cron jobs to perform daily, weekly and monthly backups
+- Snapshots are created by the aws snapshot tool launched by cron
+- The aws snapshot tool also sends results via SNS and I get backup notifications by email
+
+The recipe (=ec2-backup/recipes/default.rb=) looks like this:
+
+#+begin_src ruby
+# see https://github.com/stuart-warren/chef-aws-tag
+
+# Assign tag to the instance
+include_recipe "aws"
+tags = {
+  "MakeSnapshot" => "True"
+}
+aws_resource_tag node['ec2']['instance_id'] do
+    tags(tags)
+    action :update
+end
+
+# Create directory where snapshot tool will be stored
+directory "/srv/backup" do
+  owner 'root'
+  group 'root'
+  mode '0644'
+  action :create
+end
+
+# Copy the snapshot tool to /srv/backup
+cookbook_file "makesnapshots.py" do
+  path "/srv/backup/makesnapshots.py"
+  action :create
+end
+
+# Copy the snapshot tool config to /srv/backup
+cookbook_file "config.py" do
+  path "/srv/backup/config.py"
+  action :create
+end
+
+# Setup a cron job for daily backups
+cron "backup-daily" do
+  path "/usr/local/bin:$PATH"
+  hour "1"
+  minute "30"
+  weekday '1-6'
+  command "cd /srv/backup && /usr/bin/python makesnapshots.py day 2>&1 |/usr/bin/logger -t \"CRON: makenapshot\""
+end
+
+# Setup a cron job for weekly backups
+cron "backup-weekly" do
+  path "/usr/local/bin:$PATH"
+  hour "2"
+  minute "30"
+  weekday '7'
+  command "cd /srv/backup && /usr/bin/python makesnapshots.py week 2>&1 |/usr/bin/logger -t \"CRON: makenapshot\""
+end
+
+# Setup a cron job for monthly backups
+cron "backup-monthly" do
+  path "/usr/local/bin:$PATH"
+  hour "3"
+  minute "30"
+  day '1'
+  command "cd /srv/backup && /usr/bin/python makesnapshots.py month 2>&1 |/usr/bin/logger -t \"CRON: makenapshot\""
+end
+#+end_src
+
+Under the recipe files folder (=ec2-backup/files/default/=) I have a modified copy of the aws-snapshot-tool. The recipe folder layout is this:
+
+#+begin_example
+├── Berksfile
+├── ec2-backup
+│   ├── files
+│   │   └── default
+│   │       ├── config.py
+│   │       ├── makesnapshots.py
+│   ├── metadata.rb
+│   └── recipes
+│       └── default.rb
+#+end_example
+
+The =Berksfile= contains dependency info (only aws is relevant to ec2-backup recipe):
+
+#+begin_src ruby
+source 'https://supermarket.getchef.com'
+
+cookbook 'mongodb'
+cookbook 'aws', '>= 0.2.4'
+#+end_src
+
+My version of the =makesnapshots.py= is [[https://gist.github.com/serebrov/38f8c2d47c532243d05a][here]]. My modification was to allow tagging instances instead of volumes. There is already a similar pull request in the [[https://github.com/evannuil/aws-snapshot-tool/pull/19][original repository]] so I didn't submit my change back. There is also one new option in the =config.py= (see the full config example [[https://github.com/evannuil/aws-snapshot-tool/blob/559c1f6cf77b87c66c07b177451e76dcccc385fa/config.sample][here]]):
+
+#+begin_src python
+...
+# Set to True to use instance tags, False - volume tags
+'use_instance_tag': True,
+...
+#+end_src
+
+That's all, now I have mongo data backups with email notifications.
+
+* Links
+
+[[http://docs.mongodb.org/ecosystem/tutorial/backup-and-restore-mongodb-on-amazon-ec2/][MongoDB documentation - backup and restore on Amazon EC2]]
+
+[[https://github.com/alestic/ec2-consistent-snapshot][ec2-consistent-snapshot tool]]
+
+[[https://github.com/evannuil/aws-snapshot-tool][aws-snapshot-tool]] and related post [[http://www.coresoftwaregroup.com/blog/automated-amazon-ebs-volume-snapshots-with-boto][Automated Amazon EBS volume snapshots with boto]]
+
+[[https://github.com/CaseyLabs/aws-ec2-ebs-automatic-snapshot-bash][Bash script for Automatic EBS Snapshots and Cleanup on Amazon Web Services]] and related [[https://www.caseylabs.com/automated-ebs-volume-snapshot-script-for-linux-bash/][post]]
+
+[[https://github.com/colinbjohnson/aws-missing-tools/tree/master/ec2-automate-backup][ec2-automate-backup tool]] and related [[http://www.cloudar.be/awsblog/automating-snapshotsbackups-of-ec2-ebs-volumes/][post]] and another [[http://www.nerdpolytechnic.org/?p=89][one]]
+
+[[https://github.com/skymill/automated-ebs-snapshots][automated-ebs-snapshots tool]]
+
+[[https://medium.com/aws-activate-startup-blog/devops-backup-in-amazon-ec2-190c6fcce41b][DevOps Backup in Amazon EC2 article]]
+
+[[http://stackoverflow.com/questions/18319942/mongodb-ec2-ebs-backups][Stackoverflow: MongoDb EC2 EBS backups]]
+
+[[http://www.stardothosting.com/blog/2012/05/automated-amazon-ebs-snapshot-backup-script-with-7-day-retention/][Automated amazon ebs snapshot backup script with 7 day retention]]
+
+[[https://github.com/RGBboy/mongodb-s3-backup][Mongodb to Amazon s3 Backup Script]]
+
+[[http://docs.aws.amazon.com/opsworks/latest/userguide/workingcookbook-extend-cron.html][OpsWorks docs - Running Cron Jobs]]
+
+[[https://docs.chef.io/resource_cron.html][Chef - cron resource]]
+
+[[https://docs.chef.io/resource_file.html][Chef - file resource]] and [[https://docs.chef.io/chef/resources.html#cookbook-file][=cookbook_file=]]
+
+[[https://docs.chef.io/resource_directory.html][Chef - directory resource]]

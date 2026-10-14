@@ -1,0 +1,33 @@
+#+TITLE: PHP: UTF-8 strings handling
+#+DATE: <2013-03-23>
+#+TYPE: note
+#+FILETAGS: :php:
+#+DESCRIPTION: How to handle UTF-8 strings in PHP with mbstring function overloading and the default internal encoding.
+
+Enable mbstring [[http://www.php.net/manual/en/mbstring.overload.php][function overloading mode]] and set default encoding for string functions to utf-8 in php.ini:
+
+#+begin_src ini
+mbstring.internal_encoding = UTF-8
+mbstring.func_overload = 7
+#+end_src
+
+These settings allow us to use "usual" php string functions like =substr()= for utf-8 strings.
+It is not recommended to set function overloading in per-directory context (via Apache config or in the =.htaccess=).
+
+Default encoding can also be set using [[http://php.net/manual/en/function.mb-internal-encoding.php][=mb_internal_encoding= function]]:
+
+#+begin_src php
+mb_internal_encoding('UTF-8');
+#+end_src
+
+Or encoding can be set explicitly as an argument in the mbstring function:
+
+#+begin_src php
+$sub = mb_substr($mbstr, 0, 1, 'utf-8');
+#+end_src
+
+* Links
+
+[[http://www.php.net/manual/en/book.mbstring.php][PHP Docs - Multibyte String]]
+
+[[http://www.yiiframework.com/wiki/16/how-to-set-up-unicode/][Yii Wiki - How to set up Unicode]]

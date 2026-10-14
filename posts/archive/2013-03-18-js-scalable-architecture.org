@@ -1,0 +1,69 @@
+#+TITLE: Want Scalable Application Architecture? Check AngularJS.
+#+DATE: <2013-03-18>
+#+TYPE: post
+#+FILETAGS: :js:
+#+DESCRIPTION: The Scalable JavaScript Application Architecture by Nicholas Zakas, frameworks built on it, and why AngularJS is close to it.
+
+The [[http://www.youtube.com/watch?v=mKouqShWI4o][Scalable JavaScript Application Architecture]] is a presentation by [[http://www.nczonline.net/][Nicholas Zakas]] where he suggests a flexible and scalable architecture for JavaScript applications. Here are other related resources:
+
+- [[http://www.ubelly.com/2011/11/scalablejs/][Presentation summary]]
+- [[http://www.slideshare.net/nzakas/scalable-javascript-application-architecture][Presentation slides]]
+- [[http://addyosmani.com/largescalejavascript/][Patterns For Large-Scale JavaScript Application Architecture by Addy Osmani]]
+
+The presentation is interesting but it also leaves many open questions. In short, the architecture contains the following application layers:
+
+- base library (jquery, etc)
+- application core:
+  - manages modules (register modules, tell when to start and when to stop)
+  - handle errors (like wrap all modules' methods into try/catch and log errors)
+  - enable inter-module communication
+  - should be extensible (error handling, ajax wrapper, general utilities, anything!)
+  - can use base library
+- sandbox:
+  - facade for modules above the core
+  - interaction between modules via messages (events)
+- modules:
+  - do not know about each other, only about sandbox
+  - call only own methods or sandbox methods
+  - DOM access only inside own box (but do not use base library)
+  - no access to non-native global objects, don't create global objects
+  - ask sandbox for anything you need, don't reference other modules
+  - preferably no access to base library, use pure JS
+
+Here are some questions raised by the presentation:
+
+- It is mentioned that the architecture covers the 'controller' part of MVC, but it is not clear how to plug M and V here. Should the module act as controller and handle model / view interaction (this can be complex without access to the base library)? For me the 'module' here looks more like a [[http://en.wikipedia.org/wiki/Web_widget#Widget][widget]] - some self-contained element with own box in the HTML and related js code.
+- Modules do not interact directly and only send messages to each other. This way we can change them independently. But messages are sent with some data and the receiver should expect some data structure. So in the case when this data changes it is necessary to review and fix all possible receivers.
+- App core responsibilities are too wide (remember "anything!") and the same is related to sandbox (because it acts as a facade on top of the core).
+
+Of course good answers can be found for all these points and more questions can be raised. It is clear that the suggested architecture is an idea and the way to go but not a complete design. It was interesting to see if there are frameworks built upon this idea. And here is the list (descriptions are taken from their sites):
+
+- [[https://github.com/aurajs/aura][Aura]] is a decoupled, event-driven architecture for developing widget-based applications.
+- [[http://tcorral.github.com/Hydra.js/][Hydra.js]] is the library that will help you to scale your app.
+- [[http://alanlindsay.me/kerneljs/][Kernel.js]] is an ultra lightweight (~4k) architecture for building scalable javascript applications.
+- [[http://terrifically.org/][TerrificJS]] provides you a Scalable Javascript Architecture, that helps you to modularize your jQuery/Zepto Code in a very intuitive and natural way.
+- [[http://scaleapp.org/][scaleApp]] is a tiny JavaScript framework for scalable One-Page-Applications / Single-Page-Applications.
+- [[https://github.com/legalbox/lb_js_scalableApp][framework by Legalbox]] - the Scalable JavaScript Application framework.
+- [[http://angularjs.org/][AngularJS]] - Superheroic JavaScript MVW Framework.
+- [[http://stackoverflow.com/questions/8701336/good-implementation-of-scalable-javascript-application-architecture-sandbox-by][Stackoverflow question on the topic]]
+
+Presence of the AngularJS here can be unexpected and reasons why I included it are below. Others are directly built on the idea from Nicholas' presentation and the most popular of them (looking at the number of stars on the github) is [[https://github.com/aurajs/aura][Aura]]. Here are todo [[https://github.com/sbellity/aura-todos][application]] [[https://github.com/alexanderbeletsky/todomvc-aura][examples]] built on Aura.
+
+So why is AngularJS here? Actually I do not have much experience with it, but from what I know it looks very close to the Nicholas' Scalable Architecture:
+
+- base library - jQuery or angular's own jqLite implementation
+- app core - angular itself
+- sandbox - scope passed to the controller
+- module - angular's controller
+
+Besides the main parts of the scalable architecture AngularJS has more. For example, along with the sandbox (scope) we can pass additional services to the controller (like =$http= for ajax requests). So the sandbox does not turn into a God-object with too many responsibilities.
+
+And angular controllers are very similar to scalable architecture modules:
+
+- self-contained and sandboxed
+- can be built in pure JS without access to the base library
+- interaction between modules is done via events or via special service but not directly
+
+This way the idea of the scalable architecture is present in the AngularJS. And angular also gives other essential components (views, models, services, etc) and provides complete and ready to use architecture.
+
+Update: Toptal has reached out to me asking to link their article and I think it is quite useful not only when you need to hire someone, but also when learning or refreshing angular knowledge, so here it is: [[https://www.toptal.com/angular-js#hiring-guide][How to Hire a Great AngularJS Developer]].

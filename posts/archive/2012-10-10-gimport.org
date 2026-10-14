@@ -1,0 +1,44 @@
+#+TITLE: Yii: GImport extension
+#+DATE: <2012-10-10>
+#+TYPE: note
+#+FILETAGS: :yii:
+#+DESCRIPTION: The GImport Yii extension: recursive import of directories with caching.
+
+GImport yii extension implements recursive import of directories with caching.
+
+Import is performed recursively for specified path alias.
+Classes found are cached, so the import process can be slow only the first time.
+
+Basic usage example:
+
+#+begin_src php
+$importer = new GImport;
+$importer->add('modules.myModule.*');
+#+end_src
+
+This code will import all classes from =modules/myModule/= directory.
+
+GImport can also be configured as an application component.
+Add the following code into the application config:
+
+#+begin_src php
+return array(
+...
+'preload' => array('log', 'import'),
+...
+'components' => array(
+    'import' => array(
+        'class'=>'GImport',
+        'import' => array(
+            // add directories to import and
+            // put 'import' component to preload to trigger import
+            // on application initialization
+            'application.extensions.*',
+        ),
+    ),
+...
+#+end_src
+
+Download at [[http://www.yiiframework.com/extension/gimport/][extension page]].
+
+[[http://www.yiiframework.com/forum/index.php/topic/36445-extension-gimport/][Forum topic]].

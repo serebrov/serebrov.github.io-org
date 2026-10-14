@@ -1,20 +1,18 @@
----
-title: AWS - Deployment via OpsWorks from the command line
-date: 2014-12-30
-tags: [aws]
-type: note
-url: "/html/2014-12-30-aws-opsworks-cmd-deployment.html"
----
+#+TITLE: AWS OpsWorks: deployment from the command line
+#+DATE: <2014-12-30>
+#+TYPE: note
+#+FILETAGS: :aws:
+#+DESCRIPTION: A Python script with boto and a shell script with the AWS CLI to deploy an OpsWorks application from the command line.
 
-Below is a simple python script which performs application deployment using OpsWorks API library (boto).
-Script performs following steps
-- Execute 'update_custom_cookbooks' deployment command and wait for successful completion (or stop with an error)
-- Execute 'deploy' command and wait for completion
+Below is a simple python script which performs application deployment using the OpsWorks API library (boto).
+The script performs the following steps:
 
-<!-- more -->
-At the top there are aws configuration parameters (aws_access_key, aws_secret_key) - these can be left empty if the script is launched on the AWS instance which has IAM role assigned.
+- Execute =update_custom_cookbooks= deployment command and wait for successful completion (or stop with an error)
+- Execute =deploy= command and wait for completion
 
-```python
+At the top there are aws configuration parameters (=aws_access_key=, =aws_secret_key=) - these can be left empty if the script is launched on the AWS instance which has IAM role assigned.
+
+#+begin_src python
 #!/usr/bin/python
 
 import boto.opsworks
@@ -61,25 +59,27 @@ wait_for_deployment(result['DeploymentId'])
 result = opsworks.create_deployment(stack_id, {"Name":"deploy"}, app_id)
 print('Deploy %s' % result)
 wait_for_deployment(result['DeploymentId'])
+#+end_src
 
-```
-
-The script launches deployment command and then polls its status every three seconds until it completes or fails.
+The script launches the deployment command and then polls its status every three seconds until it completes or fails.
 Results look like this:
 
-```bash
-$ ./deploy.py
+#+begin_src shell
+./deploy.py
+#+end_src
+
+#+begin_example
 Update custom cookbooks {u'DeploymentId': u'e83a0100-52b2-2fe1-ad26-1db85b62dbfb'}
 Waiting for deployment e83a0100-52b2-2fe1-ad26-1db85b62dbfb to complete
 ........................Done e83a0100-52b2-2fe1-ad26-1db85b62dbfb
 Deploy {u'DeploymentId': u'85fda652-f215-25fd-b13d-e061adccf535'}
 Waiting for deployment 85fda652-f215-25fd-b13d-e061adccf535 to complete
 .................................Done 85fda652-f215-25fd-b13d-e061adccf535
-```
+#+end_example
 
 Here is also a similar shell script. It is simpler than the python code and just launches deployments without waiting for results:
 
-```bash
+#+begin_src shell
 #!/usr/bin/env bash
 
 STACK_ID=0a000a00-00a0-00a0-0000-00a00000000a
@@ -90,12 +90,10 @@ export AWS_SECRET_ACCESS_KEY=xXXxxxxxXXxXXxxXXxXXxxxxXxxXxxxxXXXxXxXX
 
 aws opsworks --region us-east-1 create-deployment --stack-id $STACK_ID --app-id $APP_ID --command "{\"Name\":\"update_custom_cookbooks\"}"
 aws opsworks --region us-east-1 create-deployment --stack-id $STACK_ID --app-id $APP_ID --command "{\"Name\":\"deploy\"}"
-```
+#+end_src
 
-## Links
+* Links
 
-[OpsWorks cli - create-deployment command](http://docs.aws.amazon.com/cli/latest/reference/opsworks/create-deployment.html)
+[[http://docs.aws.amazon.com/cli/latest/reference/opsworks/create-deployment.html][OpsWorks cli - create-deployment command]]
 
-[OpsWorks docs:Deploy an App (create-deployment)](http://docs.aws.amazon.com/opsworks/latest/userguide/cli-examples-create-deployment.html)
-
-
+[[http://docs.aws.amazon.com/opsworks/latest/userguide/cli-examples-create-deployment.html][OpsWorks docs: Deploy an App (create-deployment)]]
