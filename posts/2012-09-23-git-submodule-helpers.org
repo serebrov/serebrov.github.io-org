@@ -55,7 +55,7 @@ index 702fc8a..5bd722f 160000
 #+end_src
 
 Where =-Subproject commit= is another (=master=) branch state and
-=+Subproject commit= is a current branch state.
+=+Subproject commit= is the current branch state.
 
 * View changes in submodule state on the current branch
 
@@ -99,12 +99,12 @@ Where =-Subproject commit= is a previous submodule state and
 :PROPERTIES:
 :CUSTOM_ID: links
 :END:
-[[https://git.wiki.kernel.org/index.php/GitSubmoduleTutorial][GitSubmoduleTutorial]]
+[[https://archive.kernel.org/oldwiki/git.wiki.kernel.org/index.php/GitSubmoduleTutorial.html][Git Wiki: GitSubmoduleTutorial]]
 
-[[http://git-scm.com/book/en/Git-Tools-Submodules][Pro Git: 6.6 Git Tools - Submodules]]
+[[https://git-scm.com/book/en/v2/Git-Tools-Submodules][Pro Git: Git Tools - Submodules]]
 
-[[http://stackoverflow.com/questions/1979167/git-submodule-update][Stackoverflow: git submodule update]]
+[[https://stackoverflow.com/questions/1979167/git-submodule-update][Stackoverflow: git submodule update]]
 
-[[http://speirs.org/blog/2009/5/11/understanding-git-submodules.html][Understanding Git Submodules]]
+[[https://web.archive.org/web/20121005110913/http://speirs.org/blog/2009/5/11/understanding-git-submodules.html][Understanding Git Submodules]]
 
-[[http://longair.net/blog/2010/06/02/git-submodules-explained/][git Submodules Explained]]
+[[https://longair.net/blog/2010/06/02/git-submodules-explained/][git Submodules Explained]]
