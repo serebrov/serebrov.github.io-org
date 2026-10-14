@@ -11,7 +11,7 @@ clipboard same as when you copy (yank) something.
 
 This is often convenient as you don't lose what you've deleted.
 
-But on the other hand it means that when you paste something over another text
+But on the other hand it means that when you paste something over other text
 you get what was deleted into the clipboard and you'll be surprised the
 next time you try to paste.
 
@@ -24,12 +24,12 @@ The "standard" solution is to paste with ="0p=:
 Fun fact: "yank" means "copy" in vim and it means "paste" in emacs.
 #+END_QUOTE
 
-For example, let's say we want to copy the =new_value=, to clipboard and then
+For example, let's say we want to copy the =new_value= to the clipboard and then
 replace one or more occurrences of the =old_value= with it. We can use
 =:%s/new_value/old_value/g= for that, but sometimes it is more convenient
 to go over the text and do replacements manually.
 
-A possible way to do replace multiple word occurrences in =vim= is:
+A possible way to replace multiple word occurrences in =vim= is:
 
 - Yank inner word: =yiw= (the =new_value= is now in the default register =""=)
 - Move cursor to another word (the =old_value=)
@@ -66,7 +66,7 @@ paste it with =p=.
 
 This is because the =xnoremap= only changes =p= in "Visual mode"
 (see =:help mapmode-x=). And the meaning of =pgvy= is:
-- =p= - paste the =new_value= (and =old_value= gets to clipboard)
+- =p= - paste the =new_value= (and =old_value= gets to the clipboard)
 - =gv= - re-select what we've just pasted (=new_value=)
 - =y= - copy what we've just pasted (the =new_value=)
 
@@ -91,15 +91,15 @@ mode vs normal mode is natural:
 So the =xnoremap p pgvy= works well because it only redefines the visual mode behavior.
 
 With this mapping, we can still use Vim's standard behavior if needed by
-using =gp= instead of =p= (=gp= is almost the same as p, with cursor
+using =gp= instead of =p= (=gp= is almost the same as =p=, with cursor
 left after the pasted text instead of the last char of it).
 
 A solution for Emacs =evil= mode is this:
 
 #+BEGIN_SRC emacs-lisp
-    ;; By default, evil emulates Vim behavior, we need to disable it
-    ;; so we can comfortably paste multiple times in visual mode.
-    (setq evil-kill-on-visual-paste nil)
+;; By default, evil emulates Vim behavior, we need to disable it
+;; so we can comfortably paste multiple times in visual mode.
+(setq evil-kill-on-visual-paste nil)
 #+END_SRC
 
 * Alternatives (that don't work so well)
@@ -136,6 +136,6 @@ find any drawbacks while using it.
 :PROPERTIES:
 :CUSTOM_ID: links
 :END:
-[[http://vim.wikia.com/wiki/Replace_a_word_with_yanked_text][vim.wikia.com]]
+[[https://vim.fandom.com/wiki/Replace_a_word_with_yanked_text][Vim Tips Wiki: Replace a word with yanked text]]
 
 [[https://stackoverflow.com/questions/7163947/paste-multiple-times][Stackoverflow: Paste multiple times]]

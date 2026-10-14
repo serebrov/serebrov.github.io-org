@@ -1,11 +1,11 @@
 #+TITLE: AWS Error: Default subnet in us-east-1f not found
-#+DATE: <2017-06-29>
+#+DATE: <2017-06-28>
 #+TYPE: note
 #+FILETAGS: :aws:
 #+DESCRIPTION: How to solve the "default subnet in us-east-1f not found" error.
 
 I suddenly started getting the =Default subnet in us-east-1f not found=
-error during the ElasticBeanstalk environment update.
+error during the Elastic Beanstalk environment update.
 
 #+begin_example
 Failed to deploy application.
@@ -16,7 +16,7 @@ Reason: The following resource(s) failed to create: [AWSEBUpdateWaitConditionHan
 The following resource(s) failed to update: [AWSEBLoadBalancer].
 #+end_example
 
-And the similar one when trying to create the new environment:
+And a similar one when trying to create a new environment:
 
 #+begin_example
 Creating load balancer failed Reason: Default subnet in us-east-1f not found
@@ -26,16 +26,16 @@ Current state: 'CREATE_FAILED'
 Reason: The following resource(s) failed to create: [AWSEBLoadBalancer].
 #+end_example
 
-The reason seems to be that new =us-east-1f= availability zone was
-added, but the subnet for it wasn't configured (not sure why and if it
+The reason seems to be that the new =us-east-1f= availability zone was
+added, but the subnet for it wasn't configured (not sure why, and whether it is
 supposed to be configured automatically).
 
 The solution is to create the subnet manually:
 
 - Open VPC - Subnets
-- Click “Create Subnet”
-- Select the “Availability Zone” - us-east-1f
-- It is necessary to also specify the “IPv4 CIDR block” - in my case I
+- Click "Create Subnet"
+- Select the "Availability Zone" - us-east-1f
+- It is necessary to also specify the "IPv4 CIDR block" - in my case, I
   already had 5 subnets with IP blocks:
   - 172.31.0.0/20
   - 172.31.16.0/20
@@ -44,4 +44,4 @@ The solution is to create the subnet manually:
   - 172.31.64.0/20
 - I specified the next block - 172.31.80.0/20
 
-ElasticBeanstalk updates started working after that.
+Elastic Beanstalk updates started working after that.

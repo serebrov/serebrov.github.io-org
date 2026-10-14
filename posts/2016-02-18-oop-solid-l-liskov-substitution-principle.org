@@ -4,7 +4,7 @@
 #+FILETAGS: :oop:
 #+DESCRIPTION: OOP SOLID Principles "L": Liskov Substitution Principle
 
-According to the [[https://en.wikipedia.org/wiki/Liskov_substitution_principle][Wikipedia]] the Liskov Substitution Principle (LSP) is defined as:
+According to [[https://en.wikipedia.org/wiki/Liskov_substitution_principle][Wikipedia]], the Liskov Substitution Principle (LSP) is defined as:
 
 #+begin_quote
 Subtype Requirement:
@@ -12,7 +12,7 @@ Let f(x) be a property provable about objects x of type T.
 Then f(y) should be true for objects y of type S where S is a subtype of T.
 #+end_quote
 
-The basic idea - if you have an object of type =T= then you can also use
+The basic idea: if you have an object of type =T=, then you can also use
 objects of its subclasses instead of it.
 
 Or, in other words: the subclass should behave the same way as the base
@@ -28,24 +28,24 @@ The expectations about the base class can include:
 - other expectations about what the object does and how
 
 Some of these expectations can be enforced by the programming language,
-but some of them can only be expressed as the documentation.
+but some of them can only be expressed in the documentation.
 
-This way it is both important to follow the implementation requirements
-imposed by LSP as well as use common sense and avoid changing subclasses
+So it is important both to follow the implementation requirements
+imposed by LSP and to use common sense and avoid changing subclasses
 in a way that they don't work the same as base classes. The latter point
 may also help in deciding on inheritance vs composition (do I really
-inherit to create a new subtype of the existing type or do I just want
+inherit to create a new subtype of the existing type, or do I just want
 to reuse the implementation?).
 
-But let's review implementation requirements and see what rules do we
+But let's review implementation requirements and see what rules we
 need to follow in the code.
 
-* Methods Signature Requirements
+* Method Signature Requirements
 :PROPERTIES:
 :CUSTOM_ID: methods-signature-requirements
 :END:
-Signature requirements are requirements for input argument types and
-return type of the class methods.
+Signature requirements are requirements for the input argument types and
+the return type of the class methods.
 
 Let's imagine we have the following class hierarchy:
 
@@ -63,7 +63,7 @@ Let's imagine we have the following class hierarchy:
                                                      '------------'
 #+end_src
 
-Here the =LiveBeing= is the base class which is inherited by =Animal=
+Here =LiveBeing= is the base class, which is inherited by =Animal=,
 which in turn is inherited by =Cat= and =Dog=.
 
 I will use this hierarchy to explain the signature rules.
@@ -75,11 +75,11 @@ I will use this hierarchy to explain the signature rules.
 This rule means that the child class can override a method to return a
 more specific type (=Cat= instead of =Animal=).
 
-Of course, it can return the same type, but it can not return more
+Of course, it can return the same type, but it can not return a more
 generic type (like =LiveBeing= instead of =Animal=) and it can not
 return a completely different type (=House= instead of =Animal=).
 
-This rule is easy to understand and it feels natural. Here is an example
+This rule is easy to understand, and it feels natural. Here is an example
 in pseudo-code:
 
 #+begin_src python
@@ -90,19 +90,19 @@ class Owner
 
 class CatOwner extends Owner
   Cat findPet()
-      # Covariance - subclass returns more specific type
+      # Covariance - subclass returns a more specific type
       return new Cat()
 
 class BadOwner extends Owner
   LiveBeing findPet()
-      # Contravariance - breaks the rule and returns more generic type
+      # Contravariance - breaks the rule and returns a more generic type
       return new LiveBeing()
 
 function doAction(Owner owner)
     # OK for Owner, we can put an Animal object into the `animal` variable.
     # OK for CatOwner, we can put a Cat object into the `animal` variable.
     # Problem for a BadOwner object, a LiveBeing object can not be used
-    # the same way as Animal object.
+    # the same way as an Animal object.
     Animal animal = owner->findPet();
     animal->eat();
 #+end_src
@@ -111,10 +111,10 @@ The =doAction= function demonstrates a possible use case. It is OK if
 =owner= is a =CatOwner=, because both =Animal= and =Cat= should behave
 the same.
 
-But the =BadOwner= returns a =LiveBeing= and it is a problem. There is
-no guarantee that =LiveBeing= object behaves the same as =Animal=.
+But the =BadOwner= returns a =LiveBeing=, and this is a problem. There is
+no guarantee that a =LiveBeing= object behaves the same as =Animal=.
 
-For example, if we call =animal->eat()= this will not work for the
+For example, if we call =animal->eat()=, this will not work for the
 =LiveBeing= (it doesn't have such a method).
 
 ** Contravariance (Child -> Parent -> ...) of method arguments in the subtype
@@ -122,7 +122,7 @@ For example, if we call =animal->eat()= this will not work for the
 :CUSTOM_ID: contravariance-child---parent---of-method-arguments-in-the-subtype
 :END:
 This means that a child class can override the method to accept a more
-generic argument type than the method in the base class (like accept the
+generic argument type than the method in the base class (like accepting
 =LiveBeing= instead of =Animal=).
 
 #+begin_src python
@@ -131,7 +131,7 @@ class Owner
     ...
 
 class GoodOwner extends Owner
-  # Contravariance - subclass accepts more generic type
+  # Contravariance - subclass accepts a more generic type
   void feed(LiveBeing being)
     ...
 
@@ -173,8 +173,8 @@ There is a problem here - the =GoodOwner::feed= can not call the
 And this way, =GoodOwner= also can not just forward the execution to the
 parent method with something like =parent::feed(being)=.
 
-By the way, if the method doesn't use parent implementation, it may
-[[http://stackoverflow.com/q/35070912/4612064][indicate the LSP violation]] -
+By the way, if the method doesn't use the parent implementation, it may
+[[https://stackoverflow.com/q/35070912/4612064][indicate an LSP violation]] -
 potentially we can have a different behavior for this subtype than in
 the parent class.
 
@@ -187,38 +187,43 @@ where those exceptions are themselves subtypes of exceptions thrown by
 the methods of the parent type.
 
 #+begin_src python
-class BadFoodException
+    class BadFoodException
 
-class BadCatFoodException extends BadFoodException
+    class BadCatFoodException extends BadFoodException
 
-class LowQualityFoodException
+    class LowQualityFoodException
 
+    class Owner
+      void feed(Animal animal, Food food)
+        if (not this->isGoodFood(food))
+          throw BadFoodException()
+        ...
 
-class Owner
-  void feed(Animal animal, Food food)
-    if (not this->isGoodFood(food))
-      throw BadFoodException()
-    ...
+    class CatOwner
+      void feed(Animal animal, Food food)
+        if (not this->isGoodFood(food))
+          throw BadCatFoodException()
+        ...
 
-class BadOwner extends Owner
-  void feed(Animal animal, Food food)
-    if (not this->isHighQualityFood(food))
-      throw LowQualityFoodException()
-    ...
+    class BadOwner extends Owner
+      void feed(Animal animal, Food food)
+        if (not this->isHighQualityFood(food))
+          throw LowQualityFoodException()
+        ...
 
-function doAction(Owner owner)
-  try
-    owner->feed(new Dog, new SomeFood)
-  catch (BadFoodException error)
-    # OK for Owner, it can raise BadFoodException
-    # OK for CatOwner, it can raise BadCatFoodException (subclass of BadFoodException)
-    # Problem for BadOwner, it can raise LowQualityFoodException and it will not be
-    # caught here
-    ...
+    function doAction(Owner owner)
+      try
+        owner->feed(new Dog, new SomeFood)
+      catch (BadFoodException error)
+        # OK for Owner, it can raise BadFoodException
+        # OK for CatOwner, it can raise BadCatFoodException (subclass of BadFoodException)
+        # Problem for BadOwner, it can raise LowQualityFoodException and it will not be
+        # caught here
+        ...
 #+end_src
 
 If we don't follow the rule about exception types, the client code
-written for the base class =Owner= will fail for the subclass =BadOwner=
+written for the base class =Owner= will fail for the subclass =BadOwner=,
 and this way we violate the =LSP=.
 
 * Inheritance requirements
@@ -227,28 +232,28 @@ and this way we violate the =LSP=.
 :END:
 These requirements describe additional rules for inherited methods
 related to the [[https://en.wikipedia.org/wiki/Design_by_contract][Design by contract]] concept.
-It defines the "contract" for each method which includes
+This concept defines the "contract" for each method, which includes
 preconditions, postconditions and invariants:
 
-- [[https://en.wikipedia.org/wiki/Precondition][Precondition]] is a condition or predicate that must always be true just prior to the execution of some section of code.
-- [[https://en.wikipedia.org/wiki/Postcondition][Postcondition]] is a condition or predicate that must always be true just after the execution of some section of code
-- [[https://en.wikipedia.org/wiki/Invariant_(computer_science)][Invariant]] is a condition that can be relied upon to be true during execution of a program, or during some portion of it. For example, a loop invariant is a condition that is true at the beginning and end of every execution of a loop.
+- A [[https://en.wikipedia.org/wiki/Precondition][precondition]] is a condition or predicate that must always be true just prior to the execution of some section of code.
+- A [[https://en.wikipedia.org/wiki/Postcondition][postcondition]] is a condition or predicate that must always be true just after the execution of some section of code.
+- An [[https://en.wikipedia.org/wiki/Invariant_(computer_science)][invariant]] is a condition that can be relied upon to be true during execution of a program, or during some portion of it. For example, a loop invariant is a condition that is true at the beginning and end of every execution of a loop.
 
 ** Preconditions cannot be strengthened in a subtype
 :PROPERTIES:
 :CUSTOM_ID: preconditions-cannot-be-strengthened-in-a-subtype
 :END:
-In most cases preconditions are expectations about method input
-arguments, also an object's internal state can be a part of the
+In most cases, preconditions are expectations about method input
+arguments; an object's internal state can also be a part of the
 precondition.
 
-This is a more generic rule of the contravariance rule for method
-arguments. The contravariance rule says that subclass can accept more
-generic argument type (=LiveBeing= instead of =Animal=), this is a
+This is a more generic version of the contravariance rule for method
+arguments. The contravariance rule says that a subclass can accept a more
+generic argument type (=LiveBeing= instead of =Animal=); this is a
 weaker precondition (subclass accepts a wider range of arguments).
 
-The same logic applies not only to the types of arguments but to the
-other kind of expectations as well, such as a range of the integer
+The same logic applies not only to the types of arguments but to
+other kinds of expectations as well, such as the range of an integer
 argument:
 
 #+begin_src python
@@ -274,7 +279,7 @@ So the stronger precondition in the child class broke the client code
 which worked for the parent class.
 
 At the same time, if we make the precondition weaker (or even remove
-it), the client code will work the same way as for parent class.
+it), the client code will work the same way as for the parent class.
 
 ** Postconditions cannot be weakened in a subtype
 :PROPERTIES:
@@ -283,25 +288,25 @@ it), the client code will work the same way as for parent class.
 Postconditions are usually expectations related to the method return
 value.
 
-Again, this the more generic rule similar to the covariance rule (method
-can return =Cat= instead of =Animal=), the postcondition is
-strengthened.
+Again, this is a more generic rule, similar to the covariance rule (a method
+can return =Cat= instead of =Animal=, so the postcondition is
+strengthened).
 
-An example of postcondition rule violation:
+An example of a postcondition rule violation:
 
 #+begin_src python
 class The24Hours
   number setHour(number hour)
     ...
-    assert (this.hour is integer)
-    return this.hour
+    assert (this->hour is integer)
+    return this->hour
 
 class TheTime extends The24Hours
   number setHour(number hour, number hourFraction)
-    this.hour = hour + hourFraction / 100
+    this->hour = hour + hourFraction / 100
     # the postcondition is weaker (float is a wider area than integer)
-    assert (this.hour is float)
-    return this.hour
+    assert (this->hour is float)
+    return this->hour
 
 function doAction(The24Hours hours)
   # OK for The24Hours
@@ -309,33 +314,33 @@ function doAction(The24Hours hours)
   int result = hours->setHour(3)
 #+end_src
 
-So again, due to =LSP= violation, we can not use the child class instead
+So again, due to the =LSP= violation, we can not use the child class instead
 of the parent.
 
 ** Invariants of the parent type must be preserved in a subtype
 :PROPERTIES:
 :CUSTOM_ID: invariants-of-the-parent-type-must-be-preserved-in-a-subtype
 :END:
-Invariant is something that is not changed during the method execution.
-It can be the whole or part of the object internal state:
+An invariant is something that is not changed during the method execution.
+It can be the whole or a part of the object's internal state:
 
 #+begin_src python
 class The24Hours
-  # invariant: this.hour is not changed
+  # invariant: this->hour is not changed
   number getHour()
-    return this.hour
+    return this->hour
 
 class TheCounter extends The24Hours
-  # invariant violation: this.hour is changed
+  # invariant violation: this->hour is changed
   number getHour()
-    result = this.hour
-    this.hour += 1
+    result = this->hour
+    this->hour += 1
     return result
 
 function doAction(The24Hours hours)
   if (hours->getHour() <= 12)
      # OK for The24Hours
-     # Problem for TheTime, now getHour() can return value > 12
+     # Problem for TheCounter, now getHour() can return value > 12
      print 'First half of the day', hours->getHour()
 #+end_src
 
@@ -346,9 +351,9 @@ function doAction(The24Hours hours)
 The subtypes should not introduce new methods that will allow modifying
 the object state in a way that is not possible for the parent class.
 
-The internal object state should be modifiable only through their
-methods (encapsulation) and the client code can have some expectations
-as of the possible ways to modify the internal state.
+The internal object state should be modifiable only through its
+methods (encapsulation), and the client code can have some expectations
+about the possible ways to modify the internal state.
 
 For example:
 
@@ -364,10 +369,10 @@ class FlexibleTime extends Time
   # but the clients who use Time can be broken due to this
   setTime(int hour, int minute)
 
-doAction(Time time)
+function doAction(Time time)
   print 'Now it is: ', time->getTime()
   doOtherAction(time)
-  # OK for Time, it can not be changed, so value is the same
+  # OK for Time, it can not be changed, so the value is the same
   # Problem for FlexibleTime, the `doOtherAction` could change it
   print 'Now it is still: ', time->getTime()
 #+end_src
@@ -376,8 +381,8 @@ doAction(Time time)
 :PROPERTIES:
 :CUSTOM_ID: links
 :END:
-[[https://en.wikipedia.org/wiki/Liskov_substitution_principle][Wikipedia:Liskov substitution principle]]
+[[https://en.wikipedia.org/wiki/Liskov_substitution_principle][Wikipedia: Liskov substitution principle]]
 
-[[http://www.engr.mun.ca/~theo/Courses/sd/5895-downloads/sd-principles-3.ppt.pdf][Agile Design Principles: The Liskov Substitution Principle]]
+[[https://web.archive.org/web/20160304030342/http://www.engr.mun.ca/~theo/Courses/sd/5895-downloads/sd-principles-3.ppt.pdf][Agile Design Principles: The Liskov Substitution Principle]]
 
 [[https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)#Inheritance_in_object-oriented_languages][Wikipedia: Covariance and contravariance]]

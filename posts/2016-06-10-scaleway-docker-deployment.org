@@ -2,40 +2,40 @@
 #+DATE: <2016-06-10>
 #+TYPE: post
 #+FILETAGS: :docker:
-#+DESCRIPTION: Setup Automatic Deployment, Updates and Backups of Multiple Web Applications with Docker on the Scaleway Server
+#+DESCRIPTION: Set Up Automatic Deployment, Updates and Backups of Multiple Web Applications with Docker on the Scaleway Server
 #+HTML_HEAD_EXTRA: <script defer src="/static/config-preview.js"></script>
 
 * Overview
 
 The purpose of this setup is:
 
-- Setup multiple web apps with different dependencies on the same server
+- Set up multiple web apps with different dependencies on the same server
 - Link all apps to the same MySQL server
-- Manage uploaded files for web apps in the single place (so it is easy
-  to backup them)
+- Manage uploaded files for web apps in a single place (so it is easy
+  to back them up)
 - Automatically deploy and update apps on the remote server
-- Run the same setup locally, so development environment is very close
+- Run the same setup locally, so the development environment is very close
   to production
-- Setup backups for MySQL databases and for uploaded files
+- Set up backups for MySQL databases and for uploaded files
 
-In this case I deploy to [[https://scaleway.com][Scaleway]], but same
+In this case, I deploy to [[https://www.scaleway.com/en/][Scaleway]], but the same
 approach can be used for almost any cloud service.
 
 * Cloud Server
 :PROPERTIES:
 :CUSTOM_ID: cloud-server
 :END:
-First, you need the cloud server with one of operating systems,
-[[https://docs.docker.com/machine/drivers/os-base/][supported by Docker Machine]] with SSH access. I used Scaleway's VC1S
-server with Ubuntu 14.04. You also need to install [[https://docs.docker.com/engine/installation/linux/ubuntulinux/][Docker Engine]]
-and [[https://docs.docker.com/machine/install-machine/][Docker Machine]] locally.
+First, you need a cloud server with SSH access and one of the operating systems
+[[https://web.archive.org/web/20160305021742/https://docs.docker.com/machine/drivers/os-base/][supported by Docker Machine]]. I used Scaleway's VC1S
+server with Ubuntu 14.04. You also need to install [[https://docs.docker.com/engine/install/ubuntu/][Docker Engine]]
+and [[https://web.archive.org/web/20160621183625/https://docs.docker.com/machine/install-machine/][Docker Machine]] locally.
 
-* Docker Machine - setup Docker remotely
+* Docker Machine - set up Docker remotely
 :PROPERTIES:
 :CUSTOM_ID: docker-machine---setup-docker-remotely
 :END:
-Next step is to set up the Docker on the server, this is done with
-=docker-machine create= command:
+The next step is to set up Docker on the server. This is done with
+the =docker-machine create= command:
 
 #+begin_src shell
 SSH_HOST=111.222.333.44
@@ -49,18 +49,18 @@ docker-machine create --driver generic \
  scaleway
 #+end_src
 
-To make it work, it is necessary to open the 2375 port on the server. On
-Scaleway it is done via security group configuration. After changing the
+To make it work, it is necessary to open port 2375 on the server. On
+Scaleway, it is done via the security group configuration. After changing the
 security group, it is necessary to reboot the server (stop / run via
 Archive option or Hard reboot).
 
-Here I have used the =generic= docker machine driver, there are also
-specific drivers for popular cloud providers - [[https://docs.docker.com/machine/drivers/][AWS, Digital Ocean, etc]].
-Note: Scaleway has the [[https://github.com/scaleway/docker-machine-driver-scaleway][Docker Machine plugin]], using it you can do even more
+Here I have used the =generic= Docker Machine driver; there are also
+specific drivers for popular cloud providers: [[https://web.archive.org/web/20160305025402/https://docs.docker.com/machine/drivers/][AWS, DigitalOcean, etc.]]
+Note: Scaleway has a [[https://github.com/scaleway/docker-machine-driver-scaleway][Docker Machine plugin]]; with it, you can do even more
 and automatically launch the new instance during the setup.
 
-Check the full setup script [[file:files/scaleway-docker/init-docker.sh][here]], on Scaleway I also had to create loopback
-devices because docker setup failed with
+Check the full setup script [[file:files/scaleway-docker/init-docker.sh][here]]. On Scaleway, I also had to create loopback
+devices because the Docker setup failed with
 =[graphdriver] prior storage driver \"devicemapper\" failed: loopback attach failed=.
 
 If something goes wrong during the setup, run
@@ -70,7 +70,7 @@ If something goes wrong during the setup, run
 :PROPERTIES:
 :CUSTOM_ID: deployment-setup
 :END:
-This project is responsible for deployment of the web applications to
+This project is responsible for the deployment of the web applications to
 the remote host.
 
 ** Projects layout
@@ -78,12 +78,12 @@ the remote host.
 :CUSTOM_ID: projects-layout
 :END:
 There are several web applications which I want to deploy, each packaged
-into the docker container.
+into a Docker container.
 
-On the filesystem they reside in the same =~/web= folder along with the
-=web-deploy= project which acts as a glue and setups everything together
-along with MySQL container (used by all projects) and HAProxy (listens
-to the port 80 and forwards requests to individual containers):
+On the filesystem, they reside in the same =~/web= folder along with the
+=web-deploy= project which acts as glue and sets everything up together,
+along with the MySQL container (used by all projects) and HAProxy (listens
+to port 80 and forwards requests to individual containers):
 
 #+begin_src text
 in ~/web $
@@ -106,7 +106,7 @@ projectc.com/
 web-deploy/
 #+end_src
 
-The typical Dockerfile for the php application looks like this:
+The typical Dockerfile for the PHP application looks like this:
 
 #+begin_src docker
 FROM php:5.6-apache
@@ -134,20 +134,20 @@ COPY www/ /var/www/html/
 VOLUME /var/www/html/files
 #+end_src
 
-This container is based on the official [[https://hub.docker.com/_/php/][php image]]. To make the php =mail=
-function work, I also set up =msmtp= and configure php to use it. The
+This container is based on the official [[https://hub.docker.com/_/php/][PHP image]]. To make the PHP =mail=
+function work, I also set up =msmtp= and configure PHP to use it. The
 example of the msmtp configuration file is [[file:files/scaleway-docker/msmtprc][here]].
 
-On Scaleway by default SMTP ports are disabled. To make emails work, it
-is necessary to configure the security group (switch “Block SMTP” from
-On to Off). After changing the security group, server should be rebooted
+On Scaleway, SMTP ports are disabled by default. To make emails work, it
+is necessary to configure the security group (switch "Block SMTP" from
+On to Off). After changing the security group, the server should be rebooted
 (stop / run via Archive option or Hard reboot).
 
-Here is also an example of the ruby-on-rails application (Redmine)
+Here is also an example of the Ruby on Rails application (Redmine)
 Dockerfile:
 
 #+begin_src docker
-# re-use image which we already use
+# re-use the image which we already use
 FROM php:5.6-apache
 MAINTAINER serebrov@gmail.com
 
@@ -173,16 +173,16 @@ RUN a2ensite redmine
 VOLUME /var/www/redmine/files
 #+end_src
 
-This container is based on the same base official php container as php
-applications just to reuse the already downloaded layers. Ruby
-application is running under apache with mod passenger.
+This container is based on the same official PHP image as the PHP
+applications, just to reuse the already downloaded layers. The Ruby
+application runs under Apache with =mod_passenger=.
 
 * The web deploy project
 :PROPERTIES:
 :CUSTOM_ID: the-web-deploy-project
 :END:
-The =web-deploy= project is a glue to build and start the containers for
-all web projects, link them to mysql if necessary and set up the HAProxy
+The =web-deploy= project is the glue to build and start the containers for
+all web projects, link them to MySQL if necessary and set up HAProxy
 to forward requests to each sub-project.
 
 #+begin_src text
@@ -217,20 +217,20 @@ web-deploy/
     projectc.com.sh
 #+end_src
 
-Top level scripts include:
+Top-level scripts include:
 
 - [[file:files/scaleway-docker/deploy.sh][web-deploy/deploy.sh]] - deploy all apps locally or to the remote instance
-- [[file:files/scaleway-docker/init-docker.sh][web-deploy/init-docker.sh]] - use it for initial server setup (only needed once, for the new server)
-- [[file:files/scaleway-docker/init-db-files.sh][web-deploy/init-db-files.sh]] - uploads files and database dumps to remote server and then goes over dumps in mysql/dump and drops/creates databases and loads dumps, also users [[file:files/scaleway-docker/init-db.sh][web-deploy/mysql/init-db.sh]] and [[file:files/scaleway-docker/load-dumps.sh][web-deploy/mysql/dumps/load-dumps.sh]], dump files should be under =web-deploy/mysql/dumps=
+- [[file:files/scaleway-docker/init-docker.sh][web-deploy/init-docker.sh]] - use it for initial server setup (only needed once, for a new server)
+- [[file:files/scaleway-docker/init-db-files.sh][web-deploy/init-db-files.sh]] - uploads files and database dumps to the remote server, then goes over dumps in mysql/dumps, drops/creates databases and loads dumps; it also uses [[file:files/scaleway-docker/init-db.sh][web-deploy/mysql/init-db.sh]] and [[file:files/scaleway-docker/load-dumps.sh][web-deploy/mysql/dumps/load-dumps.sh]]; dump files should be under =web-deploy/mysql/dumps=
 - [[file:files/scaleway-docker/mysql-cli.sh][web-deploy/mysql-cli.sh]] can be used to start the MySQL client for the MySQL container
 
 The =deploy.sh= script uses docker-machine to build and run the
 containers on the remote server. There are several modes it can be used
-it:
+in:
 - =./deploy.sh=: deploy (or update) all projects locally
 - =./deploy.sh local projecta.com=: deploy only projecta.com locally
-- =./deploy.sh production=: deploy only projecta.com on the remote server
-- =./deploy.sh production projecta.com=: deploy only =projecta.com= on the remote server.
+- =./deploy.sh production=: deploy all projects on the remote server
+- =./deploy.sh production projecta.com=: deploy only =projecta.com= on the remote server
 
 The script looks like this:
 
@@ -249,7 +249,7 @@ fi
 if [[ "$2" != "" ]]; then
     # deploy only the specified project
     # for example ./deploy.sh production projecta.com
-    # will run ./build/projecta.com
+    # will run ./build/projecta.com.sh
     PROJECTS=$SCRIPT_PATH/build/$2.sh
 else
     # deploy all projects
@@ -288,9 +288,9 @@ fi
 docker ps
 #+end_src
 
-Internally, the =deploy.sh= script goes over the scripts under =/build=
-sub-folder with build scripts and executes them to create or update
-docker containers.
+Internally, the =deploy.sh= script goes over the scripts in the =build=
+sub-folder and executes them to create or update
+Docker containers.
 
 The build script looks like this:
 
@@ -331,43 +331,43 @@ docker run -d -p $PORT:80 -v /var/web/projecta.com/files:/var/www/html/data/uplo
 docker exec $APP_NAME sh -c 'chown -R www-data:www-data /var/www/html/files'
 #+end_src
 
-Few interesting things happen here:
+A few interesting things happen here:
 
 - This project will use port 8091 on the host machine (can be accessed
-  as localhost:8091), this port also will be mentioned in the HAProxy
+  as localhost:8091); this port will also be mentioned in the HAProxy
   config to redirect requests to this app based on the requested domain
   name
-- For local deployment the container will use source files from the host
-  machine folder, so we can edit them directly without having to login
-  to container, this is very convenient for local development
+- For local deployment, the container will use source files from the host
+  machine folder, so we can edit them directly without having to log in
+  to the container; this is very convenient for local development
 - The web application files will be stored in the volume, which is
   available on the host machine at /var/web/projecta.com/files
 - The problem with permissions to the shared volume is solved by running
-  =chown= from within the container (apache runs as www-data and after
-  creation the files folder will belong to root user)
-- This build script is used both for local and remote deployment, the
-  remote part is handled by Docker Machine which allows to run docker
+  =chown= from within the container (Apache runs as www-data, and after
+  creation the files folder will belong to the root user)
+- This build script is used both for local and remote deployment; the
+  remote part is handled by Docker Machine, which allows running Docker
   commands against the remote host (this is handled in the =deploy.sh=
   script)
 
 Note: the =docker_rm_app_image= function from the build script is
 defined in the [[file:files/scaleway-docker/utils.sh][utils.sh script]].
 
-The =web-deploy= project also includes setup for HAProxy and MySQL
+The =web-deploy= project also includes the setup for the HAProxy and MySQL
 containers.
 
 * HAProxy setup
 :PROPERTIES:
 :CUSTOM_ID: haproxy-setup
 :END:
-This container (resides in the web-deploy/haproxy) runs HAProxy and it
-serves as main entry point on the server. Requests to port 80 are
+This container (it resides in web-deploy/haproxy) runs HAProxy and
+serves as the main entry point on the server. Requests to port 80 are
 reverse-proxied to other containers. The Dockerfile is simple:
 
 #+begin_src text
 FROM haproxy:1.5
 COPY ./haproxy.cfg /usr/local/etc/haproxy/haproxy.cfg
-# this is needed to setup ssl for one of projects
+# this is needed to set up SSL for one of the projects
 COPY ./mycompany.pem /etc/ssl/certs/
 #+end_src
 
@@ -388,7 +388,7 @@ defaults
     option http-server-close
     timeout connect 5000ms
     timeout client 50000ms
-    timeout server 50000s
+    timeout server 50000ms
     stats enable
     stats auth haadimn:ZyXuuXYZ
     stats uri /haproxyStats
@@ -459,31 +459,31 @@ docker run -d --restart always --net=host -p 80:80 -p 443:443 -v /dev/log:/dev/l
 popd
 #+end_src
 
-The HAProxy container is launched with =--net=host= option, so it can
+The HAProxy container is launched with the =--net=host= option, so it can
 directly access all the ports exposed by other containers.
 
-The HAProxy also handles SSL (HTTPS) connections. For one of projects it
-redirects http to https. See the config file and
+The HAProxy also handles SSL (HTTPS) connections. For one of the projects, it
+redirects HTTP to HTTPS. See the config file and
 [[https://www.digitalocean.com/community/tutorials/how-to-implement-ssl-termination-with-haproxy-on-ubuntu-14-04][this post]]
 for more information.
 
-The HAProxy stats are available via http://hostname.com/haproxyStats.
+The HAProxy stats are available via =http://hostname.com/haproxyStats=.
 Login and password are set in the config file (haproxy.cfg, see the
-=stats auth= line in =defaults= section).
+=stats auth= line in the =defaults= section).
 
 Some hints to debug problems with HAProxy setup:
 
-- Uncomment ‘debug’ in the config file
-- Check ‘docker logs web-haproxy’
-- Check system log (/var/log/syslog), with the configuration above the
-  HAProxy container will log to host's system log (see
+- Uncomment =debug= in the config file
+- Check =docker logs web-haproxy=
+- Check the system log (/var/log/syslog); with the configuration above, the
+  HAProxy container will log to the host's system log (see
   https://github.com/dockerfile/haproxy/issues/3)
 
-* MySql setup
+* MySQL setup
 :PROPERTIES:
 :CUSTOM_ID: mysql-setup
 :END:
-The MySql container (it is under web-deploy/mysql folder) also has a
+The MySQL container (it is under the web-deploy/mysql folder) also has a
 simple Dockerfile:
 
 #+begin_src text
@@ -511,7 +511,7 @@ docker run -d -v /var/web/mysql-data:/var/lib/mysql --restart always --name $APP
 popd
 #+end_src
 
-The data folder is mapped to the host machine to /var/web/mysql-data.
+The data folder is mapped to /var/web/mysql-data on the host machine.
 The app containers which need the database are linked to this container.
 
 * Useful Docker Commands
@@ -520,14 +520,14 @@ The app containers which need the database are linked to this container.
 :END:
 Some useful commands to view and manage Docker containers:
 
-- Information about docker =docker info=
+- Information about Docker: =docker info=
 - List running containers: =docker ps=
-- Information about specific container =docker inspect {appname}=
-- View application logs =docker logs {appname}=
-- Restart application =docker restart {appname}=
+- Information about a specific container: =docker inspect {appname}=
+- View application logs: =docker logs {appname}=
+- Restart an application: =docker restart {appname}=
 - Run shell inside the container:
   =docker exec -it {appname} bash  # replace {appname} with name from docker ps=
-- Run the command inside the container (in this case - backup mysql
+- Run the command inside the container (in this case, back up MySQL
   databases):
   =docker exec web-mysql sh -c 'exec mysqldump --all-databases -uroot -p"$MYSQL_ROOT_PASSWORD"' | gzip -9 > all-databases.sql.gz=
 
@@ -535,18 +535,18 @@ Some useful commands to view and manage Docker containers:
 :PROPERTIES:
 :CUSTOM_ID: cron-in-docker-and-backups-on-scaleway
 :END:
-There are few options to run cron with docker:
+There are a few options to run cron with Docker:
 - Run cron on the host machine (cronjobs can interact with containers via =docker exec ...=)
-- Run separate container with cron (cronjobs can interact with other containers via network or shared volumes)
-- Run multiple processes inside application containers (application and cron) using supervisor or runit, for example, see http://phusion.github.io/baseimage-docker/.
+- Run a separate container with cron (cronjobs can interact with other containers via network or shared volumes)
+- Run multiple processes inside application containers (application and cron) using supervisor or runit (for example, see http://phusion.github.io/baseimage-docker/)
 - Run multiple processes via =CMD= instruction in the Dockerfile (for example, see http://programster.blogspot.com/2014/01/docker-working-with-cronjobs.html)
 
-Here I have chosen the first option to use cron on the host machine.
+Here I have chosen the first option: use cron on the host machine.
 First, the host machine is Ubuntu 14.04, so it already has cron. Second,
 everything runs on the same machine and I have no plans to scale out
 this setup, so it was the easiest option.
 
-The [[file::./files/scaleway-docker/init-db-files.sh][web-deploy/init-db-files.sh]] script contains code to setup cron, here is the related part:
+The [[file:files/scaleway-docker/init-db-files.sh][web-deploy/init-db-files.sh]] script contains code to set up cron; here is the related part:
 
 #+begin_src sh
   docker-machine ssh scaleway apt-get install -y postfix mutt s3cmd
@@ -555,32 +555,32 @@ The [[file::./files/scaleway-docker/init-db-files.sh][web-deploy/init-db-files.s
 #+end_src
 
 The =postfix= and =mutt= are needed for cron to send local emails about
-jobs. You can check these mails by ssh'ing to the server and running
-mutt. The =s3cmd= is used to backup databases and files from the shared
+jobs. You can check these emails by ssh'ing to the server and running
+mutt. The =s3cmd= is used to back up databases and files from the shared
 storage to S3. The =.s3cfg= contains credentials for
-[[http://s3tools.org/s3cmd][s3cmd]], it can be generated by running =s3cmd --configure=.
+[[https://s3tools.org/s3cmd][s3cmd]]; it can be generated by running =s3cmd --configure=.
 
 Backups are very important, because at the moment Scaleway does not
 provide highly reliable hardware (no RAID disks, see [[https://community.scaleway.com/t/i-have-questions-about-scaleway/891/2][this thread]]).
 
-And to [[https://www.scaleway.com/docs/backup-your-data-with-snapshots/][make a snapshot]], you need to archive the instance (it takes few minutes),
+And to [[https://web.archive.org/web/20160328182855/https://www.scaleway.com/docs/backup-your-data-with-snapshots/][make a snapshot]], you need to archive the instance (it takes a few minutes),
 make the snapshot and launch the instance again, so there is a noticeable
-down-time period. So I used cron to backup files and databases to
+downtime period. So I used cron to back up files and databases to
 Amazon's S3.
 
-Note: Scaleway has storage which is compatible to S3, called [[https://www.scaleway.com/features/sis/][SIS]], but at the moment
-it is not available (at least in my account). When I try to create bucket from
-the command line it returns
+Note: Scaleway has storage which is compatible with S3, called [[https://web.archive.org/web/20160811133527/https://www.scaleway.com/features/sis/][SIS]], but at the moment
+it is not available (at least in my account). When I try to create a bucket from
+the command line, it returns
 =S3 error: 400 (TooManyBuckets): You have attempted to create more buckets than allowed=.
-And the note in the Scaleway UI states “We're currently scaling up our
+And the note in the Scaleway UI states "We're currently scaling up our
 SIS infrastructure to handle the load generated by all our new users.
 All new bucket creation are currently forbidden to preserve the service
-quality for current SIS users.”.
+quality for current SIS users."
 
-The cron file to perform backups looks this way:
+The cron file to perform backups looks like this:
 
 #+begin_src text
-# In the case of problems, cron sends local email, can be checked with mutt
+# In case of problems, cron sends a local email, which can be checked with mutt
 # (it requires apt-get install postfix mutt)
 # Also check cron messages in /var/log/syslog
 # update geolite database
@@ -591,14 +591,14 @@ The cron file to perform backups looks this way:
 0 6 * * *   root s3cmd sync /var/web s3://myweb-backup/storage/
 #+end_src
 
-The command to backup mysql databases does few things:
+The command to back up MySQL databases does a few things:
 
 - Run =mysqldump= inside the MySQL container via =docker exec=
 - Pipe the result to =gzip= to archive it
-- Put the archive to S3, add a timestamp to the file name
+- Upload the archive to S3, adding a timestamp to the file name
 
 And since all application containers map their files folders under
-host's =/var/web=, I simply sync this folder to my S3 bucket.
+the host's =/var/web=, I simply sync this folder to my S3 bucket.
 
 * Conclusion
 :PROPERTIES:
@@ -611,5 +611,5 @@ and update applications on the remote server.
 I don't recommend using the approach above for serious production
 setups, but it can be useful for small / personal projects.
 
-Update: now, that it exists, I think it could be easier to use [[https://docs.docker.com/engine/swarm/][docker swarm mode]]
-to build the system like described above.
+Update: now that it exists, I think it would be easier to use [[https://docs.docker.com/engine/swarm/][Docker swarm mode]]
+to build a system like the one described above.

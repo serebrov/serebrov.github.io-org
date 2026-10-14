@@ -4,7 +4,7 @@
 #+FILETAGS: :git:
 #+DESCRIPTION: Git: How to cherry-pick a range of commits
 
-To cherry pick a range of commits to another branch, we can use the
+To cherry-pick a range of commits to another branch, we can use the
 =START^..END= commit range syntax, where =START= is the first commit in
 the range and =END= is the last commit:
 

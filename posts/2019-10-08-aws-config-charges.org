@@ -4,11 +4,11 @@
 #+FILETAGS: :aws:
 #+DESCRIPTION: Investigating unexpected AWS Config charges
 
-I started seeing an increased charge in billing for AWS Config service
-in one of the accounts, it increased from around $5 to $100 per month.
+I started seeing an increased charge in billing for the AWS Config service
+in one of the accounts; it increased from around $5 to $100 per month.
 And I didn't even remember if I enabled and configured it.
 
-I could not get any details from AWS Cost Explorer besides that charges
+I could not get any details from AWS Cost Explorer besides the fact that the charges
 are in the same region where our app is running.
 
 The confusing part was a note in the AWS Config management console:
@@ -21,7 +21,7 @@ Config Rules, click here. When you are ready to try Config Rules, update
 your settings by referring to our documentation.
 #+end_quote
 
-So it even looked like we didn't configure AWS Config at all and the
+So it even looked like we didn't configure AWS Config at all, and the
 questions I had were:
 
 1) Why are we charged for AWS Config?
@@ -33,15 +33,15 @@ The [[https://aws.amazon.com/config/pricing/][AWS Config pricing]] page was also
 table with rule evaluation prices (and I didn't have any rules defined).
 
 Only after reading through the examples, I found that they also use some
-“configuration items” to calculate the price, not only rules
+"configuration items" to calculate the price, not only rule
 evaluations. The thing I missed was at the very top:
 =You pay $0.003 per configuration item recorded in your AWS account per AWS Region.=
 (I jumped over this part initially right into the rules pricing table).
 
-It appears, that AWS Config was enabled and some automation in our
-account caused the large number of configuration items (changes to the
+It appears that AWS Config was enabled and some automation in our
+account caused a large number of configuration items (changes to the
 configuration) to be recorded. The guide on how to get and query the
-collected data (it's on S3) can be found [[https://aws.amazon.com/premiumsupport/knowledge-center/retrieve-aws-config-items-per-month/][here]].
+collected data (it's on S3) can be found [[https://repost.aws/knowledge-center/retrieve-aws-config-items-per-month][here]].
 
 The procedure is the following:
 
@@ -49,9 +49,9 @@ The procedure is the following:
 - Go to S3, find that bucket and go into it to get the path to the logs
 - The path will be something like this:
   =s3://aws-config-bucket-123456789123/AWSLogs/123456789123/Config/us-east-1=
-- Go to [[https://console.aws.amazon.com/athena/home][AWS Athena]], create external table and query the data
+- Go to [[https://console.aws.amazon.com/athena/home][AWS Athena]], create an external table and query the data
 
-The table can be created using from query editor. First, create the database:
+The table can be created from the query editor. First, create the database:
 
 #+begin_src sql
 CREATE DATABASE s3data
@@ -80,7 +80,7 @@ CREATE EXTERNAL TABLE awsconfig (
 ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe' LOCATION 's3://aws-config-bucket-123456789123/AWSLogs/123456789123/Config/us-east-1/'
 #+end_src
 
-Replace the =LOCATION= path with actual path on S3. Now we can query the
+Replace the =LOCATION= path with the actual path on S3. Now we can query the
 =awsconfig= table to see how many and which items were created, for
 example:
 
@@ -101,8 +101,8 @@ GROUP BY result.configurationitemcapturetime
 ORDER BY result.configurationitemcapturetime
 #+end_src
 
-The above will show number of configuration items created per day. The
-=configurationitems= field is a JSON object, so we =UNNEST= and join it
+The above will show the number of configuration items created per day. The
+=configurationitems= field is an array of JSON objects, so we =UNNEST= and join it
 to access the columns inside JSON.
 
 #+begin_example
@@ -182,5 +182,5 @@ ORDER BY NumberOfChanges DESC
 #+end_example
 
 Using these queries, it should be possible to get an idea of what is
-happening, in my case it was misbehaving ElasticBeanstalk environment
+happening. In my case, it was a misbehaving Elastic Beanstalk environment
 with bad health that was constantly re-creating all the resources.

@@ -9,7 +9,7 @@
 :CUSTOM_ID: setup
 :END:
 
-[[http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tools.DynamoDBLocal.html][Download]] and extract dynamodb local to some folder.
+[[https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html][Download]] and extract DynamoDB Local to some folder.
 
 Launch it (=-sharedDb= allows us to connect to the same database with other tools):
 
@@ -17,11 +17,11 @@ Launch it (=-sharedDb= allows us to connect to the same database with other tool
   $ java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
 #+end_src
 
-By default it will be running on the port 8000 and will create the db
+By default it will be running on port 8000 and will create the db
 file in the same directory where it was launched.
 
-Without the =-sharedDB= parameter the DB file name depends on connection
-parameters, the name is ={aws_access_key_id}_{region_name}.db=. So
+Without the =-sharedDb= parameter, the DB file name depends on connection
+parameters; the name is ={aws_access_key_id}_{region_name}.db=. So
 different clients can use different databases.
 
 There is also an =-inMemory= parameter to keep data in memory:
@@ -35,28 +35,28 @@ There is also an =-inMemory= parameter to keep data in memory:
 :CUSTOM_ID: how-to-load-test-data-and-dumprestore-the-data
 :END:
 The easiest way is to create some script to generate the test data. This
-way it is possible to run DynamoDB local in memory and populate it with
+way it is possible to run DynamoDB Local in memory and populate it with
 test data after launch. Another way is to dump real db data and restore
-it into local DB. Here are some related tools to help with this and
+it into the local DB. Here are some related tools to help with this and
 similar tasks:
 
 - [[https://github.com/bchew/dynamodump][dynamodump - Simple backup and restore for Amazon DynamoDB using boto]]
-- [[https://github.com/adamchainz/dynamodb_utils][dynamodb_utils - A toolchain for Amazon's DynamoDB to make common operations (backup, restore backups) easier]]
-- [[https://github.com/edasque/DynamoDBtoCSV][DynamoDBtoCSV - Dump DynamoDB data into a CSV file]] and [[http://www.frenchguys.com/wordpress/exporting-dynamodb-data-to-csv/][related blog post]]
+- [[https://github.com/adamchainz/dynamodb_utils][=dynamodb_utils= - A toolchain for Amazon's DynamoDB to make common operations (backup, restore backups) easier]]
+- [[https://github.com/edasque/DynamoDBtoCSV][DynamoDBtoCSV - Dump DynamoDB data into a CSV file]] and [[https://web.archive.org/web/20150215213651/http://www.frenchguys.com/wordpress/exporting-dynamodb-data-to-csv/][related blog post]]
 - [[https://github.com/yegor256/dynamo-archive][dynamo-archive - Archive and Restore DynamoDB Tables]]
 - [[https://github.com/JasonGhent/AWS-DynamoDB-to-MongoDB][AWS DynamoDB to MongoDB Conversion]]
 
-* DynamoDb local web shell
+* DynamoDB Local web shell
 :PROPERTIES:
 :CUSTOM_ID: dynamodb-local-web-shell
 :END:
-DynamoDB local also has a web shell available via
-http://localhost:8000/shell. Make sure you launched the database with a
+DynamoDB Local also has a web shell available via
+http://localhost:8000/shell. Make sure you launched the database with the
 =-sharedDb= flag.
 
-Without the =-sharedDb= it will use ={access_key}_us-west-2.db= file.
-Access key can be set in shell settings, but the region name is
-hard-coded as =us-west-2= (see source in chrome dev tools,
+Without the =-sharedDb= flag, it will use the ={access_key}_us-west-2.db= file.
+The access key can be set in shell settings, but the region name is
+hard-coded as =us-west-2= (see the source in Chrome DevTools,
 =/shell/jsrepl/sandbox.js= file).
 
 * AWS Explorer
@@ -64,14 +64,14 @@ hard-coded as =us-west-2= (see source in chrome dev tools,
 :CUSTOM_ID: aws-explorer
 :END:
 
-[[http://docs.aws.amazon.com/AWSToolkitEclipse/latest/GettingStartedGuide/Welcome.html][AWS Explorer]] is a toolkit for eclipse which contains the DynamoDb GUI.
+[[https://web.archive.org/web/20150208082838/http://docs.aws.amazon.com/AWSToolkitEclipse/latest/GettingStartedGuide/Welcome.html][AWS Explorer]] is a toolkit for Eclipse which contains the DynamoDB GUI.
 
-Install it as described [[http://docs.aws.amazon.com/AWSToolkitEclipse/latest/GettingStartedGuide/tke_setup_install.html][here]].
+Install it as described [[https://web.archive.org/web/20150208114605/http://docs.aws.amazon.com/AWSToolkitEclipse/latest/GettingStartedGuide/tke_setup_install.html][here]].
 
-To browse an application database start the DynamoDb local with the
-=-sharedDb= flag and select 'local' region in the AWS regions dropdown.
+To browse an application database, start DynamoDB Local with the
+=-sharedDb= flag and select the 'local' region in the AWS regions dropdown.
 
-Without the =-sharedDb= Eclipse will use a file like
+Without the =-sharedDb= flag, Eclipse will use a file like
 =AKXAX4X6XAFXIXNIXEXA_local.db=.
 
 * Table prefixes
@@ -88,20 +88,20 @@ table prefixes for different environments and/or different applications.
 :END:
 
 While the tools mentioned above are good to examine the data generated
-by your application the simplest way to verify your code is to build a
+by your application, the simplest way to verify your code is to build a
 set of unit tests.
 
-DynamoDB Local is too slow for unit tests and it is better to use some
+DynamoDB Local is too slow for unit tests, and it is better to use some
 other dynamo mock. In my current project I use a custom mock which is a
 simplified boto API implementation. Try to search for some native
 implementation of the dynamo API in your project language which will
 hold all the data in memory.
 
-Also, it's a good idea to make DB access configurable for tests so it
+Also, it's a good idea to make DB access configurable for tests, so it
 will be easy to switch tests between mock / local db / real db.
 
 DynamoDB Mocks:
 
-- [[http://aws.amazon.com/blogs/aws/amazon-dynamodb-libraries-mappers-and-mock-implementations-galore/][Amazon DynamoDB Libraries, Mappers, and Mock Implementations Galore!]]
-- [[https://pypi.python.org/pypi/ddbmock][ddbmock - Amazon DynamoDB mock implementation (python)]] and a [[https://bitbucket.org/Ludia/dynamodb-mock/overview][bitbucket repository]]
-- [[https://github.com/mhart/dynalite][dynalite - A mock implementation of Amazon's DynamoDB built on LevelDB]]
+- [[https://aws.amazon.com/blogs/aws/amazon-dynamodb-libraries-mappers-and-mock-implementations-galore/][Amazon DynamoDB Libraries, Mappers, and Mock Implementations Galore!]]
+- [[https://pypi.org/project/ddbmock/][ddbmock - Amazon DynamoDB mock implementation (python)]] and a [[https://bitbucket.org/Ludia/dynamodb-mock/overview][bitbucket repository]]
+- [[https://github.com/architect/dynalite][dynalite - A mock implementation of Amazon's DynamoDB built on LevelDB]]

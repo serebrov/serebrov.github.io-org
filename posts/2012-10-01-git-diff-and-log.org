@@ -25,7 +25,7 @@ For example, we have a history like this:
                 E ---- F  branch
 #+end_example
 
-** List of new commits on both branches (log with three dots):
+** List of new commits on both branches (log with three dots)
 :PROPERTIES:
 :CUSTOM_ID: list-of-new-commits-on-both-branches-log-with-three-dots
 :END:
@@ -46,7 +46,7 @@ commit > E
 commit < C
 #+end_src
 
-** Diff with two dots, =master= commits shown as removed changes, =branch= commits - as added:
+** Diff with two dots, =master= commits shown as removed changes, =branch= commits - as added
 :PROPERTIES:
 :CUSTOM_ID: diff-with-two-dots-master-commits-shown-as-removed-changes-branch-commits---as-added
 :END:
@@ -61,7 +61,7 @@ git diff master branch
 +changes from E,F
 #+end_src
 
-** Diff with two dots, =branch= commits are shown as removed changes, =master= commits as added:
+** Diff with two dots, =branch= commits are shown as removed changes, =master= commits as added
 :PROPERTIES:
 :CUSTOM_ID: diff-with-two-dots-branch-commits-are-shown-as-removed-changes-master-commits-as-added
 :END:
@@ -85,7 +85,7 @@ has changed on master (or on another base branch).
 
 In this case, we can use =git log= with two dots to get the list of
 changes and =git log -p= to see the diff (while =git diff= with two dots
-will still show changes from the base branch, so is not suitable for
+will still show changes from the base branch, so it is not suitable for
 this task).
 
 For example, we have a history like this:
@@ -96,7 +96,7 @@ For example, we have a history like this:
                 E ---- F  branch
 #+end_example
 
-** List of new commits on =branch= (log with two dots):
+** List of new commits on =branch= (log with two dots)
 :PROPERTIES:
 :CUSTOM_ID: list-of-new-commits-on-branch-log-with-two-dots
 :END:
@@ -106,7 +106,7 @@ F
 E
 #+end_src
 
-** List of new commits on =branch= (cherry):
+** List of new commits on =branch= (cherry)
 :PROPERTIES:
 :CUSTOM_ID: list-of-new-commits-on-branch-cherry
 :END:
@@ -123,7 +123,7 @@ git cherry -v master
 The =git cherry= command provides a more compact output with the list of
 new commits on the =branch= compared to =master=.
 
-** List of new commits on =master= (log with two dots):
+** List of new commits on =master= (log with two dots)
 :PROPERTIES:
 :CUSTOM_ID: list-of-new-commits-on-master-log-with-two-dots
 :END:
@@ -133,7 +133,7 @@ D
 C
 #+end_src
 
-** Diff, only new commits on =branch= (log with two dots and =-p= or diff with three dots):
+** Diff, only new commits on =branch= (log with two dots and =-p= or diff with three dots)
 :PROPERTIES:
 :CUSTOM_ID: diff-only-new-commits-on-branch-log-with-two-dots-and--p-or-diff-with-three-dots
 :END:
@@ -147,7 +147,7 @@ git diff master...branch
 +changes from F
 #+end_src
 
-** Diff, only new commits on =master= (log with two dots and =-p= or diff with three dots):
+** Diff, only new commits on =master= (log with two dots and =-p= or diff with three dots)
 :PROPERTIES:
 :CUSTOM_ID: diff-only-new-commits-on-master-log-with-two-dots-and--p-or-diff-with-three-dots
 :END:
@@ -165,7 +165,7 @@ git diff branch...master
 :PROPERTIES:
 :CUSTOM_ID: git-diff-and-log-inconsistency
 :END:
-In the sections above we can see that git diff and git log with three
+In the sections above we can see that =git diff= and =git log= with three
 and two dots seem to behave inconsistently:
 
 - =git log master..branch= - only new commits on =branch=
@@ -176,7 +176,7 @@ and two dots seem to behave inconsistently:
 The [[https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection#_commit_ranges][definition]] of two and three dots:
 
 - Double Dot - range of commits that are reachable from one commit but
-  aren't reachable from another (in other words, new commits on branch
+  aren't reachable from another (in other words, new commits on the branch
   that are not present on master)
 - Triple Dot - all the commits that are reachable by either of two
   references but not by both of them (changes on both branches, but not
@@ -213,7 +213,7 @@ changes (changes on both branches):
 :PROPERTIES:
 :CUSTOM_ID: diff-staged-changes
 :END:
-Show staged changes - added to index, but not committed yet:
+Show staged changes - added to the index, but not committed yet:
 
 #+begin_src shell
 git diff --cached
@@ -225,21 +225,21 @@ git diff --staged
 :PROPERTIES:
 :CUSTOM_ID: diff-pulled-changes
 :END:
-Show diff of changes pulled from upstream:
+Show the diff of changes pulled from upstream:
 
 #+begin_src shell
 git pull origin
 git diff @{1}..
 #+end_src
 
-Here =@= means =HEAD= and =@{1}= means “prior value of the HEAD”, the
+Here =@= means =HEAD= and =@{1}= means "prior value of the HEAD", the
 list of prior values can be seen with =git reflog=.
 
 * Log without merge commits
 :PROPERTIES:
 :CUSTOM_ID: log-without-merge-commits
 :END:
-To show the log without merge commits use =--no-merges= flag:
+To show the log without merge commits use the =--no-merges= flag:
 
 #+begin_src shell
 git log --no-merges
@@ -249,7 +249,7 @@ git log --no-merges
 :PROPERTIES:
 :CUSTOM_ID: log-without-another-branch-commits
 :END:
-To exclude commits on =master= (or another) branch, use =--not= flag:
+To exclude commits on =master= (or another) branch, use the =--not= flag:
 
 #+begin_src shell
 git log contrib --not master # or git log contrib ^master
@@ -261,7 +261,7 @@ To exclude both commits on =master= and merge commits:
 git log contrib ^master --no-merges
 #+end_src
 
-What was added in remote branch, but not in local:
+What was added in the remote branch, but not in the local one:
 
 #+begin_src shell
 git log origin/featureA ^featureA
@@ -287,7 +287,7 @@ git log refA refB --not refC
 :PROPERTIES:
 :CUSTOM_ID: git-log-formatting
 :END:
-Log with diff (p), only last two entries:
+Log with diff (p), only the last two entries:
 
 #+begin_src shell
 git log -p -2
@@ -301,13 +301,13 @@ git log --pretty=oneline
 
 Log with graph:
 
-#+begin_src sh
+#+begin_src shell
 git log --pretty=format:"%h %s" --graph
 #+end_src
 
 Format log:
 
-#+begin_src sh
+#+begin_src shell
 git log --pretty=format:"%h - %an, %ar : %s"
 #+end_src
 
@@ -335,10 +335,10 @@ Log formatting options:
 :PROPERTIES:
 :CUSTOM_ID: links
 :END:
-[[http://stackoverflow.com/questions/61002/how-can-i-generate-a-git-diff-of-whats-changed-since-the-last-time-i-pulled][Stackoverflow: How can I generate a git diff of what's changed since the last time I pulled?]]
+[[https://stackoverflow.com/questions/61002/how-can-i-generate-a-git-diff-of-whats-changed-since-the-last-time-i-pulled][Stackoverflow: How can I generate a git diff of what's changed since the last time I pulled?]]
 
-[[https://stackoverflow.com/questions/7251477/what-are-the-differences-between-double-dot-and-triple-dot-in-git-dif][Stackoverflow: What are the differences between double-dot “..” and triple-dot “...” in Git diff commit ranges?]]
+[[https://stackoverflow.com/questions/7251477/what-are-the-differences-between-double-dot-and-triple-dot-in-git-dif][Stackoverflow: What are the differences between double-dot ".." and triple-dot "..." in Git diff commit ranges?]]
 
-[[http://git-scm.com/book/en/Git-Tools-Revision-Selection][ProGit: Git Tools - Revision Selection]]
+[[https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection][ProGit: Git Tools - Revision Selection]]
 
-[[http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository#Viewing-Your-Staged-and-Unstaged-Changes][ProGit: Viewing Your Staged and Unstaged Changes]]
+[[https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository#_git_diff_staged][ProGit: Viewing Your Staged and Unstaged Changes]]

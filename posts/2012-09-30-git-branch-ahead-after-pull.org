@@ -16,14 +16,14 @@ The sequence of actions:
 
 - There is a change in the =origin/master=
 - We do the =git pull origin master=
-- Change is received and merged
-- git status shows "Your branch is ahead of 'origin/master' by 1 commit."
+- The change is received and merged
+- =git status= shows "Your branch is ahead of 'origin/master' by 1 commit."
 
 The reason is that after the =pull origin master= the reference to the
-remote =origin/master= is not changed (still points to older version)
+remote =origin/master= is not changed (still points to the older version)
 and only your local copy of the branch is updated.
 
-The problem is that =git pull origin master= is a wrong command (unless you intentionally
+The problem is that =git pull origin master= is the wrong command (unless you intentionally
 wanted to only update the local branch).
 
 Solution: use =git pull= instead.
@@ -33,17 +33,17 @@ local branch, and you do it manually by running =git merge origin/master=.
 
 To check the state, run:
 
-#+begin_example shell
+#+begin_src shell
 git diff origin/master
-#+end_example
+#+end_src
 
 It will show the difference and it should be the last master change.
 
 To fix the problem, run:
 
-#+begin_example shell
+#+begin_src shell
 git fetch origin
-#+end_example
+#+end_src
 
 This will update git links to remotes.
 
@@ -53,12 +53,12 @@ If you have this problem then you likely wanted to just do =git pull= instead of
 :PROPERTIES:
 :CUSTOM_ID: links
 :END:
-[[http://stackoverflow.com/questions/1741143/git-git-pull-origin-mybranch-leaves-local-mybranch-n-commits-ahead-of-origin][Stackoverflow: ‘git pull origin mybranch’ leaves local mybranch N commits ahead of origin. Why?]]
+[[https://stackoverflow.com/questions/1741143/git-git-pull-origin-mybranch-leaves-local-mybranch-n-commits-ahead-of-origin][Stackoverflow: 'git pull origin mybranch' leaves local mybranch N commits ahead of origin. Why?]]
 
-[[http://git.661346.n2.nabble.com/Git-repo-on-a-machine-with-zero-commits-is-ahead-of-remote-by-103-commits-td5957671.html][Git repo on a machine with zero commits is ahead of remote by 103 commits.. !]]
+[[https://web.archive.org/web/20201028022646/http://git.661346.n2.nabble.com/Git-repo-on-a-machine-with-zero-commits-is-ahead-of-remote-by-103-commits-td5957671.html][Git repo on a machine with zero commits is ahead of remote by 103 commits.. !]]
 
-[[http://www.quora.com/What-are-the-differences-between-git-pull-git-pull-origin-master-and-git-pull-origin-master][Quora: Git (revision control): What are the differences between “git pull”, “git pull origin master”, and “git pull origin/master”?]]
+[[https://www.quora.com/What-are-the-differences-between-git-pull-git-pull-origin-master-and-git-pull-origin-master][Quora: Git (revision control): What are the differences between "git pull", "git pull origin master", and "git pull origin/master"?]]
 
-[[http://stackoverflow.com/questions/2883840/differences-between-git-pull-origin-master-git-pull-origin-master][Stackoverflow: Differences between git pull origin master & git pull origin/master]]
+[[https://stackoverflow.com/questions/2883840/differences-between-git-pull-origin-master-git-pull-origin-master][Stackoverflow: Differences between git pull origin master & git pull origin/master]]
 
-[[http://stackoverflow.com/questions/5283829/why-do-i-have-to-push-the-changes-i-just-pulled-from-origin-in-git][Stackoverflow: Why do I have to push the changes I just pulled from origin in Git?]]
+[[https://stackoverflow.com/questions/5283829/why-do-i-have-to-push-the-changes-i-just-pulled-from-origin-in-git][Stackoverflow: Why do I have to push the changes I just pulled from origin in Git?]]

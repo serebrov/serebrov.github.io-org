@@ -4,7 +4,7 @@
 #+FILETAGS: :python:
 #+DESCRIPTION: Ways to format function parameters in Python.
 
-There are two ways [[https://www.python.org/dev/peps/pep-0008/#indentation][recommended in pep-8]] to format the blocks with long parameter lists in Python:
+There are two ways [[https://peps.python.org/pep-0008/#indentation][recommended in PEP 8]] to format the blocks with long parameter lists in Python:
 
 #+begin_src python
 # Arguments start on the next line
@@ -21,12 +21,12 @@ foo = long_function_name(var_one, var_two,
                          var_three, var_four)
 #+end_src
 
-I always prefer the first option and the other one is problematic for a few reasons.
+I always prefer the first option, as the other one is problematic for a few reasons.
 
 For example, if you have two blocks with such indentation, the indent will be jumping:
 
 #+begin_src python
-# Two functions formatted in such way don't look good, indent is jumping
+# Two functions formatted in such a way don't look good, the indent is jumping
 foo = long_function_name(var_one, var_two,
                          var_three, var_four)
 bar = another_func(var_one, var_two,
@@ -41,7 +41,7 @@ foo = long_function_name(var_one, var_two,
                          var_three, var_four)
 
 # After renaming the function (or the `foo` variable),
-# we need to fix the indentation on following lines.
+# we need to fix the indentation on the following lines.
 foo = renamed_long_function_name(var_one, var_two,
                          var_three, var_four)
 
@@ -49,10 +49,10 @@ foo = self.long_function_name(var_one, var_two,
                          var_three, var_four)
 #+end_src
 
-Now, besides the rename / refactoring we need to also fix the
-indentation in following lines.
+Now, besides the rename / refactoring, we also need to fix the
+indentation in the following lines.
 
-While the first way of formatting works well in these cases:
+The first way of formatting, on the other hand, works well in these cases:
 
 #+begin_src python
 # Two functions near each other, indentation is not jumping
@@ -77,6 +77,6 @@ foo = self.long_function_name(
     var_three, var_four)
 #+end_src
 
-Along with more convenience during the development, this also results in
+Along with more convenience during development, this also results in
 better diffs, so it will make the code review process easier for a
 reviewer.

@@ -2,19 +2,19 @@
 #+DATE: <2012-04-24>
 #+TYPE: note
 #+FILETAGS: :vim:git:
-#+DESCRIPTION: Vim: how to use fugitive as git merge tool
+#+DESCRIPTION: Vim: how to use fugitive as a git merge tool
 
 To use fugitive as a merge tool you can run the following commands:
 
 #+begin_src shell
-  git config --global mergetool.fugitive.cmd 'vim -f -c "Gdiff" "$MERGED"'
-  git config --global merge.tool fugitive
+git config --global mergetool.fugitive.cmd 'vim -f -c "Gdiff" "$MERGED"'
+git config --global merge.tool fugitive
 #+end_src
 
 * Links :folded:
 :PROPERTIES:
 :CUSTOM_ID: links
 :END:
-[[http://stackoverflow.com/questions/7309707/my-git-mergetool-open-4not-3-windows-in-vimdiff][stackoverflow]]
+[[https://stackoverflow.com/questions/7309707/my-git-mergetool-open-4not-3-windows-in-vimdiff][stackoverflow]]
 
 [[http://vimcasts.org/episodes/fugitive-vim-resolving-merge-conflicts-with-vimdiff/][fugitive screencast]]

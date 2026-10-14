@@ -4,31 +4,31 @@
 #+FILETAGS: :git:
 #+DESCRIPTION: Git: How to move files with history from one repository to another.
 
-Git allows joining unrelated repositories via remotes which, in turn,
+Git allows joining unrelated repositories via remotes, which, in turn,
 allows moving files and change history between them.
 
 Some cases when this might be needed:
 
-- Extract part of a big repository into a separate repository,
+- Extract a part of a big repository into a separate repository,
   preserving change history
-- Splitting big repository to a set of smaller repositories
-- Merge smaller repository into a bigger one (merge in library from the
-  external repository)
+- Split a big repository into a set of smaller repositories
+- Merge a smaller repository into a bigger one (merge in a library from
+  an external repository)
 
 Preserving the history has an important effect: after we do the change,
 for example, extract a part of a bigger repository into a separate
 repository, we can continue moving changes between them (merge updates
 from the big repository to the small one and back).
 
-Below, I am assuming the first case (extract part of the big
-repository), other cases can be implemented with a similar technique.
+Below, I am assuming the first case (extracting a part of the big
+repository). Other cases can be implemented with a similar technique.
 
 * Setup
 :PROPERTIES:
 :CUSTOM_ID: setup
 :END:
-Assuming we have a source (upstream) repository and we want to extract a
-top-level =/lib= folder into a separate repository, first, create a
+Assume we have a source (upstream) repository and we want to extract a
+top-level =/lib= folder into a separate repository. First, create a
 destination repository:
 
 #+begin_src shell
@@ -37,7 +37,7 @@ cd dest-repo
 git init
 #+end_src
 
-Add a main repository as remote and checkout master branch:
+Add the main repository as a remote and check out the master branch:
 
 #+begin_src shell
 git remote add -f upstream git@github.com:myaccount/main.git
@@ -46,9 +46,9 @@ git subtree split --prefix=lib/ -b upstream_lib
 #+end_src
 
 What we do above is: add the source (upstream) repository as a remote,
-checkout its =master= branch to the destination repository and then use
-=git subtree split= to create =upstream_master_lib= branch containing
-only =/lib= folder with all the change history.
+check out its =master= branch to the destination repository and then use
+=git subtree split= to create the =upstream_lib= branch containing
+only the =/lib= folder with all the change history.
 
 Now we can merge the upstream files and history from the =/lib= folder
 to the target =master= branch:
@@ -59,11 +59,21 @@ git merge upstream_lib
 git push origin HEAD
 #+end_src
 
+** Update: a better version?                                        :folded:
+Now we can create the target =master= branch from the upstream files and
+history of the =/lib= folder and push it to the destination remote:
+
+#+begin_src shell
+git checkout -B master upstream_lib
+git remote add origin git@github.com:myaccount/lib.git
+git push origin master
+#+end_src
+
 * Update from upstream
 :PROPERTIES:
 :CUSTOM_ID: update-from-upstream
 :END:
-Pull recent upstream repository master branch and re-split it to a new
+Pull the recent upstream master branch and re-split it into a new
 branch:
 
 #+begin_src shell

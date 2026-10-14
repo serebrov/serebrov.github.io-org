@@ -2,25 +2,25 @@
 #+DATE: <2013-10-22>
 #+TYPE: note
 #+FILETAGS: :aws:
-#+DESCRIPTION: How to setup a cron command with RDS DB access on Elastic Beanstalk.
+#+DESCRIPTION: How to set up a cron command with RDS DB access on Elastic Beanstalk.
 
 * Problem
 :PROPERTIES:
 :CUSTOM_ID: problem
 :END:
 
-We want to have a cron command that launches a php script with the DB access.
+We want to have a cron command that launches a PHP script with DB access.
 
-The DB connection string looks like this
+The DB connection string looks like this:
 
 #+begin_example
 'connectionString' => 'mysql:host='.$_SERVER['RDS_HOSTNAME'].';port='.$_SERVER['RDS_PORT'].';dbname='.$_SERVER['RDS_DB_NAME'],
 #+end_example
 
-where =RDS_xxx= parameters come from environment variables.
+where the =RDS_xxx= parameters come from environment variables.
 
 The problem is that cron launches the command with a clean environment
-(there are no =RDS_xx= variables). So the command fails to access the
+(there are no =RDS_xxx= variables). So the command fails to access the
 database.
 
 * Solution
@@ -29,7 +29,7 @@ database.
 :END:
 
 The solution is to set the required environment variables before
-launching the command and this can be done with
+launching the command, and this can be done with the
 =/opt/elasticbeanstalk/support/envvars= script:
 
 #+begin_example

@@ -2,33 +2,33 @@
 #+DATE: <2020-05-03>
 #+TYPE: note
 #+FILETAGS: :vue:
-#+DESCRIPTION: How to Use Multiple vue.config.js configs in vue CLI setup.
+#+DESCRIPTION: How to use multiple vue.config.js configs in a Vue CLI setup.
 
 It can be useful to have more than one configuration file, for example, to build several code bundles.
 
-The config file to use can be set with =VUE_CLI_SERVICE_CONFIG_PATH= environment variable:
+The config file to use can be set with the =VUE_CLI_SERVICE_CONFIG_PATH= environment variable:
 
 #+begin_src shell
 # Build using vue.config.public.js
 CONF=`realpath vue.config.public.js`
 VUE_CLI_SERVICE_CONFIG_PATH=$CONF npm run build -- --mode production
 
-# build using vue.config.js
+# Build using vue.config.js
 npm run build -- --mode production
 #+end_src
 
 Where =npm run build= is defined in =package.json= as =vue-cli-service build=.
 
-It is also possible to create several bundles using vue cli
-[[https://cli.vuejs.org/config/#pages][multi-page mode]], but in this case we will have big common js and css “vendors” package.
+It is also possible to create several bundles using Vue CLI
+[[https://cli.vuejs.org/config/#pages][multi-page mode]], but in this case we will have a big common JS and CSS "vendors" package.
 
-The js bundle is [[https://stackoverflow.com/a/61089300/4612064][solvable with custom chunks settings]], but it still leaves big css
-shared package (I didn't find the solution for that).
+The JS bundle is [[https://stackoverflow.com/a/61089300/4612064][solvable with custom chunks settings]], but it still leaves a big shared
+CSS package (I didn't find a solution for that).
 
-The separate vue.config.js file has the advantage of building a completely independent bundle.
+The separate =vue.config.js= file has the advantage of building a completely independent bundle.
 
 The [[https://stackoverflow.com/a/50951316/4612064][alternative, check the comments]] is to have [[https://gist.github.com/educkf/97e76da8d8c2b5dad17846a7d576e205][separate configs and copy them over]],
 but this is less convenient than using the environment variable.
 
-Note: I didn't find any mention on =VUE_CLI_SERVICE_CONFIG_PATH= in the
-documentation, found it looking at the [[https://github.com/vuejs/vue-cli/blob/a1041a897e4e9e57924bb6a2bfffde5db1d87ae7/packages/%40vue/cli-service/lib/Service.js#L323][source code]].
+Note: I didn't find any mention of =VUE_CLI_SERVICE_CONFIG_PATH= in the
+documentation. I found it by looking at the [[https://github.com/vuejs/vue-cli/blob/a1041a897e4e9e57924bb6a2bfffde5db1d87ae7/packages/%40vue/cli-service/lib/Service.js#L323][source code]].

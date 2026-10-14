@@ -4,7 +4,7 @@
 #+FILETAGS: :git:
 #+DESCRIPTION: Git: How to show the number of commits by author
 
-The =shortlog -ns= will show the number of commits by author:
+The =git shortlog -ns= command shows the number of commits by author:
 
 #+begin_src shell
 git shortlog -ns

@@ -1,17 +1,17 @@
-#+TITLE: ElasticBeanstalk deployment from different computers
+#+TITLE: Elastic Beanstalk deployment from different computers
 #+DATE: <2013-09-11>
 #+TYPE: note
 #+FILETAGS: :aws:
 #+DESCRIPTION: Elastic Beanstalk - deploy from different machines / by different users (or how to get rid of absolute paths in configs)
 
-By default Elastic Beanstalk console tool (eb) adds config files to
-.gitignore. If there are manual changes to EB configs it can be
+By default, the Elastic Beanstalk console tool (eb) adds config files to
+=.gitignore=. If there are manual changes to EB configs, it can be
 difficult to sync these changes manually between different machines /
-different users. Of course it is possible to add config files to git
-repository but there are also several parameters in the main config
+different users. Of course, it is possible to add config files to the git
+repository, but there are also several parameters in the main config
 which are absolute paths to local files. This makes configs unusable for
 other users (except for the case when different users have exactly the
-same files layout). Here is how this problem can be fixed:
+same file layout). Here is how this problem can be fixed:
 
 1. Add eb tools under git control
 2. Add eb configs under git control
@@ -28,8 +28,8 @@ This is necessary because we want all users to have the same tools
 version. Also we are going to make some changes to eb sources to make it
 understand relative paths.
 
-Download [[http://aws.amazon.com/code/6752709412171743][eb tools]] and extract somewhere inside your project.
-Or copy existing version into the project.
+Download [[https://web.archive.org/web/20130911185827/http://aws.amazon.com/code/6752709412171743][eb tools]] and extract them somewhere inside your project.
+Or copy the existing version into the project.
 
 Add a wrapper script to run the original eb tool:
 
@@ -38,7 +38,7 @@ Add a wrapper script to run the original eb tool:
 
   # Run the eb tool from the root project directory as
   # console/eb {parameters}
-  # Use linux python2.7 version
+  # Use the Linux python2.7 version
 
   SCRIPT_PATH=`dirname $0`
 
@@ -46,7 +46,7 @@ Add a wrapper script to run the original eb tool:
   eb "$@"
 #+end_src
 
-Script should be on the same level as the extracted directory. For example, I have:
+The script should be on the same level as the extracted directory. For example, I have:
 
 #+begin_src shell
   project_root/
@@ -62,7 +62,7 @@ Script should be on the same level as the extracted directory. For example, I ha
   | .gitignore
 #+end_src
 
-So I launch the ‘eb’ as ‘console/eb parameters’ from the project root directory.
+So I launch =eb= as =console/eb parameters= from the project root directory.
 
 * Add eb configs under git control
 :PROPERTIES:
@@ -81,10 +81,10 @@ Add the EB configs under git control:
 For the 2.5.1 version I had to make two changes in the config file
 parser class.
 
-The file path is
+The file path is:
 
 #+begin_quote
-.../AWS-ElasticBeanstalk-CLI-2.5.1/eb/linux/python2.7/lib/utility/configfile_parser.py.
+.../AWS-ElasticBeanstalk-CLI-2.5.1/eb/linux/python2.7/lib/utility/configfile_parser.py
 #+end_quote
 
 And the changes are:
@@ -109,13 +109,13 @@ And the changes are:
          config_pairs = input_file.read()
 #+end_src
 
-Now you can use relative to project root paths in your configs.
+Now you can use paths relative to the project root in your configs.
 
 * Change paths in configs to relative
 :PROPERTIES:
 :CUSTOM_ID: change-paths-in-configs-to-relative
 :END:
-I had three absolute paths in my =./elasticbeanstalk/config=:
+I had three absolute paths in my =./.elasticbeanstalk/config=:
 
 #+begin_src shell
   [global]
@@ -136,10 +136,10 @@ I had three absolute paths in my =./elasticbeanstalk/config=:
   ..
 #+end_src
 
-Path to aws credential file can be easily fixed by just removing it - eb
-tools will use config from your home dir by default (=~/.elasticbeanstalk/aws_credential_file=).
+The path to the AWS credential file can be easily fixed by just removing it: eb
+tools will use the config from your home dir by default (=~/.elasticbeanstalk/aws_credential_file=).
 
-Other two paths (for branch configs) can now be changed to relative:
+The other two paths (for branch configs) can now be changed to relative:
 
 #+begin_src shell
   [global]
@@ -164,8 +164,8 @@ Other two paths (for branch configs) can now be changed to relative:
 :PROPERTIES:
 :CUSTOM_ID: use-it
 :END:
-Make sure you are using the ‘eb’ wrapper script from the root project
-directory. For example, for ‘eb status’:
+Make sure you are using the =eb= wrapper script from the root project
+directory. For example, for =eb status=:
 
 #+begin_src shell
   $ cd project/root/dir

@@ -1,3 +1,4 @@
+
 #+TITLE: Elastic Beanstalk: CloudWatch Logs setup
 #+DATE: <2015-05-20>
 #+TYPE: note
@@ -9,27 +10,27 @@
 
 CloudWatch Logs is an AWS service to collect and monitor system and
 application logs. At the top level, the setup is this:
-- install CloudWatch agent to collect logs data and send to CloudWatch Logs service
-- define log metric filters to extract useful data, like number of all errors or information about some specific events
+- install the CloudWatch agent to collect log data and send it to the CloudWatch Logs service
+- define log metric filters to extract useful data, like the number of all errors or information about some specific events
 - create alarms for metrics to get notifications about logs
 - make sure that the instance role has permissions to push logs to CloudWatch
 
 All the configuration can be done using the Elastic Beanstalk config. In
-this case when the new environment is launched or existing environment
-is updated the CloudWatch Logs setup is done automatically.
+this case, when a new environment is launched or an existing environment
+is updated, the CloudWatch Logs setup is done automatically.
 
 There is an example of the configuration in the Elastic Beanstalk docs:
-[[http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.cloudwatchlogs.html][Using Elastic Beanstalk with Amazon CloudWatch Logs]].
+[[https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.cloudwatchlogs.html][Using Elastic Beanstalk with Amazon CloudWatch Logs]].
 
 The =Setting Up CloudWatch Logs Integration with Configuration Files=
 section briefly describes how to use config examples for different
 environments, but there is no detailed information about the config
 files. And config files are complex. It is easy to use examples as is,
-but it is not that easy to do the setup for own logs. I will start with
+but it is not that easy to do the setup for your own logs. I will start with
 the review of the Apache access log example and will show how to change
 it to collect data from the error log as well.
 
-An example for php and python is an archive containing:
+The example for PHP and Python is an archive containing:
 
 #+begin_example
 cloudwatchlogs-apache/
@@ -38,12 +39,12 @@ cloudwatchlogs-apache/
   cwl-webrequest-metrics.config
 #+end_example
 
-Files need to be placed under =.ebextensions= folder. I recommend
-extracting an archive into =.ebextensions/cloudwatchlogs-apache=. You
-can also put an archive file itself, but it will be not convenient to
-view/edit configs then.
+Files need to be placed under the =.ebextensions= folder. I recommend
+extracting the archive into =.ebextensions/cloudwatchlogs-apache=. You
+can also put the archive file itself, but then it will not be convenient to
+view/edit configs.
 
-First two files are generic and can be used as is:
+The first two files are generic and can be used as is:
 
 #+begin_details
 #+begin_summary
@@ -59,14 +60,14 @@ eb-logs.config ([[file:files/eb-logs.config][open]])
 #+include: "files/eb-logs.config" src yaml
 #+end_details
 
-These files will set up CloudWatch Logs agent on the instance and configure
+These files will set up the CloudWatch Logs agent on the instance and configure
 Elastic Beanstalk logs publication to S3.
 
 Note: you also need to enable the access for Elastic Beanstalk instances
-to Cloudwatch Logs: add the appropriate permission for the
+to CloudWatch Logs: add the appropriate permission for the
 =aws-elasticbeanstalk-ec2-role= in IAM settings.
 
-The last config is an example of CloudWatch Logs setup for Apache's access log,
+The last config is an example of CloudWatch Logs setup for Apache's access log;
 adjust it as necessary:
 
 #+begin_details
@@ -76,21 +77,21 @@ cwl-webrequest-metrics.config ([[file:files/cwl-webrequest-metrics.config][open]
 #+include: "files/cwl-webrequest-metrics.config" src yaml
 #+end_details
 
-Config file consists of several sections - 'Mappings', 'Outputs',
-'Resources'. There are cross-references between these sections, like
-filters defined in 'Mappings' section are used later in 'Resources'
+The config file consists of several sections - 'Mappings', 'Outputs',
+'Resources'. There are cross-references between these sections, for example,
+filters defined in the 'Mappings' section are used later in the 'Resources'
 section for metric filters configuration.
 
 Unfortunately, there is no complete description of this config format in
-the Elastic Beanstalk documentation. As I understand this is actually a
-CloudFormation template but written in yaml (Elastic Beanstalk config
-format) instead of json (regular CloudFormation template format).
+the Elastic Beanstalk documentation. As I understand, this is actually a
+CloudFormation template, but written in YAML (Elastic Beanstalk config
+format) instead of JSON (regular CloudFormation template format).
 
 General template structure and information about its sections can be
-found here: [[http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html][CloudFormation - Template Anatomy]].
+found here: [[https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html][CloudFormation - Template Anatomy]].
 
-Let's examine a =cwl-webrequest-metrics.config= file.
-The first section is 'Mappings', here it is:
+Let's examine the =cwl-webrequest-metrics.config= file.
+The first section is 'Mappings'; here it is:
 
 #+begin_src yaml
 # Apache access log pattern:
@@ -108,28 +109,28 @@ Mappings:
       HttpNon5xxMetricFilter: "[..., status!=5*, size, referer, agent]"
 #+end_src
 
-Here we see some definitions like log file path (=LogFile=), log
+Here we see some definitions like the log file path (=LogFile=), log
 timestamp format (=TimestampFormat=) and filter patterns
-(=Http4xxMetricfilter=, =HttpNon4xxMetricFilter=, ...). These
+(=Http4xxMetricFilter=, =HttpNon4xxMetricFilter=, ...). These
 definitions work as constants defined at the top of the template and are
-referred from other sections of the file.
+referred to from other sections of the file.
 
 Filter patterns will be used to set up metric filters for the access
 log. Here we have patterns which will find all requests with 4XX
-response code, all requests with non 4XX code, all 5XX responses and all
-non 5XX responses.
+response code, all requests with non-4XX code, all 5XX responses and all
+non-5XX responses.
 
-The =TimestampFormat= setting is used by CloudWatch Logs agent to get
-timestamps for log records, so it is important to verify that format is
-set correctly. The timestamp format is the same as used by [[https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior][python's strptime function]].
+The =TimestampFormat= setting is used by the CloudWatch Logs agent to get
+timestamps for log records, so it is important to verify that the format is
+set correctly. The timestamp format is the same as used by [[https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior][Python's strptime function]].
 
 Some more information about the format can be found in the CloudWatch
-Logs agent [[https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py][setup file]], check around the middle of the file, the description of the
+Logs agent [[https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py][setup file]]: check around the middle of the file for the description of the
 =datetime_format= parameter - there is a table with placeholders and
 examples.
 
-Since timestamp format is the same as used by python, it is easy to test
-it using python interpreter. Start python in command line and use code
+Since the timestamp format is the same as used by Python, it is easy to test
+it using the Python interpreter. Start Python in the command line and use code
 like this:
 
 #+begin_example
@@ -141,17 +142,17 @@ In some cases, it can be complex to set the timestamp format because
 there can be just no placeholders to express the real format in the log.
 In this case, try to match at least part of the timestamp.
 
-For example, Apache error log has a timestamp like =Sun May 17 21:59:15.837463 2015=.
+For example, the Apache error log has a timestamp like =Sun May 17 21:59:15.837463 2015=.
 The problem is that there is a fractional part of the second in the middle,
-before the year and official python docs doesn't have a placeholder for this case
+before the year, and the official Python docs don't have a placeholder for this case
 (edit: there is an =%f= for microseconds, but let's pretend we don't know this).
 
-The pattern I used for Apache error log is =%a %b %d %H:%M:%S= (short
-weekday, short month name, day, hour:minute:second) and it matches only
-the start of the timestamp and does not include year. But it works well
-and I guess that CloudWatch agent takes the current year as default.
+The pattern I used for the Apache error log is =%a %b %d %H:%M:%S= (short
+weekday, short month name, day, hour:minute:second), and it matches only
+the start of the timestamp and does not include the year. But it works well,
+and I guess that the CloudWatch agent takes the current year as default.
 
-Next section in the config file is =Outputs=:
+The next section in the config file is =Outputs=:
 
 #+begin_src yaml
 Outputs:
@@ -160,12 +161,12 @@ Outputs:
     Value: { "Ref" : "AWSEBCloudWatchLogs8832c8d3f1a54c238a40e36f31ef55a0WebRequestLogGroup"}
 #+end_src
 
-Here we describe CloudWatch Logs group. Log group is a top level entity,
-like "production-apache-errors", "staging-syslog", etc. Inside the group
+Here we describe the CloudWatch Logs group. A log group is a top-level entity,
+like "production-apache-errors", "staging-syslog", etc. Inside the group,
 we have streams, each stream contains log records from some EC2
 instance.
 
-Next section is =Resources= where we define AWS resources used in our setup:
+The next section is =Resources=, where we define AWS resources used in our setup:
 
 #+begin_src yaml
 Resources :
@@ -183,21 +184,21 @@ Resources :
 #+end_src
 
 Above is the definition of the log group resource. Notice the usage of
-"Fn::FunctionName" constructs, the config file also has a mini-language
-to refer other sections of the config or to join strings. For example,
+"Fn::FunctionName" constructs: the config file also has a mini-language
+to refer to other sections of the config or to join strings. For example,
 ={"Fn::Join":["-", [{ "Ref":"AWSEBEnvironmentName" }, "webrequests"]]}=
-will take Elastic Beanstalk environment name and add =-webrequests=
+will take the Elastic Beanstalk environment name and add =-webrequests=
 after it, so the log group name will be =environment-webrequests=.
 
-Or function call like this (it is used below)
+Or a function call like this (it is used below)
 ={"Fn::FindInMap":["CWLogs", "WebRequestLogGroup", "TimestampFormat"]}=
 will look up a =TimestampFormat= value in the =Mappings= config section.
 
 You can find more information on functions here:
-- [[http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/intrinsic-function-reference.html][Elastic Beanstalk - Intrinsic Function Reference]]
-- [[http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html][CloudFormation - Intrinsic Function Reference]]
+- [[https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/ebextensions-functions.html][Elastic Beanstalk - Intrinsic Function Reference]]
+- [[https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/intrinsic-function-reference.html][CloudFormation - Intrinsic Function Reference]]
 
-Next resource in the =Resources= section is an autoscaling group:
+The next resource in the =Resources= section is an autoscaling group:
 
 #+begin_src yaml
   ## Register the files/log groups for monitoring
@@ -219,32 +220,32 @@ Next resource in the =Resources= section is an autoscaling group:
               group : root
 #+end_src
 
-Here we describe autoscaling group and say that during the new EC2
-instance initialization ([[http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-init.html][AWS::CloudFormation::Init]])
+Here we describe the autoscaling group and say that during the new EC2
+instance initialization ([[https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-init.html][AWS::CloudFormation::Init]])
 the =/tmp/cwlogs/conf.d/apache-access.conf= file should be created. This
 is a CloudWatch agent configuration which instructs an agent to collect
-data from the apache access log. We also describe a content for this
+data from the Apache access log. We also describe the content for this
 file:
 
 #+begin_src yaml
 content : |
   [apache-access_log]
-  ## We take file name from the Mappings - CWLogs - WebRequestLogGroup - LogFile
+  ## We take the file name from the Mappings - CWLogs - WebRequestLogGroup - LogFile
   file = `{"Fn::FindInMap":["CWLogs", "WebRequestLogGroup", "LogFile"]}`
   ## Log group is a reference to the log group resource we defined above
   log_group_name = `{ "Ref" : "AWSEBCloudWatchLogs8832c8d3f1a54c238a40e36f31ef55a0WebRequestLogGroup" }`
   ## Log stream name is an instance id
   log_stream_name = {instance_id}
-  ## date_format for cloudwatch agent is also defined in Mappings section above
+  ## datetime_format for the CloudWatch agent is also defined in the Mappings section above
   datetime_format = `{"Fn::FindInMap":["CWLogs", "WebRequestLogGroup", "TimestampFormat"]}`
 #+end_src
 
-You can find more information about the CloudWatch agent configuration [[http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/AgentReference.html][here]].
+You can find more information about the CloudWatch agent configuration [[https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AgentReference.html][here]].
 
-Note: it is not always convenient to have one stream per instance,
-[[file:2015-06-17-cloudwatch-logs-single-stream.org][see the follow up note on how to set up one stream for all instances]].
+Note: it is not always convenient to have one stream per instance;
+[[file:2015-06-17-cloudwatch-logs-single-stream.org][see the follow-up note on how to set up one stream for all instances]].
 
-Next four resources are metric filters. These filters will extract and
+The next four resources are metric filters. These filters will extract and
 count messages with specific status codes from the Apache access log.
 
 #+begin_src yaml
@@ -295,17 +296,17 @@ count messages with specific status codes from the Apache access log.
 #+end_src
 
 Metric filters use filter patterns defined in the =Mappings= section.
-Pattern syntax is described [[https://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/FilterAndPatternSyntax.html][here]] and it is convenient to test patterns in the
+Pattern syntax is described [[https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html][here]], and it is convenient to test patterns in the
 AWS console:
-- Open CloudWatch service in AWS console
-- Click =Logs= on the left, select log group on the right
-- Click =Create Metric Filter= button
+- Open the CloudWatch service in the AWS console
+- Click =Logs= on the left, select the log group on the right
+- Click the =Create Metric Filter= button
 
-Now you can select existing log data if you already have it or just
-paste some text from the local log file, enter filter pattern and test
+Now you can select existing log data if you already have it, or just
+paste some text from the local log file, enter a filter pattern and test
 it on the log data.
 
-For example, entering the filter like =[timestamp, type = *, ...]= you
+For example, by entering a filter like =[timestamp, type = *, ...]=, you
 can see what is taken as a timestamp. If we have log data like this:
 
 #+begin_src text
@@ -315,7 +316,7 @@ can see what is taken as a timestamp. If we have log data like this:
 [Thu May 14 16:26:54.407930 2015] [mpm_prefork:notice] [pid 2631] AH00163: Apache/2.4.10 (Amazon) mod_wsgi/3.5 Python/2.7.5 configured -- resuming normal operations
 #+end_src
 
-Then the test result for a pattern =[timestamp, type = *, ...]= will be this:
+Then the test result for the pattern =[timestamp, type = *, ...]= will be this:
 
 #+begin_src text
 Line Number $timestamp                       $type               $3       ...
@@ -324,22 +325,22 @@ Line Number $timestamp                       $type               $3       ...
 3           Thu May 14 16:26:54.406397 2015  ...
 #+end_src
 
-Here the data is considered as a space-delimited, so each word becomes a
-data column. Spaces can be "escaped" with square brackets, like
+Here the data is considered space-delimited, so each word becomes a
+data column. Spaces can be "escaped" with square brackets, so
 =[Thu May 07 07:03:48.655204 2015]= will be considered one field.
 
-This way for custom application logs it is better to use square brackets
+So for custom application logs, it is better to use square brackets
 to specify log record fields. For example, it is better to use
 =[2015-05-14 19:00:03] [WARNING] -- the warning message= instead of
 =2015-05-14 19:00:03 WARNING -- the warning message=.
 
 Note: in the =Mappings= section we also specify =TimestampFormat=, but
-it has no effect for filters and only used by CloudWatch agent.
+it has no effect on filters and is only used by the CloudWatch agent.
 
-And finally we define alarms which will watch for metrics above and
-generate SNS notification if we have too many 5XX responses (here we
-count responses) or if percent of 4XX responses becomes high (here we
-calculate percent value of 4XX responses).
+And finally we define alarms which will watch the metrics above and
+generate an SNS notification if we have too many 5XX responses (here we
+count responses) or if the percentage of 4XX responses becomes high (here we
+calculate the percentage of 4XX responses).
 
 #+begin_details
 #+begin_summary
@@ -393,24 +394,24 @@ Alarms configuration (click to expand)
 #+end_src
 #+end_details
 
-More information about =Resources= section:
-- [[http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environment-resources.html][Elastic Beanstalk - Customizing Environment Resources]]
-- [[http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/template-reference-aeb.html][Elastic Beanstalk - Customizing AWS Resources]]
+More information about the =Resources= section:
+- [[https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environment-resources.html][Elastic Beanstalk - Customizing Environment Resources]]
+- [[https://web.archive.org/web/20150520005816/http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/template-reference-aeb.html][Elastic Beanstalk - Customizing AWS Resources]]
 
 * Apache error log setup
 :PROPERTIES:
 :CUSTOM_ID: apache-error-log-setup
 :END:
 
-To create a CloudWatch Log configuration for another log file do the
+To create a CloudWatch Logs configuration for another log file, do the
 following:
-- Copy =cwl-webrequest-metrics.config= and save under new name into the same folder
+- Copy =cwl-webrequest-metrics.config= and save it under a new name into the same folder
 - In the =Mappings= section: change the log file path, timestamp format and filter patterns
-- In the =AWSEBAutoScalingGroup= resource: change the config file name: =apache-access.conf= to =my-log-name.conf= and change =[apache-access_log]= section name in the content
-- Search for =webrequest= and replace all occurrences with appropriate name, do the case-insensitive search to change webrequest, WebRequest, etc
-- Review filter patterns, metrics and alarms, these will be different for each log file
+- In the =AWSEBAutoScalingGroup= resource: change the config file name: =apache-access.conf= to =my-log-name.conf= and change the =[apache-access_log]= section name in the content
+- Search for =webrequest= and replace all occurrences with an appropriate name; do a case-insensitive search to change webrequest, WebRequest, etc.
+- Review filter patterns, metrics and alarms; these will be different for each log file
 
-For example, a config for apache error log can look like this:
+For example, a config for the Apache error log can look like this:
 
 #+begin_details
 #+begin_summary
@@ -498,7 +499,7 @@ Resources :
 #+end_src
 #+end_details
 
-Note that metrics and alarms are optional and log data will be sent to
+Note that metrics and alarms are optional, and log data will be sent to
 CloudWatch Logs even if there are no metrics/alarms. But in this case,
 it will be necessary to review logs manually and set up metrics and
 alarms later if needed.
@@ -507,14 +508,14 @@ alarms later if needed.
 :PROPERTIES:
 :CUSTOM_ID: links
 :END:
-[[http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.cloudwatchlogs.html][Using Elastic Beanstalk with Amazon CloudWatch Logs (+ config examples)]]
+[[https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.cloudwatchlogs.html][Using Elastic Beanstalk with Amazon CloudWatch Logs (+ config examples)]]
 
-[[http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/mon-scripts-perl.html][Amazon CloudWatch Monitoring Scripts for Linux (sample Perl scripts that demonstrate how to produce and consume Amazon CloudWatch custom metrics)]]
+[[https://web.archive.org/web/20150329190810/http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/mon-scripts-perl.html][Amazon CloudWatch Monitoring Scripts for Linux (sample Perl scripts that demonstrate how to produce and consume Amazon CloudWatch custom metrics)]]
 
-[[https://aws.amazon.com/blogs/aws/cloudwatch-log-service/][AWS Blog: Store and Monitor OS & Application Log Files with Amazon CloudWatch (manual setup, note about elastic beanstalk, information about cloud formation and ops works)]]
+[[https://aws.amazon.com/blogs/aws/cloudwatch-log-service/][AWS Blog: Store and Monitor OS & Application Log Files with Amazon CloudWatch (manual setup, note about Elastic Beanstalk, information about CloudFormation and OpsWorks)]]
 
-[[http://www.intelligrape.com/blog/logs-monitoring-using-aws-cloudwatch/][Logs Monitoring Using AWS CloudWatch (awslogs agent setup via script + metrics / alarms from the AWS console)]]
+[[https://www.tothenew.com/blog/logs-monitoring-using-aws-cloudwatch/][Logs Monitoring Using AWS CloudWatch (awslogs agent setup via script + metrics / alarms from the AWS console)]]
 
-[[http://stackoverflow.com/questions/1761609/whats-a-good-way-to-collect-logs-from-amazon-ec2-instances][Stackoverflow: What's a good way to collect logs from Amazon EC2 instances?]]
+[[https://stackoverflow.com/questions/1761609/whats-a-good-way-to-collect-logs-from-amazon-ec2-instances][Stack Overflow: What's a good way to collect logs from Amazon EC2 instances?]]
 
-[[https://blog.opsgenie.com/2014/08/how-to-use-cloudwatch-to-generate-alerts-from-logs][How to use CloudWatch to generate alerts from logs?]]
+[[https://web.archive.org/web/20150318055801/https://blog.opsgenie.com/2014/08/how-to-use-cloudwatch-to-generate-alerts-from-logs][How to use CloudWatch to generate alerts from logs?]]

@@ -2,27 +2,27 @@
 #+DATE: <2019-06-16>
 #+TYPE: note
 #+FILETAGS: :git:
-#+DESCRIPTION: How to add a github hook that automatically inserts issue number in the commit message.
+#+DESCRIPTION: How to add a git hook that automatically inserts the issue number into the commit message.
 
-When using project management system (Jira, Redmine, Github issues, etc)
-it is useful to add the issue number into the commit message that makes
+When using a project management system (Jira, Redmine, GitHub issues, etc.),
+it is useful to add the issue number to the commit message. This makes
 it easier to understand which issue the commit belongs to and often
 allows the project management system to display related commits.
 
-For same reasons, it is also useful to include the issue number into the
+For the same reasons, it is also useful to include the issue number in the
 branch name, such as =123-branch-description= or
 =feature/PROJECT-123-branch-description=.
 
-The process of adding the issue number into commit message can be
-automated with git =prepare-commit-msg= hook (shell script).
+The process of adding the issue number into the commit message can be
+automated with the git =prepare-commit-msg= hook (shell script).
 
-Below are few examples of hook scripts.
+Below are a few examples of hook scripts.
 
 * Branch Named as =123-branch-description=
 :PROPERTIES:
 :CUSTOM_ID: branch-named-as-123-branch-description
 :END:
-In the simplest case we have branches named as =123-branch-description=,
+In the simplest case, we have branches named as =123-branch-description=,
 where =123= is the issue id:
 
 #+begin_src shell
@@ -33,7 +33,7 @@ where =123= is the issue id:
 # get current branch
 branchName=`git rev-parse --abbrev-ref HEAD`
 
-# search issue id in the branch name, such a "123-description" or "XXX-123-description"
+# search issue id in the branch name, such as "123-description" or "XXX-123-description"
 issueId=$(echo $branchName | sed -nE 's,([A-Z]?-?[0-9]+)-.+,\1,p')
 
 # only prepare commit message if pattern matched and issue id was found
@@ -51,7 +51,7 @@ fi
 :CUSTOM_ID: branch-named-as-featureproject-123-branch-description
 :END:
 This version is useful for gitflow and Jira (where we should use
-PROJECT-123 format to display commits in the issue):
+the PROJECT-123 format to display commits in the issue):
 
 #+begin_src shell
 #!/bin/bash
@@ -61,7 +61,7 @@ PROJECT-123 format to display commits in the issue):
 # get current branch
 branchName=`git rev-parse --abbrev-ref HEAD`
 
-# search jira issue id in a pattern such a "feature/ABC-123-description"
+# search jira issue id in a pattern such as "feature/ABC-123-description"
 jiraId=$(echo $branchName | sed -nE 's,[a-z]+/([A-Z]+-[0-9]+)-.+,\1,p')
 
 # only prepare commit message if pattern matched and jiraId was found
@@ -78,15 +78,15 @@ fi
 :PROPERTIES:
 :CUSTOM_ID: cross-repository-version
 :END:
-This is useful when project uses multiple repositories on GitHub and
-issues tracked in one of the project (or there is a separate project for
+This is useful when a project uses multiple repositories on GitHub and
+issues are tracked in one of the repositories (or there is a separate project for
 issues).
 
-In this case, we also need to add full repository name to the commit
+In this case, we also need to add the full repository name to the commit
 message.
 
-The hook below puts short issue number at the beginning of the commit
-message and adds full issue id (=organization/repository/#issueId=) at
+The hook below puts the short issue number at the beginning of the commit
+message and adds the full issue id (=organization/repository#issueId=) at
 the end.
 
 #+begin_src shell
@@ -97,13 +97,13 @@ the end.
 # get current branch
 branchName=`git rev-parse --abbrev-ref HEAD`
 
-# search issue id in the branch name, such a "123-description" or "XXX-123-description"
+# search issue id in the branch name, such as "123-description" or "XXX-123-description"
 issueId=$(echo $branchName | sed -nE 's,([A-Z]?-?[0-9]+)-.+,\1,p')
 
 # only prepare commit message if pattern matched and issue id was found
 if [[ ! -z $issueId ]]; then
  # $1 is the name of the file containing the commit message
- # We prepend issue number in the beginning (so we can easily see it in history)
+ # We prepend the issue number at the beginning (so we can easily see it in history)
  # And also we append the full issue id (with organization/repository#) prefix,
  # so this commit hook works for other repositories (frontend) too.
  echo -e "[#$issueId] ""$(cat $1)""\n[organization/repository#$issueId]" > "$1"
@@ -119,9 +119,9 @@ fi
 :END:
 - Create the =.git/hooks/prepare-commit-msg= script
 - Copy the content from the snippet above
-- Make the file executable =chmod +x .git/hooks/prepare-commit-msg=
-- Try to commit something, check that the issue number is automatically
+- Make the file executable: =chmod +x .git/hooks/prepare-commit-msg=
+- Try to commit something and check that the issue number is automatically
   added
 
-Note: when you do the =commit --amend=, the issue number will be added
+Note: when you do =commit --amend=, the issue number will be added
 for the second time - you need to remove it manually.

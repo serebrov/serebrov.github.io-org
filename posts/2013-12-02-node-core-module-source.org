@@ -17,11 +17,11 @@ $ node
 
 Now check the =fs.readFileSync.js= file in the current folder.
 
-Also on some systems the source code of core node modules is in the =/usr/lib/nodejs/=.
+Also, on some systems, the source code of core node modules is in =/usr/lib/nodejs/=.
 
-And another (less interesting) way to get core module source is to look
-for it in the node github repository:
- * check installed node.js version (node --version)
- * find appropriate release on github (https://github.com/joyent/node/releases), for example, [[https://github.com/joyent/node/releases/tag/v0.8.17][0.8.17]]
- * click commit id on the left [[https://github.com/joyent/node/commit/c50c33e9397d7a0a8717e8ce7530572907c054ad][c50c33e]] ​
- * click "Browse code" and see the [[https://github.com/joyent/node/tree/c50c33e9397d7a0a8717e8ce7530572907c054ad][source]]
+And another (less interesting) way to get the core module source is to look
+for it in the node GitHub repository:
+ * check the installed node.js version (=node --version=)
+ * find the appropriate release on GitHub ([[https://github.com/nodejs/node-v0.x-archive/releases][releases]]), for example, [[https://github.com/nodejs/node-v0.x-archive/releases/tag/v0.8.17][0.8.17]]
+ * click the commit id on the left: [[https://github.com/nodejs/node-v0.x-archive/commit/c50c33e9397d7a0a8717e8ce7530572907c054ad][c50c33e]]
+ * click "Browse code" and see the [[https://github.com/nodejs/node-v0.x-archive/tree/c50c33e9397d7a0a8717e8ce7530572907c054ad][source]]

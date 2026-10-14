@@ -1,13 +1,16 @@
-#+TITLE: Elastic Beanstalk: python application server structure and celery setup
+#+TITLE: Elastic Beanstalk: Python application server structure and Celery setup
 #+DATE: <2015-04-02>
 #+TYPE: note
 #+FILETAGS: :aws:
-#+DESCRIPTION: What is on the Elastic Beanstalk server for python app and how to install Celery
+#+DESCRIPTION: What is on the Elastic Beanstalk server for a Python app and how to install Celery
 
 * Elastic Beanstalk Server Setup
+:PROPERTIES:
+:CUSTOM_ID: elastic-beanstalk-server-setup
+:END:
 
-Python application is deployed under =/opt/python/= on the Elastic Beanstalk EC2 instance.
-The application is running under Apache web server.
+The Python application is deployed under =/opt/python/= on the Elastic Beanstalk EC2 instance.
+The application is running under the Apache web server.
 
 The source folder structure is this:
 
@@ -25,28 +28,28 @@ run           - virtual environments
 
 Apache logs, deployment logs and system messages log are under =/var/log=.
 
-Another important directory is =/opt/elasticbeanstalk= - here there are
+Another important directory is =/opt/elasticbeanstalk= - it contains
 EB tool scripts and app server restart hooks.
 
-Apache is managed by [[http://supervisord.org/][supervisord]], to check the status run this command:
+Apache is managed by [[https://supervisord.org/][supervisord]]. To check the status, run this command:
 
 #+begin_src shell
 sudo /usr/local/bin/supervisorctl -c /opt/python/etc/supervisord.conf status
 #+end_src
 
-And you can restart apache like this:
+And you can restart Apache like this:
 
 #+begin_src shell
 sudo /usr/local/bin/supervisorctl -c /opt/python/etc/supervisord.conf restart httpd
 #+end_src
 
-* How to launch python application manually
+* How to launch a Python application manually
 :PROPERTIES:
 :CUSTOM_ID: how-to-launch-python-application-manually
 :END:
 
-I have a [[http://flask.pocoo.org/][flask]] application and usually it is started as =python application.py=.
-To run it on the server instance you need to init virtual environment and set
+I have a [[https://flask.palletsprojects.com/en/stable/][Flask]] application, and usually it is started as =python application.py=.
+To run it on the server instance you need to init the virtual environment and set
 environment variables first:
 
 #+begin_src shell
@@ -60,18 +63,18 @@ cd /opt/python/current/app
 python application.py
 #+end_src
 
-Or start flask shell with =flask shell=.
+Or start the Flask shell with =flask shell=.
 
 * How to install Celery
 :PROPERTIES:
 :CUSTOM_ID: how-to-install-celery
 :END:
-[[http://www.celeryproject.org/][Celery]] is a distributed task queue.
+[[https://docs.celeryq.dev/en/stable/][Celery]] is a distributed task queue.
 
 Our requirements are the following:
 
-- the celery application should be launched automatically when new version is deployed to Elastic Beanstalk
-- the celery application should be watched by supervisord and restarted in the case of failure
+- the Celery application should be launched automatically when a new version is deployed to Elastic Beanstalk
+- the Celery application should be watched by supervisord and restarted in case of failure
 
 The final project structure will be this:
 
@@ -90,7 +93,7 @@ The final project structure will be this:
   requirements.txt             - project requirements for pip
 #+end_example
 
-First, add the following line to the =requirements.txt= in the root folder
+First, add the following line to the =requirements.txt= file in the root folder
 of your project (these requirements will be installed with pip automatically):
 
 #+begin_example
@@ -98,14 +101,14 @@ of your project (these requirements will be installed with pip automatically):
 Celery==3.1.17
 #+end_example
 
-Note that the version number can be different, 3.1.17 is just an actual
-version at the moment of writing.
+Note that the version number can be different; 3.1.17 is just the current
+version at the time of writing.
 
-Then create a main celery application file. In my case, this is
-=celery.py= file in the root folder. Here I don't describe the celery
-application file content - do whatever you need from celery here.
+Then create the main Celery application file. In my case, this is the
+=celery.py= file in the root folder. Here I don't describe the Celery
+application file content - do whatever you need from Celery here.
 
-Now modify the elasticbeanstalk config (=.elasticbeanstalk/myapp.config=)
+Now modify the Elastic Beanstalk config (=.ebextensions/myapp.config=)
 to include the deployment script:
 
 #+begin_src yaml
@@ -120,16 +123,16 @@ container_commands:
     command: logger "End container commands" -t "DEPLOY"
 #+end_src
 
-Here we configure ElasticBeanstalk to launch the custom deployment script.
+Here we configure Elastic Beanstalk to launch the custom deployment script.
 
-In general I find the approach with the shell script for beanstalk
-configuration to be much more convenient than the standard way to put
-shell script code to the yaml config file.
+In general, I find the approach with the shell script for Beanstalk
+configuration to be much more convenient than the standard way of putting
+shell script code into the YAML config file.
 
-More details about this method can be found in the great [[http://www.hudku.com/blog/innocuous-looking-evil-devil/][Innocuous looking Evil Devil]] article.
-Check also [[http://www.hudku.com/blog/tag/elastic-beanstalk][related posts]].
+More details about this method can be found in the great [[https://web.archive.org/web/20191019030435/http://www.hudku.com/blog/innocuous-looking-evil-devil/][Innocuous looking Evil Devil]] article.
+Also check [[http://www.hudku.com/blog/tag/elastic-beanstalk][related posts]].
 
-This deployment script =.ebextensions/deploy.sh=:
+The deployment script =.ebextensions/deploy.sh=:
 
 #+begin_src shell
 #!/usr/bin/env bash
@@ -164,9 +167,9 @@ supervisorctl -c /opt/python/etc/supervisord.conf update
 supervisorctl -c /opt/python/etc/supervisord.conf restart celeryd
 #+end_src
 
-A small inconvenience with supervisord is that configuration for all
-apps managed by supervisord should be inside the main supervisord.conf
-file or additional configs should be included into it. So in any case we
+A small inconvenience with supervisord is that the configuration for all
+apps managed by supervisord should be inside the main =supervisord.conf=
+file, or additional configs should be included into it. So in any case we
 need to modify the main supervisord config. The script above does this
 by adding the following lines to it:
 
@@ -180,7 +183,7 @@ The =celeryd.conf= is copied into the same folder where =supervisord.conf=
 resides.
 
 The =.ebextensions/utils.sh= script contains additional functions used
-by deployment script:
+by the deployment script:
 
 #+begin_src shell
 #!/usr/bin/env bash
@@ -195,7 +198,7 @@ error_exit() {
 }
 
 # Copy + chmod + chown
-# copy_ext source target 0755 user:group
+# copy_ext source target 0755 user group
 copy_ext() {
     #cp + chmod + chown
     local source=$1
@@ -226,12 +229,12 @@ is_leader() {
     if [[ "$EB_IS_COMMAND_LEADER" == "true" ]]; then
         # to be used in if's, so '0' means true (like for script exit code - 0 is success)
         #return 0
-        #more clear (true returns 0)
+        # clearer (true returns 0)
         true
     else
         # to be used in if's, so '1' means false
         #return 1
-        #more clear (false returns non zero)
+        # clearer (false returns non-zero)
         false
     fi
 }
@@ -251,7 +254,7 @@ script_add_line() {
 }
 #+end_src
 
-The celeryd.conf in =.ebextensions/files/celeryd.conf= is a supervisord
+The =celeryd.conf= file in =.ebextensions/files/= is a supervisord
 config:
 
 #+begin_src ini
@@ -281,8 +284,8 @@ killasgroup=true
 ; priority=998
 #+end_src
 
-Restart hook =.ebextensions/files/99_restart_services.sh= restarts
-celery application when application server is reloaded or restarted:
+The restart hook =.ebextensions/files/99_restart_services.sh= restarts
+the Celery application when the application server is reloaded or restarted:
 
 #+begin_src shell
 #!/bin/bash
@@ -298,8 +301,8 @@ fi
 eventHelper.py --msg "Application server successfully restarted." --severity INFO
 #+end_src
 
-Finally the script under =scripts/celeryd= is used to set environment
-variables, activate virtual environment and run celery application:
+Finally, the script under =scripts/celeryd= is used to set environment
+variables, activate the virtual environment and run the Celery application:
 
 #+begin_src shell
 #!/bin/bash
@@ -314,16 +317,16 @@ cd /opt/python/current/app
 exec /opt/python/run/venv/bin/celery worker -A tasks --loglevel=INFO
 #+end_src
 
-Actually we configured Elastic Beanstalk to run and manage an additional
+In fact, we configured Elastic Beanstalk to run and manage an additional
 application. The same approach can be used for any kind of application,
-not necessarily celery - it can be any other application even written in
-other than python language.
+not necessarily Celery - it can be any other application, even one
+written in a language other than Python.
 
 * Bonus: how to install ZeroMQ library
 :PROPERTIES:
 :CUSTOM_ID: bonus-how-to-install-zeromq-library
 :END:
-To install ZeroMQ python library add it to requirements.txt:
+To install the ZeroMQ Python library, add it to =requirements.txt=:
 
 #+begin_example
 Flask==0.9
@@ -332,14 +335,14 @@ boto==2.34.0
 pyzmq==13.0.2
 #+end_example
 
-Installation process also includes a compilation phase and you can get
+The installation process also includes a compilation phase, and you can get
 an error like this:
 
 #+begin_example
 gcc: error trying to exec 'cc1plus': execvp: No such file or directory
 #+end_example
 
-To solve this problem, add following packages into the elasticbeanstalk config:
+To solve this problem, add the following packages to the Elastic Beanstalk config:
 
 #+begin_src yaml
   packages:

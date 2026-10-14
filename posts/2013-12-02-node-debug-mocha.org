@@ -1,10 +1,10 @@
-#+TITLE: Node.js: debug mocha test
+#+TITLE: Node.js: debug a mocha test
 #+DATE: <2013-12-02>
 #+TYPE: note
 #+FILETAGS: :js:
-#+DESCRIPTION: How to debug mocha test with node inspector
+#+DESCRIPTION: How to debug a mocha test with node inspector
 
-To debug mocha test with [[https://github.com/node-inspector/node-inspector][node inspector]] use the delay before test:
+To debug a mocha test with [[https://github.com/node-inspector/node-inspector][node inspector]], use a delay before the test:
 
 #+begin_src js
   beforeEach(function(done) {
@@ -23,5 +23,5 @@ breakpoint. Mocha should be launched like this:
   mocha -t 10000 --debug
 #+end_src
 
-The same approach can be used not only for tests but for any
-short-living node app: just wrap the startup code into the =setTimeout()= call.
+The same approach can be used not only for tests but also for any
+short-lived node app: just wrap the startup code into the =setTimeout()= call.
