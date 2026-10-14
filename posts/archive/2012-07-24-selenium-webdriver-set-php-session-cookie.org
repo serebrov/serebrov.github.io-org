@@ -1,0 +1,24 @@
+#+TITLE: Selenium WebDriver: set PHP session cookie
+#+DATE: <2012-07-24>
+#+TYPE: note
+#+FILETAGS: :web:
+#+DESCRIPTION: How to set the PHP session cookie with domain and path in Selenium WebDriver using JavaScript.
+
+To set the php session cookie we can use the =addcookie= (or python
+version =add_cookie=) method of the webdriver. But it accepts only name
+and value and does not allow setting additional cookie parameters like
+domain, path, etc.
+
+Fortunately it is easy to do with javascript.
+
+Here is an example of a JS code to set the cookie:
+
+#+begin_src js
+document.cookie = "PHPSESSID=9ojofgkb21nujvhulvgq4drh06; domain=.myhost.com; path=/";
+#+end_src
+
+And here is python code version (assume you have set =cookie= and =domain= variables):
+
+#+begin_src python
+webdriver.execute_script("document.cookie = 'PHPSESSID="+cookie+"; domain="+domain+"; path=/'")
+#+end_src

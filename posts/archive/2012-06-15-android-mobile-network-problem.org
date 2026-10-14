@@ -1,0 +1,67 @@
+#+TITLE: Android: mobile network problem after BusyBox update
+#+DATE: <2012-06-15>
+#+TYPE: post
+#+FILETAGS: :android:
+#+DESCRIPTION: Fixing mobile network on a rooted LG P500 after the BusyBox update, by restoring the original ip binary.
+
+I have LG p500 (Optimus One), rooted with original ROM.
+
+After update to [[https://play.google.com/store/apps/details?id=stericson.busybox][BusyBox]] 1.20.1 my mobile GPRS network became broken.
+I got network indicator (E with two arrows), but can not access network.
+
+I suspected that this was something with dns settings, but did not find
+any solution. I uninstalled busybox, but this didn't help. I did a
+factory reset - also didn't help. Actually I thought factory reset will
+return my device to the original state, but then noticed that I still
+have root and busybox.
+
+So I started examining system logs and found this error:
+
+#+begin_example
+Failed to replace default route com.android.server.NativeDaemonConnectorException
+06-12 17:04:40.999 E/NetworkManagmentService(1560)com.android.server.NetworkManagementService 994
+Failed to replace default route com.android.server.NativeDaemonConnectorException:
+Cmd {route replace def v4 rmnet0 31.144.159.49} failed with code 400 : {failed to replace default route for [rmnet0 -4] (I/O error)}: for iface [rmnet0]
+06-12 17:04:40.999 E/NetworkStateTracker(1560)android.net.NetworkStateTracker 249
+Unable to add default route.
+#+end_example
+
+I googled this error and found XDA thread which mentions this error, the
+page where it is first mentioned - [[http://forum.xda-developers.com/showthread.php?t=1314898&page=418][XDA forum thread, see post 4174]].
+
+Note that I use original LG ROM (not the rom discussed in that thread).
+A few pages later there is a more detailed examination - [[http://forum.xda-developers.com/showthread.php?t=1314898&page=428][see post 4272 and 4275]].
+
+During discussion they suggested trying this command (I modified it a
+bit because original forum version gave error about wrong arguments. I
+issued this command in the [[https://play.google.com/store/apps/details?id=os.tools.scriptmanager][Script Manager]] via su):
+
+#+begin_src shell
+su -c "ip -4 route replace default via 109.46.130.66 dev rmnet0"
+#+end_src
+
+Where ip (109.46.130.66) is ip address from the
+com.android.server.NativeDaemonConnectorException error above - I think
+this is dynamic dns server I got from my mobile network provider
+(different on each connection). And this command makes network work! But
+only for current session. When I reconnect GPRS the network doesn't work
+again (because new dns server ip is issued every time).
+
+The final solution is to take an "ip" binary from the original rom and
+replace the busybox version:
+
+- Get the [[http://forum.xda-developers.com/showthread.php?t=1260920][stock rom]]
+- Extract system files from kdz format, [[http://forum.xda-developers.com/showthread.php?t=901417][how to]]
+- After extracting =system.mbn=: copy =system/bin/ip= to the device
+  (somewhere, for example, sd card root).
+- Rename =/system/bin/ip= to =/system/bin/ip_busybox= (just a backup). To
+  access system folder on the device I used [[https://play.google.com/store/apps/details?id=com.estrongs.android.pop][ES File Explorer]]
+  with root mode enabled.
+- Copy original "ip" (from sdcard root) to =/system/bin/=
+
+Finally I want to thank [[https://play.google.com/store/apps/details?id=stericson.busybox][BusyBox installer]] developer, Stephen.
+I contacted him by email when I realized that
+problem was with busybox installer and he answered and put effort to
+help me find the solution. Also he posted about this issue in the
+XDA thread mentioned above (I could not do this because I have no
+permission to post into developer topics on XDA).

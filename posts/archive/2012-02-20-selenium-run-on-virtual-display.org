@@ -1,0 +1,67 @@
+#+TITLE: Selenium: run tests on a virtual display
+#+DATE: <2012-02-20>
+#+TYPE: note
+#+FILETAGS: :web:
+#+DESCRIPTION: How to run Selenium tests on a headless machine with the Xvfb virtual display, and watch them with VNC.
+
+Selenium tests require a browser to run, so usually we run them on the
+X-server enabled machine. But in some cases, like CI system running on
+the headless EC2 instance, we want to run it on the virtual display.
+This can be done using xvfb (X virtual framebuffer).
+
+* Set up
+
+Install xvfb
+
+#+begin_src shell
+sudo apt-get install xvfb
+#+end_src
+
+Install x11vnc
+
+#+begin_src shell
+sudo apt-get install x11vnc
+#+end_src
+
+* Run tests on virtual display
+
+Start Xvfb (virtual display number 99)
+
+#+begin_src shell
+Xvfb -ac :99
+#+end_src
+
+Tell tests to run on virtual display
+
+#+begin_src shell
+export DISPLAY=:99
+#+end_src
+
+Or inside the test code (python)
+
+#+begin_src python
+os.environ['DISPLAY'] = ':99'
+...
+selenium = webdriver.Firefox(firefox_profile=ffp, firefox_binary=ffb)
+...
+#+end_src
+
+* Watch tests running on virtual display
+
+Start x11vnc server on the same display:
+
+#+begin_src shell
+x11vnc -display :99
+#+end_src
+
+Use vnc client (for example,
+[[https://launchpad.net/gtkvncviewer][gtkvncviewer]]) to connect to the
+localhost and watch how tests are running.
+
+* Links
+
+[[http://serverfault.com/questions/273095/connect-to-xvfb-remote-to-fix-firefox-headless-crash][Server Fault: connect to Xvfb remotely]]
+
+[[http://www.semicomplete.com/blog/geekery/xvfb-firefox.html][Xvfb + Firefox]]
+
+[[http://markgandolfo.com/?p=47][Hudson Ci Server Running Selenium/Webdriver Cucumber In Headless Mode Xvfb]]

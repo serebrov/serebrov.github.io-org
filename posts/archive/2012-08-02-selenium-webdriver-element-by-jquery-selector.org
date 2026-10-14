@@ -1,0 +1,16 @@
+#+TITLE: Selenium WebDriver: get WebElement by jQuery selector
+#+DATE: <2012-08-02>
+#+TYPE: note
+#+FILETAGS: :web:
+#+DESCRIPTION: How to find a WebElement in Selenium WebDriver with a jQuery selector, like :visible, that CSS selectors do not support.
+
+This can be necessary for example for selector like =#id > li:visible=.
+
+If you try to do =webdriver.find_element_by_css_selector= you will get an error message "The given selector =#id > li:visible= is either invalid or does not result in a WebElement."
+
+The workaround is to use jQuery to find the element. It can be done with this code (python):
+
+#+begin_src python
+script = "return $('"+selector+"').get(0);"
+element = webdriver.execute_script(script);
+#+end_src

@@ -1,0 +1,84 @@
+#+TITLE: Selenium: Python Firefox webdriver, unsafe setters in =firefox_profile.py=
+#+DATE: <2012-02-20>
+#+TYPE: note
+#+FILETAGS: :web:
+#+DESCRIPTION: Why the Python Firefox webdriver fails with "Can't load the profile" after setting boolean profile flags, and how to fix it.
+
+Problem: after setting the boolean flags for Firefox profile the
+webdriver fails with "Can't load the profile" error.
+
+I tried to disable native events for Firefox webdriver in the following way:
+
+#+begin_src python
+ffp = webdriver.firefox.firefox_profile.FirefoxProfile(path)
+if (Config.ff_native_events_enabled == False):
+    ffp.native_events_enabled = False
+ffb = webdriver.firefox.firefox_binary.FirefoxBinary(firefox_path=Config.browser_binary)
+selenium = webdriver.Firefox(firefox_profile=ffp, firefox_binary=ffb)
+#+end_src
+
+After that Firefox starts, but python code can not connect to the webdriver extension.
+
+Test fails with error like this:
+
+#+begin_example
+Traceback (most recent call last):
+...
+File "/usr/local/lib/python2.6/dist-packages/selenium/webdriver/firefox/webdriver.py", line 45, in __init__
+    self.binary, timeout),
+File "/usr/local/lib/python2.6/dist-packages/selenium/webdriver/firefox/extension_connection.py", line 46, in __init__
+    self.binary.launch_browser(self.profile)
+File "/usr/local/lib/python2.6/dist-packages/selenium/webdriver/firefox/firefox_binary.py", line 44, in launch_browser
+    self._wait_until_connectable()
+File "/usr/local/lib/python2.6/dist-packages/selenium/webdriver/firefox/firefox_binary.py", line 86, in _wait_until_connectable
+    self.profile.path, self._get_firefox_output()))
+WebDriverException: Message: "Can't load the profile. Profile Dir: /tmp/tmp2aEvmI/webdriver-py-profilecopy Firefox output: "
+#+end_example
+
+Actually this error is not related to the profile loading and it fails
+in =_wait_until_connectable= method.
+
+If I comment out the =ffp.native_events_enabled = False= line then
+everything works.
+
+* Solution
+
+After some examination I found that webdriver (python code) passes
+parameters to the firefox extension through the user.js file in the
+Firefox profile folder. And it looked like this:
+
+#+begin_src js
+user_pref("security.warn_entering_weak", false);
+user_pref("security.fileuri.strict_origin_policy", false);
+user_pref("webdriver_enable_native_events", False);
+...
+#+end_src
+
+Note that here we have lowercase 'false' for all options except the
+=webdriver_enable_native_events=. The python code which is responsible
+for this:
+
+#+begin_src python
+# my code
+ffp.native_events_enabled = False
+
+# webdriver code
+@native_events_enabled.setter
+def native_events_enabled(self, value):
+    self.default_preferences['webdriver_enable_native_events'] = str(value)
+#+end_src
+
+Here python boolean value is converted into the "False" string. The
+solution is to use in my code lowercase string instead of boolean:
+
+#+begin_src python
+# my code
+ffp.native_events_enabled = "false"
+#+end_src
+
+I also added a [[http://code.google.com/p/selenium/issues/detail?id=3400][bug report]] and hope this will be fixed in selenium code.
+The same problem exists for other boolean setters, like =accept_untrusted_certs=.
+
+* Links
+
+[[http://code.google.com/p/selenium/issues/detail?id=3400][bug report]]
