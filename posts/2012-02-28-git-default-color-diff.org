@@ -6,7 +6,7 @@
 
 * Git me some colors!
 
-To have a more colorful git ouptput, use the following command:
+To have a more colorful git output, use the following command:
 
 #+begin_src shell
 git config color.ui true
@@ -27,12 +27,12 @@ git config color.interactive auto
 git config color.status auto
 #+end_src
 
-See also color.* options in the [[http://schacon.github.com/git/git-config.html][git config docs]].
+See also =color.*= options in the [[https://git-scm.com/docs/git-config][git config docs]].
 
 * Links
 :PROPERTIES:
 :CUSTOM_ID: links
 :END:
-[[http://book.git-scm.com/5_customizing_git.html][git book]]
+[[https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration][git book]]
 
-[[http://stefaanlippens.net/color_highlighted_diffs_with_git_svn_cvs][Color highlighted diffs with git, svn and cvs]]
+[[https://www.stefaanlippens.net/color_highlighted_diffs_with_git_svn_cvs/][Color highlighted diffs with git, svn and cvs]]

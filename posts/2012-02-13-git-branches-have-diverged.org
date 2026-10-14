@@ -14,7 +14,7 @@ and have 1 and 1 different commit(s) each, respectively.
 #+end_example
 
 The error is caused by two independent commits - one (or more) on the
-local branch copy and other - on the remote branch copy (for example,
+local branch copy and another - on the remote branch copy (for example,
 commit by another person to the same branch).
 
 Another case for the error is =git rebase= (error is expected, see
@@ -30,10 +30,10 @@ The history looks like this:
 
 The solution depends on what has actually happened, the reason why the
 upstream state has changed. If someone else is also working on the same
-branch, the good way to solve it is to rebase the commit =C= on top of
+branch, a good way to solve it is to rebase the commit =C= on top of
 the remote state:
 
-#+begin_src sh
+#+begin_src shell
 git rebase origin/branch_xxx
 #+end_src
 
@@ -48,17 +48,17 @@ The history after the rebase will look like this:
 Another way to fix the issue is to merge the upstream branch state to
 local:
 
-#+begin_src sh
+#+begin_src shell
 git merge origin/branch_xxx
 #+end_src
 
-The history after will look like this:
+The history after the merge will look like this:
 
 #+begin_example
     ... o ---- o ---- A ---- C ---- B  --- [merge commit]
 #+end_example
 
-* The same git error after rebase:
+* The same git error after rebase
 :PROPERTIES:
 :CUSTOM_ID: the-same-git-error-after-rebase
 :END:
@@ -71,7 +71,7 @@ origin repository, for example, we start with a state like this:
                         C  branch_xxx, origin/branch_xxx
 #+end_example
 
-Now we want to rebase branch_xxx against the master branch:
+Now we want to rebase =branch_xxx= against the master branch:
 
 #+begin_src shell
 git checkout master
@@ -80,7 +80,7 @@ git checkout branch_xxx
 git rebase master
 #+end_src
 
-Now local state of the =mybranch= and =origin/mybranch= state will
+Now the local state of =branch_xxx= and =origin/branch_xxx= will
 diverge. This is expected as rebase rewrites history, so after it you'll
 have different local and remote state:
 
@@ -101,7 +101,7 @@ and have 1 and 1 different commits each, respectively.
   (use "git pull" to merge the remote branch into yours)
 #+end_example
 
-If you absolutely sure this is your case then you can force Git to push
+If you are absolutely sure this is your case then you can force Git to push
 your changes:
 
 #+begin_src shell

@@ -1,16 +1,16 @@
-#+TITLE: oauth 1.0 notes
+#+TITLE: OAuth 1.0 notes
 #+DATE: <2012-03-15>
 #+TYPE: post
 #+FILETAGS: :oauth:
 #+DESCRIPTION: OAuth 1.0 flow notes
 
-* oAuth 1.0 flow
+* OAuth 1.0 flow
 :PROPERTIES:
 :CUSTOM_ID: oauth-1.0-flow
 :END:
-A good explanation image from [[http://oauth.net/core/1.0/][oauth.net]]:
+A good explanation image from [[https://oauth.net/core/1.0/][oauth.net]]:
 
-#+caption: oAuth flow
+#+caption: OAuth flow
 [[file:images/2012-03-15-oauth-1-0-diagram.png]]
 
 Flow description:
@@ -25,7 +25,7 @@ Flow description:
     - here =oauth_signature= is the signature of the request created
       using Consumer Secret, simplified example:
     - =$signature = md5($request_text . $consumer_secret)=
-    - both sides (Consumer and Service Provider) know consumer_secret
+    - both sides (Consumer and Service Provider) know =consumer_secret=
       and are able to perform this operation, so Service Provider can
       check whether signature is valid
 - B) Service provider returns Request Token
@@ -47,7 +47,7 @@ Flow description:
     - =oauth_verifier=
   - here =oauth_signature= is the signature of the request created using
     request token secret from B
-  - note, that on step A Consumer uses his Consumer Secret to sign the
+  - note that on step A Consumer uses his Consumer Secret to sign the
     request and here he uses request token secret
 - F) Service provider grants Access Token
   - =oauth_token=
@@ -65,19 +65,19 @@ Flow description:
 :PROPERTIES:
 :CUSTOM_ID: links
 :END:
-[[http://en.wikipedia.org/wiki/OAuth][wikipedia]]
+[[https://en.wikipedia.org/wiki/OAuth][Wikipedia]]
 
-[[http://oauth.net/][oauth.net]]
+[[https://oauth.net/][oauth.net]]
 
-[[http://hueniverse.com/oauth/][oauth guide]]
+[[https://web.archive.org/web/20120314105758/http://hueniverse.com/oauth/][oauth guide]]
 
-[[http://developer.yahoo.com/oauth/guide/oauth-auth-flow.html][yahoo]]
+[[https://web.archive.org/web/20120309231319/http://developer.yahoo.com/oauth/guide/oauth-auth-flow.html][yahoo]]
 
-[[http://thinkvitamin.com/code/introduction-to-oauth/][introduction to oauth]]
+[[https://web.archive.org/web/20120420161016/http://thinkvitamin.com/code/introduction-to-oauth/][introduction to oauth]]
 
-[[http://habrahabr.ru/post/77648/][habrahabr, in russian]]
+[[https://habr.com/ru/articles/77648/][habrahabr, in russian]]
 
-* yii implementations
+* Yii implementations
 :PROPERTIES:
 :CUSTOM_ID: yii-implementations
 :END:
@@ -85,20 +85,20 @@ Flow description:
 
 [[https://github.com/jorgebg/yii-eoauth][eoauth extension]]
 
-[[http://www.yiiframework.com/extension/api-module/][api module extension]]
+[[https://www.yiiframework.com/extension/api-module][api module extension]]
 
-* php implementations
+* PHP implementations
 :PROPERTIES:
 :CUSTOM_ID: php-implementations
 :END:
-[[http://oauth.net/code/][list of libraries on oauth.net]]
+[[https://oauth.net/code/][list of libraries on oauth.net]]
 
-[[https://dev.twitter.com/docs/twitter-libraries#php][list of libraries on twitter.com]]
+[[https://web.archive.org/web/20130115222508/https://dev.twitter.com/docs/twitter-libraries#php][list of libraries on twitter.com]]
 
-[[http://www.php.net/manual/en/book.oauth.php][php extension]]
+[[https://www.php.net/manual/en/book.oauth.php][php extension]]
 
-[[http://code.google.com/p/oauth-php/][oauth php project]]
+[[https://code.google.com/archive/p/oauth-php][oauth php project]]
 
-[[http://code.google.com/p/oauth/][oauth project]]
+[[https://code.google.com/archive/p/oauth][oauth project]]
 
-[[http://framework.zend.com/manual/en/zend.oauth.introduction.html][zend]]
+[[https://web.archive.org/web/20120906015928/http://framework.zend.com/manual/en/zend.oauth.introduction.html][zend]]
