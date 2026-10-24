@@ -67,8 +67,9 @@ site: 1em + (count - 1) / (largest count)."
           "#+end_export\n"))
 
 (defun blog-tags-sidebar (tags)
-  "Return the HTML of the sidebar with the tag cloud for TAGS."
-  (concat "<aside class=\"sidebar\" aria-labelledby=\"sidebar-tags\">\n"
+  "Return the HTML of the sidebar block with the tag cloud for TAGS."
+
+  (concat "<aside class=\"sidebar-tags\" aria-labelledby=\"sidebar-tags\">\n"
           "<h2 id=\"sidebar-tags\" class=\"sidebar-title\"><a href=\"/tags/\">Tags</a></h2>\n"
           (blog-tags-cloud-html tags)
           "</aside>\n"))

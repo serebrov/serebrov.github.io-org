@@ -169,16 +169,32 @@ INFO is the export plist, BACKEND is the export backend."
              (file-in-directory-p (plist-get info :input-file) (blog-path "posts")))
     (concat body (blog-tags-links (plist-get info :filetags)))))
 
+(defun blog-sidebar-toc (output)
+  "Return a copy of the table of contents in OUTPUT for the sidebar, or \"\".
+The copy has no ids, so the ids on the page stay unique.  The page
+keeps its own table of contents for narrow screens (see blog.css)."
+  (if (string-match "<nav id=\"table-of-contents\"\\(?:.\\|\n\\)*?</nav>" output)
+      (string-replace "<nav " "<nav class=\"sidebar-toc\" "
+                      (replace-regexp-in-string " id=\"[^\"]*\"" "" (match-string 0 output)))
+    ""))
+
 (defun blog-add-sidebar (output backend info)
   "Add the sidebar after the <main> element of OUTPUT.
-The sidebar is the :blog-sidebar property of INFO.  The /tags/ page
-has no sidebar, because its content is the same tag cloud."
-  (let ((sidebar (plist-get info :blog-sidebar)))
-    (when (and sidebar
+The sidebar has the table of contents of the page, the links to the
+post lists (layout/sidebar-menu.html), and the tag cloud, the
+:blog-sidebar property of INFO.  The /tags/ page has no
+sidebar, because its content is the same tag cloud."
+  (let ((tags (plist-get info :blog-sidebar)))
+    (when (and tags
                (org-export-derived-backend-p backend 'html)
                (not (string= (file-relative-name (plist-get info :input-file) blog-root)
                              "tags/index.org")))
-      (string-replace "</main>" (concat "</main>\n" sidebar) output))))
+      (string-replace "</main>"
+                      (concat "</main>\n<div class=\"sidebar\">\n"
+                              (blog-sidebar-toc output) "\n"
+                              (blog-read-layout "sidebar-menu.html")
+                              tags "</div>")
+                      output))))
 
 (defun blog-page-options (sidebar)
   "Return the export options that all pages share.

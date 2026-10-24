@@ -35,8 +35,8 @@ a { color: var(--link); }
 @media (max-width: 600px) {
   .site-menu { flex-basis: 100%; }
 }
-.site-menu, .site-contacts { display: flex; gap: 1rem; }
-.site-menu a, .site-contacts a { text-decoration: none; }
+.site-menu, .site-contacts, .sidebar-menu { display: flex; gap: 1rem; }
+.site-menu a, .site-contacts a, .sidebar-menu a { text-decoration: none; }
 .site-menu a[aria-current] { color: var(--text); font-weight: 600; }
 #postamble {
   display: flex;
@@ -51,23 +51,47 @@ a { color: var(--link); }
 }
 #postamble p { margin: 0; }
 
-/* Sidebar (see blog-tags-sidebar in blog-tags.el).  Below the page
-   content on narrow screens, a second column on wide screens. */
+/* Sidebar (see blog-add-sidebar in publish.el): a copy of the table of
+   contents, the links to the post lists, and the tag cloud, with lines
+   between them.  On narrow screens, only the tag cloud, below the page
+   content (the header and the footer have the post list links).  On wide screens, a left column that stays
+   on the screen and scrolls independently of the page. */
 .sidebar { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-.sidebar-title { margin: 0 0 0.6rem; font-size: 1rem; }
+.sidebar-toc, .sidebar .sidebar-menu { display: none; }
+.sidebar-title, .sidebar-toc h2 { margin: 0 0 0.6rem; font-size: 1rem; }
 .sidebar-title a { color: var(--text); text-decoration: none; }
 .sidebar .tag-cloud { margin: 0; gap: 0.2rem 0.8rem; }
 @media (min-width: 64rem) {
   body:has(> .sidebar) {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 14rem;
+    grid-template-columns: 16rem minmax(0, 1fr);
     column-gap: 3rem;
     align-items: start;
-    max-width: 64rem;
+    max-width: 66rem;
   }
   body:has(> .sidebar) > #preamble, body:has(> .sidebar) > #postamble { grid-column: 1 / -1; }
-  body:has(> .sidebar) > #content { grid-column: 1; grid-row: 2; }
-  .sidebar { grid-column: 2; grid-row: 2; margin-top: 1.5rem; padding-top: 0; border-top: none; }
+  body:has(> .sidebar) > #content { grid-column: 2; grid-row: 2; }
+  body:has(> .sidebar) #content > #table-of-contents { display: none; }
+  .sidebar {
+    grid-column: 1;
+    grid-row: 2;
+    position: sticky;
+    top: 0;
+    max-height: 100vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-sizing: border-box;
+    margin-top: 0;
+    padding: 1.5rem 0.5rem 1.5rem 0;
+    border-top: none;
+  }
+  .sidebar > :not(:first-child) { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .sidebar .sidebar-menu { display: flex; }
+  .sidebar-toc { display: block; font-size: 0.9rem; line-height: 1.45; }
+  .sidebar-toc ul { margin: 0; padding-left: 1rem; }
+  .sidebar-toc > div > ul { padding-left: 0; list-style: none; }
+  .sidebar-toc li { margin: 0.25rem 0; }
+  .sidebar-toc a { text-decoration: none; }
 }
 
 h2,h3,h4,h5,h6 {
