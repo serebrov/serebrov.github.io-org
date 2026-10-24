@@ -1,7 +1,7 @@
 # Build and preview the blog. See README.org.
 
 EMACS ?= emacs
-PORT ?= 8000
+PORT ?= 8008
 PUBLISH = $(EMACS) --batch -Q -l publish.el
 
 .PHONY: build rebuild serve clean
