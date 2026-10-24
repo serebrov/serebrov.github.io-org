@@ -280,10 +280,24 @@ without TAGS, the projects only give the post files."
       ("blog" :components ("blog-posts" "blog-archive" "blog-index" "blog-tags"
                            "blog-media" "blog-files" "blog-static")))))
 
+(defconst blog-build-stamp ".cache/build-stamp"
+  "File that the build touches after it publishes, relative to `blog-root'.")
+
+(defun blog-templates-changed-p ()
+  "Return non-nil if a file that all pages use is newer than the last build.
+These files are layout/*.html, publish.el, and blog-tags.el.  Without
+a build stamp, the value is t."
+  (let ((stamp (blog-path blog-build-stamp)))
+    (seq-some (lambda (file) (file-newer-than-file-p file stamp))
+              (append (directory-files (blog-path "layout") t "\\.html\\'")
+                      (mapcar #'blog-path '("publish.el" "blog-tags.el"))))))
+
 (defun blog-publish (&optional force)
-  "Publish the blog to public/.  With FORCE, export all files again."
+  "Publish the blog to public/.  With FORCE, export all files again.
+All files are also exported again when `blog-templates-changed-p'."
   (interactive "P")
-  (let* ((org-publish-timestamp-directory (blog-path ".cache/"))
+  (let* ((force (or force (blog-templates-changed-p)))
+         (org-publish-timestamp-directory (blog-path ".cache/"))
          (tags (blog-tags-collect (blog-post-files (blog-projects))))
          (org-publish-project-alist (blog-projects tags))
          (org-html-htmlize-output-type 'css)
@@ -295,7 +309,8 @@ without TAGS, the projects only give the post files."
          (org-export-filter-final-output-functions
           (append '(blog-lazy-images blog-add-sidebar) org-export-filter-final-output-functions))
          (make-backup-files nil))
-    (org-publish "blog" force)))
+    (org-publish "blog" force)
+    (write-region "" nil (blog-path blog-build-stamp) nil 'silent)))
 
 (provide 'publish)
 ;;; publish.el ends here

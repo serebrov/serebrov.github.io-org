@@ -34,7 +34,8 @@ In Emacs:
 
 =make build= exports only updated org files.
 
-Changes in =layout/= or =publish.el=, require =make rebuild= to update all pages.
+When a file in =layout/=, =publish.el=, or =blog-tags.el= is newer than the last build, =make build= exports all pages again.
+The build keeps the time of the last build in =.cache/build-stamp=.
 
 To convert multiple files from markdown to org:
 
