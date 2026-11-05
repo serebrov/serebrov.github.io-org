@@ -1,5 +1,7 @@
 #+TITLE: Blog
 
+**ARCHIVED** Merged into https://github.com/serebrov/serebrov.github.io.
+
 The org-mode content for the site (in https://github.com/serebrov/serebrov.github.io).
 
 The live site is updated by the GitHub action that rebuilds live pages:
