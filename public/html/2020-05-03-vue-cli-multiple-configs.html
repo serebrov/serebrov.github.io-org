@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2026-11-04 Wed 21:10 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vue.js CLI: multiple vue.config.js configs</title>
+<meta name="author" content="Boris" />
+<meta name="description" content="How to use multiple vue.config.js configs in a Vue CLI setup." />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="/static/org_css/normalize.css">
+<link rel="stylesheet" href="/static/org_css/htmlize.css">
+<link rel="stylesheet" href="/static/org_css/org.css">
+<link rel="stylesheet" href="/static/blog.css">
+<script defer src="/static/blog.js"></script>
+</head>
+<body>
+<header id="preamble" class="status">
+<a class="site-logo" href="/"><img loading="lazy" src="/html/images/logo.jpg" alt="" width="128" height="128"></a>
+<div class="site-info">
+  <a class="site-title" href="/">vim, git, aws and other three-letter words</a>
+  <p class="site-desc">Software Development Notes</p>
+</div>
+<nav class="site-menu" aria-label="Main menu">
+  <a href="/" data-section="posts" aria-current="true">Posts</a>
+  <a href="/archive.html" data-section="archive">Archive</a>
+  <a href="/tags/" data-section="tags">Tags</a>
+</nav>
+</header>
+<main id="content" class="content">
+<header>
+<h1 class="title">Vue.js CLI: multiple vue.config.js configs</h1>
+</header><p>
+It can be useful to have more than one configuration file, for example, to build several code bundles.
+</p>
+
+<p>
+The config file to use can be set with the <code>VUE_CLI_SERVICE_CONFIG_PATH</code> environment variable:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><code><span class="org-comment-delimiter"># </span><span class="org-comment">Build using vue.config.public.js
+</span><span class="org-variable-name">CONF</span>=<span class="org-sh-quoted-exec">`realpath vue.config.public.js`</span>
+<span class="org-variable-name">VUE_CLI_SERVICE_CONFIG_PATH</span>=$<span class="org-variable-name">CONF</span> npm run build -- --mode production
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Build using vue.config.js
+</span>npm run build -- --mode production
+</code></pre>
+</div>
+
+<p>
+Where <code>npm run build</code> is defined in <code>package.json</code> as <code>vue-cli-service build</code>.
+</p>
+
+<p>
+It is also possible to create several bundles using Vue CLI
+<a href="https://cli.vuejs.org/config/#pages">multi-page mode</a>, but in this case we will have a big common JS and CSS "vendors" package.
+</p>
+
+<p>
+The JS bundle problem is <a href="https://stackoverflow.com/questions/51242317/how-to-split-vue-cli-3-pages-vendor-file/61089300#61089300">solvable with custom chunk settings</a>, but it still leaves a big shared
+CSS package (I didn't find a solution for that).
+</p>
+
+<p>
+The separate <code>vue.config.js</code> file has the advantage of building a completely independent bundle.
+</p>
+
+<p>
+The <a href="https://stackoverflow.com/questions/49454372/how-can-i-create-two-separate-bundles-with-vue-cli-3/50951316#50951316">alternative</a> (check the comments) is to have <a href="https://gist.github.com/educkf/97e76da8d8c2b5dad17846a7d576e205">separate configs and copy them over</a>,
+but this is less convenient than using the environment variable.
+</p>
+
+<p>
+Note: I didn't find any mention of <code>VUE_CLI_SERVICE_CONFIG_PATH</code> in the
+documentation. I found it by looking at the <a href="https://github.com/vuejs/vue-cli/blob/a1041a897e4e9e57924bb6a2bfffde5db1d87ae7/packages/%40vue/cli-service/lib/Service.js#L323">source code</a>.
+</p>
+<p class="post-tags">Tags: <a href="/tags/vue/">vue</a></p>
+</main>
+<div class="sidebar">
+
+<nav class="sidebar-menu" aria-label="Post lists">
+  <a href="/">All Posts</a>
+  <a href="/archive.html">Archive</a>
+</nav>
+<aside class="sidebar-tags" aria-labelledby="sidebar-tags">
+<h2 id="sidebar-tags" class="sidebar-title"><a href="/tags/">Tags</a></h2>
+<ul class="tag-cloud">
+<li><a href="/tags/android/" style="font-size: 1.00em" title="1 post">android</a></li>
+<li><a href="/tags/aws/" style="font-size: 1.82em" title="19 posts">aws</a></li>
+<li><a href="/tags/docker/" style="font-size: 1.00em" title="1 post">docker</a></li>
+<li><a href="/tags/git/" style="font-size: 1.95em" title="22 posts">git</a></li>
+<li><a href="/tags/jquery/" style="font-size: 1.00em" title="1 post">jquery</a></li>
+<li><a href="/tags/js/" style="font-size: 1.45em" title="11 posts">js</a></li>
+<li><a href="/tags/kbd/" style="font-size: 1.14em" title="4 posts">kbd</a></li>
+<li><a href="/tags/mac/" style="font-size: 1.09em" title="3 posts">mac</a></li>
+<li><a href="/tags/mysql/" style="font-size: 1.05em" title="2 posts">mysql</a></li>
+<li><a href="/tags/npm/" style="font-size: 1.00em" title="1 post">npm</a></li>
+<li><a href="/tags/oauth/" style="font-size: 1.00em" title="1 post">oauth</a></li>
+<li><a href="/tags/obs/" style="font-size: 1.00em" title="1 post">obs</a></li>
+<li><a href="/tags/oop/" style="font-size: 1.00em" title="1 post">oop</a></li>
+<li><a href="/tags/org/" style="font-size: 1.00em" title="1 post">org</a></li>
+<li><a href="/tags/php/" style="font-size: 1.14em" title="4 posts">php</a></li>
+<li><a href="/tags/python/" style="font-size: 1.09em" title="3 posts">python</a></li>
+<li><a href="/tags/rds/" style="font-size: 1.00em" title="1 post">rds</a></li>
+<li><a href="/tags/shell/" style="font-size: 1.18em" title="5 posts">shell</a></li>
+<li><a href="/tags/ssh/" style="font-size: 1.00em" title="1 post">ssh</a></li>
+<li><a href="/tags/tts/" style="font-size: 1.00em" title="1 post">tts</a></li>
+<li><a href="/tags/vim/" style="font-size: 1.18em" title="5 posts">vim</a></li>
+<li><a href="/tags/vr/" style="font-size: 1.00em" title="1 post">vr</a></li>
+<li><a href="/tags/vue/" style="font-size: 1.09em" title="3 posts">vue</a></li>
+<li><a href="/tags/web/" style="font-size: 1.36em" title="9 posts">web</a></li>
+<li><a href="/tags/yii/" style="font-size: 1.14em" title="4 posts">yii</a></li>
+</ul>
+</aside>
+</div>
+<footer id="postamble" class="status">
+<nav class="site-contacts" aria-label="Contacts">
+  <a href="/">Posts</a>
+  <a href="/archive.html">Archive</a>
+  <span class="divider">&nbsp;|&nbsp;</span>
+  <a href="https://github.com/serebrov">GitHub</a>
+  <a href="https://stackoverflow.com/users/4612064/borys-serebrov?tab=summary">StackOverflow</a>
+  <a href="https://x.com/serebrov">Twitter</a>
+</nav>
+<p class="copyright">&copy; 2020-2026 Borys Serebrov</p>
+</footer>
+</body>
+</html>

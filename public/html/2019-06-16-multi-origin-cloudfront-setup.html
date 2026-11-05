@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2026-11-04 Wed 21:10 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AWS CloudFront setup with multiple origins</title>
+<meta name="author" content="Boris" />
+<meta name="description" content="Multi-origin CloudFront setup to route requests to different services based on request path." />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="/static/org_css/normalize.css">
+<link rel="stylesheet" href="/static/org_css/htmlize.css">
+<link rel="stylesheet" href="/static/org_css/org.css">
+<link rel="stylesheet" href="/static/blog.css">
+<script defer src="/static/blog.js"></script>
+</head>
+<body>
+<header id="preamble" class="status">
+<a class="site-logo" href="/"><img loading="lazy" src="/html/images/logo.jpg" alt="" width="128" height="128"></a>
+<div class="site-info">
+  <a class="site-title" href="/">vim, git, aws and other three-letter words</a>
+  <p class="site-desc">Software Development Notes</p>
+</div>
+<nav class="site-menu" aria-label="Main menu">
+  <a href="/" data-section="posts" aria-current="true">Posts</a>
+  <a href="/archive.html" data-section="archive">Archive</a>
+  <a href="/tags/" data-section="tags">Tags</a>
+</nav>
+</header>
+<main id="content" class="content">
+<header>
+<h1 class="title">AWS CloudFront setup with multiple origins</h1>
+</header><nav id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#cloudfront-setup-structure">CloudFront Setup Structure</a></li>
+<li><a href="#multi-origin-cloudfront-setup">Multi-Origin CloudFront Setup</a></li>
+<li><a href="#single-page-app-setup">Single-Page App Setup</a></li>
+<li><a href="#wordpress-setup">WordPress Setup</a>
+<ul>
+<li><a href="#elastic-beanstalk-setup-for-php-app">Elastic Beanstalk Setup for PHP App</a></li>
+</ul>
+</li>
+<li><a href="#unbounce-setup">Unbounce Setup</a></li>
+<li><a href="#lambda-code-cloudfrontdefaultindexfororigin">Lambda Code: CloudFrontDefaultIndexForOrigin</a></li>
+<li><a href="#lambda-code-cloudfrontredirecttotrailingslash">Lambda Code: CloudFrontRedirectToTrailingSlash</a></li>
+<li><a href="#lambda-code-cloudfrontsubdirectoryindex">Lambda Code: CloudFrontSubdirectoryIndex</a></li>
+<li><a href="#lambda-code-cloudfrontredirectapp">Lambda Code: CloudFrontRedirectApp</a>
+<ul>
+<li><a href="#another-way-to-redirect-requests-to-the-new-location-with-s3-static-website">Another Way to Redirect Requests to the New Location with S3 Static Website</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+<p>
+AWS CloudFront allows having multiple origins for a distribution, and,
+along with Lambda@Edge functions, this makes it possible to use
+CloudFront as an entry point to route requests to different services
+based on the request path.
+</p>
+
+<p>
+For example:
+</p>
+
+<ul class="org-ul">
+<li>www.myapp.com -&gt; unbounce.com (landing pages)</li>
+<li>www.myapp.com/app -&gt; single-page app hosted on S3</li>
+<li>www.myapp.com/blog -&gt; WordPress blog</li>
+</ul>
+<div id="outline-container-cloudfront-setup-structure" class="outline-2">
+<h2 id="cloudfront-setup-structure">CloudFront Setup Structure</h2>
+<div class="outline-text-2" id="text-cloudfront-setup-structure">
+<p>
+A CloudFront <a href="https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-working-with.html">distribution</a> is an entry point to which we assign a root domain name (www.myapp.com).
+</p>
+
+<p>
+The distribution can have one or more origins (these are our services: landing page, S3 app, WordPress, etc.).
+</p>
+
+<p>
+And each origin has behaviors: rules defining how CloudFront will work
+for the specific request path:
+</p>
+<ul class="org-ul">
+<li>Allowed protocols (HTTP, HTTPS) and HTTP methods</li>
+<li>Caching settings</li>
+<li>Lambda@Edge functions to add custom logic to the request or response processing</li>
+</ul>
+
+<p>
+For example, we can have a distribution for a single-page app hosted on
+S3 (the origin is an S3 bucket) with one behavior defining caching rules.
+</p>
+
+<p>
+Or we can have a distribution for a <a href="https://aws.amazon.com/blogs/startups/how-to-accelerate-your-wordpress-site-with-amazon-cloudfront/">WordPress site</a>
+with one origin (WordPress server) and several behaviors defining
+caching rules for static and dynamic content.
+</p>
+
+<p>
+In a simple case, that is enough: if we have multiple services
+(a single-page app and a WordPress blog), we can create separate
+distributions for them and use different subdomains to route the
+requests (<code>app.myapp.com</code> and <code>blog.myapp.com</code>).
+</p>
+
+<p>
+But it is also possible to merge different services under the same
+distribution and the same domain name (<code>myapp.com/app</code> and
+<code>myapp.com/blog</code>) - this is the <code>multi-origin setup</code> described below.
+</p>
+</div>
+</div>
+<div id="outline-container-multi-origin-cloudfront-setup" class="outline-2">
+<h2 id="multi-origin-cloudfront-setup">Multi-Origin CloudFront Setup</h2>
+<div class="outline-text-2" id="text-multi-origin-cloudfront-setup">
+<p>
+If we want to have a single domain name used for all services (frontend
+app, landing pages, WordPress blog, etc.), we can achieve that with
+CloudFront by having one origin for each service and multiple
+behaviors to specify which request paths should be forwarded to these
+origins.
+</p>
+
+<p>
+The example setup for this post includes the following origins:
+</p>
+
+<ul class="org-ul">
+<li><code>www.myapp.com</code> -&gt; unbounce.com, landing pages</li>
+<li><code>www.myapp.com/app</code> -&gt; single-page application, S3 bucket</li>
+<li><code>www.myapp.com/blog</code> -&gt; WordPress running on Elastic Beanstalk (origin points to Elastic Load Balancer)</li>
+</ul>
+
+<p>
+And behaviors for our distribution will route requests to different
+origins based on the request path:
+</p>
+<ul class="org-ul">
+<li><code>app*</code> -&gt; S3 origin, <code>S3-app.myapp.com</code></li>
+<li><code>blog/wp-login.php</code> -&gt; WordPress origin, <code>wordpress-elb</code>, no caching</li>
+<li><code>blog/wp-admin/*</code> -&gt; WordPress origin, <code>wordpress-elb</code>, no caching</li>
+<li><code>blog/wp-content/uploads/*</code>, origin: <code>S3-wordpress.myapp.com</code></li>
+<li><code>blog*</code>, origin: <code>wordpress-elb</code></li>
+<li><code>/</code> -&gt; unbounce origin, <code>unbounce-www.myapp.com</code></li>
+</ul>
+
+<p>
+The <code>app*</code> behavior serves the single-page application from the S3
+origin. The app is accessible from the sub-path (<code>myapp.com/app</code>) and
+should be placed in a subfolder on S3 (the sub-path is preserved in
+the request to the origin).
+</p>
+
+<p>
+In the case of a single-page web application, there is a single entry
+point, usually <code>index.html</code>, that is loaded on the first request, and further
+navigation across app pages is handled by the application code in the browser.
+</p>
+
+<p>
+To implement this logic in CloudFront, we use Lambda@Edge functions
+attached to the origin request and response events:
+</p>
+
+<ul class="org-ul">
+<li>Origin Request: CloudFrontSubdirectoryIndex - handles root requests
+(<code>www.myapp.com/app</code>) and forwards them to <code>index.html</code></li>
+<li>Origin Response: CloudFrontDefaultIndexForOrigin - catches 404 / 403
+responses (<code>www.myapp.com/app/some-path</code>) and forwards them to
+<code>index.html</code></li>
+</ul>
+
+<p>
+In general, this setup is flexible enough to handle various use cases.
+</p>
+
+<p>
+Advantages of CloudFront for routing are:
+</p>
+
+<ul class="org-ul">
+<li>A distributed solution, which is very fast for end users</li>
+<li>No need for a single entry point component for app services; requests
+are routed by CloudFront</li>
+<li>All services are under the same subdomain, so we avoid additional
+<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS">CORS</a> complexity</li>
+</ul>
+
+<p>
+More details about the setup for specific services and the Lambda function
+code are below.
+</p>
+</div>
+</div>
+<div id="outline-container-single-page-app-setup" class="outline-2">
+<h2 id="single-page-app-setup">Single-Page App Setup</h2>
+<div class="outline-text-2" id="text-single-page-app-setup">
+<p>
+The single-page app setup is quite simple with CloudFront: the app
+source is copied to an S3 bucket and then served via CloudFront (the origin
+is the S3 bucket, with one default behavior).
+</p>
+
+<p>
+Here is an example shell script to deploy the SPA to S3
+(which also sends a Slack notification about the deployment):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><code><span class="org-comment-delimiter">#</span><span class="org-comment">!/usr/bin/</span><span class="org-keyword">env</span><span class="org-comment"> bash
+</span>
+<span class="org-variable-name">SLACK_HOOK</span>=https://hooks.slack.com/services/XXX/YYY/aaabbbccc
+<span class="org-variable-name">GIT_BRANCH</span>=$(git rev-parse --abbrev-ref HEAD)
+
+<span class="org-keyword">if</span> [[ $<span class="org-variable-name">APP_ENV</span> == <span class="org-string">"develop"</span> ]]; <span class="org-keyword">then</span>
+    <span class="org-variable-name">CLOUDFRONT_DISTRIBUTION</span>=EEE88888888888
+    <span class="org-variable-name">AWS_BUCKET</span>=dev.myapp.com
+<span class="org-keyword">elif</span> [[ $<span class="org-variable-name">APP_ENV</span> == <span class="org-string">"production"</span> ]]; <span class="org-keyword">then</span>
+    <span class="org-variable-name">CLOUDFRONT_DISTRIBUTION</span>=EEE9999999999
+    <span class="org-variable-name">AWS_BUCKET</span>=app.myapp.com
+<span class="org-keyword">else</span>
+    <span class="org-builtin">echo</span> <span class="org-string">"Unknown environment ${APP_ENV}"</span>
+    <span class="org-keyword">exit</span> 1
+<span class="org-keyword">fi</span>
+
+<span class="org-builtin">echo</span> <span class="org-string">"Deploying ${GIT_BRANCH} to ${AWS_BUCKET} with options ${AWS_CLI_OPTS}"</span>
+aws s3 sync --delete dist/ s3://${<span class="org-variable-name">AWS_BUCKET</span>}/app/ ${<span class="org-variable-name">AWS_CLI_OPTS</span>}
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Invalidate app on CloudFront
+</span>aws cloudfront create-invalidation --distribution-id ${<span class="org-variable-name">CLOUDFRONT_DISTRIBUTION</span>} --paths /app/* ${<span class="org-variable-name">AWS_CLI_OPTS</span>}
+
+<span class="org-keyword">if</span> [ $<span class="org-variable-name">?</span> -eq 0 ]; <span class="org-keyword">then</span>
+    <span class="org-builtin">echo</span> <span class="org-string">'Deployment: OK'</span>
+    curl -s -X POST $<span class="org-variable-name">SLACK_HOOK</span> <span class="org-sh-escaped-newline">\</span>
+    -H <span class="org-string">"content-type:application/json"</span> <span class="org-sh-escaped-newline">\</span>
+    -d <span class="org-string">'{"text":"[frontend] Branch `'"${GIT_BRANCH}"'` was successfully deployed to `'"${AWS_BUCKET}"'` bucket."}'</span>
+<span class="org-keyword">else</span>
+    <span class="org-builtin">echo</span> <span class="org-string">'Deployment: FAILED'</span>
+    <span class="org-keyword">exit</span> $<span class="org-variable-name">?</span>
+    curl -s -X POST $<span class="org-variable-name">SLACK_HOOK</span> <span class="org-sh-escaped-newline">\</span>
+    -H <span class="org-string">"content-type:application/json"</span> <span class="org-sh-escaped-newline">\</span>
+    -d <span class="org-string">'{"text":"[frontend] Branch `'"${GIT_BRANCH}"'` deployment to `'"${AWS_BUCKET}"'` bucket FAILED."}'</span>
+<span class="org-keyword">fi</span>
+</code></pre>
+</div>
+
+<p>
+I used a similar setup for Angular and Vue applications; it should work
+well for other frameworks too.
+</p>
+
+<p>
+In a single-origin setup (no other services, and the distribution is only
+used for the single-page app), it is also useful to:
+</p>
+
+<ul class="org-ul">
+<li>Set the default object for the distribution to <code>index.html</code></li>
+<li>Add 404 and 403 error handlers for the distribution and reply with 200 OK and
+<code>index.html</code> (so all requests are sent to the single-page app
+even if there are no real files on S3)</li>
+</ul>
+
+<p>
+Unfortunately, these settings are at the distribution level, but in a
+multi-origin setup, we would need them for behaviors representing
+specific request paths. For example, we need to redirect requests to
+<code>index.html</code> for <code>www.myapp.com/app</code>, but not for <code>www.myapp.com/blog</code>.
+</p>
+
+<p>
+In a multi-origin setup, this logic is handled by Lambda@Edge functions:
+<a href="#lambda-code-cloudfrontsubdirectoryindex">CloudFrontSubdirectoryIndex</a> and <a href="#lambda-code-cloudfrontdefaultindexfororigin">CloudFrontDefaultIndexForOrigin</a>.
+</p>
+</div>
+</div>
+<div id="outline-container-wordpress-setup" class="outline-2">
+<h2 id="wordpress-setup">WordPress Setup</h2>
+<div class="outline-text-2" id="text-wordpress-setup">
+<p>
+WordPress can be installed on a standalone EC2 instance, hosted
+externally or launched <a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/php-hawordpress-tutorial.html">using Elastic Beanstalk</a>; in any case, the CloudFront setup will be similar:
+</p>
+
+<ul class="org-ul">
+<li>One origin that points to the WordPress server (<code>wordpress-elb</code> in my
+case, the Elastic Beanstalk load balancer)</li>
+<li>Several behaviors that define caching rules for the static and dynamic
+content:
+<ul class="org-ul">
+<li><code>blog/wp-login.php</code> -&gt; WordPress origin, <code>wordpress-elb</code>, no caching</li>
+<li><code>blog/wp-admin/*</code> -&gt; WordPress origin, <code>wordpress-elb</code>, no caching</li>
+<li><code>blog/wp-content/uploads/*</code>, origin: <code>S3-wordpress.myapp.com</code></li>
+<li><code>blog*</code>, origin: <code>wordpress-elb</code></li>
+</ul></li>
+</ul>
+
+<p>
+Here we forward requests to <code>/wp-login.php</code> and <code>wp-admin/*</code> without caching.
+</p>
+
+<p>
+WordPress media files are hosted on S3 (for example, using the <a href="https://wordpress.org/plugins/amazon-s3-and-cloudfront/">WP Offload Media</a> plugin)
+and other requests also go to the load balancer, but with caching enabled.
+</p>
+
+<p>
+For the <code>blog*</code> behaviors, we also have the <a href="#lambda-code-cloudfrontredirecttotrailingslash">CloudFrontRedirectToTrailingSlash</a>
+Lambda function attached to the "Viewer Request" event that forwards
+<code>www.myapp.com/blog</code> requests to <code>www.myapp.com/blog/</code>.
+</p>
+
+<p>
+Here are some useful resources describing the WordPress setup options on AWS:
+</p>
+
+<ul class="org-ul">
+<li><a href="https://d0.awsstatic.com/whitepapers/deploying-wordpress-with-aws-elastic-beanstalk.pdf">Deploying WordPress with AWS Elastic Beanstalk (PDF)</a></li>
+<li><a href="https://aws.amazon.com/blogs/startups/how-to-accelerate-your-wordpress-site-with-amazon-cloudfront/">How to accelerate your WordPress site with Amazon CloudFront</a></li>
+<li><a href="https://d0.awsstatic.com/whitepapers/wordpress-best-practices-on-aws.pdf">WordPress best practices on AWS (PDF)</a></li>
+<li><a href="https://github.com/aws-samples/aws-refarch-wordpress">Hosting WordPress on AWS</a></li>
+</ul>
+</div>
+<div id="outline-container-elastic-beanstalk-setup-for-php-app" class="outline-3">
+<h3 id="elastic-beanstalk-setup-for-php-app">Elastic Beanstalk Setup for PHP App</h3>
+<div class="outline-text-3" id="text-elastic-beanstalk-setup-for-php-app">
+<p>
+The whole WordPress setup (along with the WordPress code and plugins) is
+added to the git repository and deployed to Elastic Beanstalk as a
+<a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_PHP_eb.html">PHP application</a>.
+</p>
+
+<p>
+The (standard) Elastic Beanstalk setup for PHP is a set of
+configurations and scripts that automatically deploys and runs the
+application on the EC2 instance:
+</p>
+
+<ul class="org-ul">
+<li>The app is deployed to <code>/var/www/html</code> and handled by Apache</li>
+<li>Apache logs are under <code>/var/log/httpd</code> (logs are also sent to
+CloudWatch)</li>
+<li>The system log is <code>/var/log/messages</code></li>
+</ul>
+
+<p>
+Note: along with the application code, it is useful to also deploy the <code>.git</code>
+folder (don't add it to <code>.ebignore</code>), so <code>git status</code> on the server
+inside <code>/var/www/html</code> will show if there are any modifications done
+directly on the server by WordPress or plugins.
+</p>
+
+<p>
+WordPress plugins often modify local files, so it is useful to check the
+behavior periodically (especially after installing some plugins or doing
+configuration changes) to see if there is something that needs to be
+saved to the repository. It is also useful to check for local
+changes to the files after changing WordPress settings (if there are
+changes, we need to copy them back to the local machine, commit to git and
+redeploy).
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-unbounce-setup" class="outline-2">
+<h2 id="unbounce-setup">Unbounce Setup</h2>
+<div class="outline-text-2" id="text-unbounce-setup">
+<p>
+Unbounce.com is a service for landing pages, and there are two (official)
+ways to use it: point a CNAME (such as <code>www.myapp.com</code>) to unbounce.com, or
+use a WordPress plugin - in this case, the "Host" header should contain
+the domain name (<code>www.myapp.com</code>).
+</p>
+
+<p>
+We can use the latter to make Unbounce work with CloudFront: we set up
+the <code>www.myapp.com</code> domain to point to CloudFront and we configure
+CloudFront to forward the <code>Host</code> header to Unbounce.
+</p>
+
+<p>
+This is how Unbounce and CloudFront can be configured to work together:
+</p>
+
+<ol class="org-ol">
+<li>Add the <code>www.myapp.com</code> domain on unbounce.com</li>
+<li>Get the Unbounce URL, like <code>ab44444888888.unbouncepages.com</code></li>
+<li>In DNS settings, point the <code>www</code> CNAME to
+<code>ab44444888888.unbouncepages.com</code></li>
+<li>Wait until Unbounce shows "Working and Secure" for the domain</li>
+<li>Edit (or create) the CloudFront distribution and set the alternate domain name to
+<code>www.myapp.com</code> (or see <a href="https://serverfault.com/questions/888714/send-custom-host-header-with-cloudfront/888776#888776">this answer</a>;
+there is also a method based on a Lambda function)</li>
+<li>Create the CloudFront origin and point it to the Unbounce URL
+(<code>ab44444888888.unbouncepages.com</code>)</li>
+<li>Create the default behavior <code>(*)</code> for the origin above and disable caching
+(set "Cache Based on Selected Request Headers" to "All")</li>
+<li>Change the DNS settings and point the <code>www</code> subdomain to the CloudFront distribution
+(<code>d33xxx8888xxxx.cloudfront.net</code>) - replace the Unbounce domain with
+the CloudFront domain</li>
+<li>Wait for the DNS changes to propagate; now the <code>www.myapp.com</code> root URL
+should point to CloudFront</li>
+</ol>
+
+<p>
+So we first point the CNAME to unbounce.com, wait until Unbounce thinks that
+everything is good, and then reconfigure the CNAME to point to CloudFront
+(and CloudFront forwards the custom domain name via the Host header).
+</p>
+</div>
+</div>
+<div id="outline-container-lambda-code-cloudfrontdefaultindexfororigin" class="outline-2">
+<h2 id="lambda-code-cloudfrontdefaultindexfororigin">Lambda Code: CloudFrontDefaultIndexForOrigin</h2>
+<div class="outline-text-2" id="text-lambda-code-cloudfrontdefaultindexfororigin">
+<p>
+This is the function to handle index documents in subfolders.
+</p>
+
+<p>
+For a multi-origin setup, we use a CloudFront distribution to route the
+requests to multiple origins depending on the request path.
+</p>
+
+<p>
+In this case, the application on S3 also needs to be in a subfolder
+(<code>my-bucket/app</code>). And it means that we lose the ability to redirect
+failing requests to <code>index.html</code> (this only works in the root folder),
+so if we go to the URL <code>www.myapp.com/app/login</code>, it will end up with a
+404 error.
+</p>
+
+<p>
+In a single-origin CloudFront distribution, this issue can be solved by
+setting the default object for the distribution to <code>index.html</code> and also
+adding "Error pages" for 404 and 403 that would also point to
+<code>index.html</code>.
+</p>
+
+<p>
+For a "multi-origin" setup, a solution is to add a Lambda@Edge function for
+the "Origin Response" event and replace 403 / 404 errors with
+<code>index.html</code> content.
+</p>
+
+<p>
+The Lambda function code (<a href="https://andrewlock.net/using-lambda-at-edge-to-handle-angular-client-side-routing-with-s3-and-cloudfront/">source</a>) looks like this:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><code><span class="org-string">'use strict'</span>;
+
+<span class="org-comment-delimiter">// </span><span class="org-comment">Source - https://andrewlock.net/using-lambda-at-edge-to-handle-angular-client-side-routing-with-s3-and-cloudfront/
+</span>
+<span class="org-keyword">const</span> <span class="org-variable-name">http</span> = require(<span class="org-string">'https'</span>);
+
+<span class="org-keyword">const</span> <span class="org-variable-name">indexPage</span> = <span class="org-string">'index.html'</span>;
+
+exports.handler = <span class="org-keyword">async</span> (event, context, callback) =&gt; {
+    <span class="org-keyword">const</span> <span class="org-variable-name">cf</span> = event.Records[0].cf;
+    <span class="org-keyword">const</span> <span class="org-variable-name">request</span> = cf.request;
+    <span class="org-keyword">const</span> <span class="org-variable-name">response</span> = cf.response;
+    <span class="org-keyword">const</span> <span class="org-variable-name">statusCode</span> = response.status;
+
+    <span class="org-comment-delimiter">// </span><span class="org-comment">Only replace 403 and 404 requests typically received
+</span>    <span class="org-comment-delimiter">// </span><span class="org-comment">when loading a page for a SPA that uses client-side routing
+</span>    <span class="org-keyword">const</span> <span class="org-variable-name">doReplace</span> = request.method === <span class="org-string">'GET'</span>
+                    &amp;&amp; (statusCode == <span class="org-string">'403'</span> || statusCode == <span class="org-string">'404'</span>);
+
+    <span class="org-keyword">const</span> <span class="org-variable-name">result</span> = doReplace
+        ? <span class="org-keyword">await</span> generateResponseAndLog(cf, request, indexPage, response)
+        : response;
+
+    callback(<span class="org-constant">null</span>, result);
+};
+
+<span class="org-keyword">async</span> <span class="org-keyword">function</span> generateResponseAndLog(<span class="org-variable-name">cf</span>, <span class="org-variable-name">request</span>, <span class="org-variable-name">indexPage</span>, <span class="org-variable-name">originalResponse</span>) {
+
+    <span class="org-keyword">const</span> <span class="org-variable-name">domain</span> = cf.config.distributionDomainName;
+    <span class="org-keyword">const</span> <span class="org-variable-name">appPath</span> = getAppPath(request.uri);
+
+    <span class="org-keyword">const</span> <span class="org-variable-name">indexPath</span> = <span class="org-string">`/${appPath}/${indexPage}`</span>;
+
+    <span class="org-keyword">const</span> <span class="org-variable-name">response</span> = <span class="org-keyword">await</span> generateResponse(domain, indexPath, request, originalResponse);
+    <span class="org-comment-delimiter">// </span><span class="org-comment">console.log('response: ' + JSON.stringify(response));
+</span>    <span class="org-keyword">return</span> response;
+}
+
+<span class="org-keyword">async</span> <span class="org-keyword">function</span> generateResponse(<span class="org-variable-name">domain</span>, <span class="org-variable-name">path</span>, <span class="org-variable-name">request</span>, <span class="org-variable-name">originalResponse</span>) {
+    <span class="org-keyword">try</span> {
+        <span class="org-comment-delimiter">// </span><span class="org-comment">Load HTML index from the CloudFront cache
+</span>        <span class="org-keyword">const</span> <span class="org-variable-name">s3Response</span> = <span class="org-keyword">await</span> httpGet({ hostname: domain, path: path });
+        <span class="org-keyword">const</span> <span class="org-variable-name">headers</span> = s3Response.headers || {
+            <span class="org-string">'content-type'</span>: [{ value: <span class="org-string">'text/html;charset=UTF-8'</span> }]
+        };
+
+        <span class="org-keyword">const</span> <span class="org-variable-name">responseHeaders</span> = wrapAndFilterHeaders(headers, originalResponse.headers || {})
+
+        <span class="org-comment-delimiter">// </span><span class="org-comment">Debug headers to see the original requested URL vs the index file request.
+</span>        <span class="org-comment-delimiter">// </span><span class="org-comment">responseHeaders['x-lambda-request-uri'] = [{value: request.uri}]
+</span>        <span class="org-comment-delimiter">// </span><span class="org-comment">responseHeaders['x-lambda-hostname'] = [{value: domain}]
+</span>        <span class="org-comment-delimiter">// </span><span class="org-comment">responseHeaders['x-lambda-path'] = [{value: path}]
+</span>        <span class="org-comment-delimiter">// </span><span class="org-comment">responseHeaders['x-lambda-response-status'] = [{value: String(s3Response.status)}]
+</span>
+        <span class="org-keyword">return</span> {
+            status: <span class="org-string">'200'</span>,
+            headers: responseHeaders,
+            body: s3Response.body
+        };
+    } <span class="org-keyword">catch</span> (error) {
+        console.log(error)
+        <span class="org-keyword">return</span> {
+            status: <span class="org-string">'500'</span>,
+            headers: {<span class="org-string">'content-type'</span>: [{ value: <span class="org-string">'text/plain'</span> }]},
+            body: <span class="org-string">'An error occurred loading the page'</span>
+        };
+    }
+}
+
+<span class="org-keyword">function</span> <span class="org-function-name">httpGet</span>(<span class="org-variable-name">params</span>) {
+    <span class="org-keyword">return</span> <span class="org-keyword">new</span> <span class="org-type">Promise</span>((resolve, reject) =&gt; {
+        http.get(params, (resp) =&gt; {
+            console.log(<span class="org-string">`Fetching ${params.hostname}${params.path}, status code : ${resp.statusCode}`</span>);
+            <span class="org-keyword">let</span> <span class="org-variable-name">result</span> = {
+                status: resp.statusCode,
+                headers: resp.headers,
+                body: <span class="org-string">''</span>
+            };
+            resp.on(<span class="org-string">'data'</span>, (chunk) =&gt; { result.body += chunk; });
+            resp.on(<span class="org-string">'end'</span>, () =&gt; { resolve(result); });
+        }).on(<span class="org-string">'error'</span>, (err) =&gt; {
+            console.log(<span class="org-string">`Couldn't fetch ${params.hostname}${params.path} : ${err.message}`</span>);
+            reject(err, <span class="org-constant">null</span>);
+        });
+    });
+}
+
+<span class="org-comment-delimiter">// </span><span class="org-comment">Get the app path segment e.g. candidates.app, employers.client etc
+</span><span class="org-keyword">function</span> <span class="org-function-name">getAppPath</span>(<span class="org-variable-name">path</span>) {
+    <span class="org-keyword">if</span> (!path) {
+        <span class="org-keyword">return</span> <span class="org-string">''</span>;
+    }
+
+    <span class="org-keyword">if</span> (path[0] === <span class="org-string">'/'</span>) {
+        path = path.slice(1);
+    }
+
+    <span class="org-keyword">const</span> <span class="org-variable-name">segments</span> = path.split(<span class="org-string">'/'</span>);
+
+    <span class="org-comment-delimiter">// </span><span class="org-comment">will always have at least one segment (may be empty)
+</span>    <span class="org-keyword">return</span> segments[0];
+}
+
+<span class="org-comment-delimiter">// </span><span class="org-comment">Cloudfront requires header values to be wrapped in an array
+</span><span class="org-keyword">function</span> <span class="org-function-name">wrapAndFilterHeaders</span>(<span class="org-variable-name">headers</span>, <span class="org-variable-name">originalHeaders</span>) {
+    <span class="org-keyword">const</span> <span class="org-variable-name">allowedHeaders</span> = [
+        <span class="org-string">'content-type'</span>,
+        <span class="org-string">'content-length'</span>,
+        <span class="org-string">'last-modified'</span>,
+        <span class="org-string">'date'</span>,
+        <span class="org-string">'etag'</span>
+    ];
+
+    <span class="org-keyword">const</span> <span class="org-variable-name">responseHeaders</span> = originalHeaders;
+
+    <span class="org-keyword">if</span> (!headers) {
+        <span class="org-keyword">return</span> responseHeaders;
+    }
+
+    <span class="org-keyword">for</span> (<span class="org-keyword">var</span> <span class="org-variable-name">propName</span> <span class="org-keyword">in</span> headers) {
+        <span class="org-comment-delimiter">// </span><span class="org-comment">only include allowed headers
+</span>        <span class="org-keyword">if</span> (allowedHeaders.includes(propName.toLowerCase())) {
+            <span class="org-keyword">var</span> <span class="org-variable-name">header</span> = headers[propName];
+            <span class="org-keyword">if</span> (Array.isArray(header)){
+                <span class="org-comment-delimiter">// </span><span class="org-comment">assume already 'wrapped' format
+</span>                responseHeaders[propName] = header;
+            } <span class="org-keyword">else</span> {
+                <span class="org-comment-delimiter">// </span><span class="org-comment">fix to required format
+</span>                responseHeaders[propName] = [{ value: header }];
+            }
+        }
+    }
+    <span class="org-keyword">return</span> responseHeaders;
+}
+</code></pre>
+</div>
+</div>
+</div>
+<div id="outline-container-lambda-code-cloudfrontredirecttotrailingslash" class="outline-2">
+<h2 id="lambda-code-cloudfrontredirecttotrailingslash">Lambda Code: CloudFrontRedirectToTrailingSlash</h2>
+<div class="outline-text-2" id="text-lambda-code-cloudfrontredirecttotrailingslash">
+<p>
+This function is used for the WordPress setup to redirect
+<code>www.myapp.com/blog</code> requests to <code>www.myapp.com/blog/</code> (it adds a trailing
+slash, which triggers index.php loading from the folder).
+</p>
+
+<p>
+The Lambda function code (<a href="https://www.barelyknown.com/posts/add-trailing-slash-to-cloudfront-request">source</a>):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><code><span class="org-keyword">const</span> <span class="org-variable-name">path</span> = require(<span class="org-string">'path'</span>);
+exports.handler = <span class="org-keyword">async</span> (event) =&gt; {
+  <span class="org-keyword">const</span> { request } = event.Records[0].cf;
+  <span class="org-keyword">const</span> { uri } = request;
+  <span class="org-keyword">const</span> <span class="org-variable-name">extension</span> = path.extname(uri);
+  <span class="org-keyword">if</span> (extension &amp;&amp; extension.length &gt; 0) {
+    <span class="org-keyword">return</span> request;
+  }
+  <span class="org-keyword">const</span> <span class="org-variable-name">last_character</span> = uri.slice(-1);
+  <span class="org-keyword">if</span> (last_character === <span class="org-string">"/"</span>) {
+    <span class="org-keyword">return</span> request;
+  }
+  <span class="org-keyword">const</span> <span class="org-variable-name">newUri</span> = <span class="org-string">`${uri}/`</span>;
+  console.log(<span class="org-string">`Rewriting ${uri} to ${newUri}...`</span>);
+  request.uri = newUri;
+  <span class="org-keyword">return</span> request;
+};
+</code></pre>
+</div>
+
+<p>
+The function is attached to the "Viewer Request" event.
+</p>
+</div>
+</div>
+<div id="outline-container-lambda-code-cloudfrontsubdirectoryindex" class="outline-2">
+<h2 id="lambda-code-cloudfrontsubdirectoryindex">Lambda Code: CloudFrontSubdirectoryIndex</h2>
+<div class="outline-text-2" id="text-lambda-code-cloudfrontsubdirectoryindex">
+<p>
+This function is attached to the "Origin Request" event, and it handles
+requests like <code>www.myapp.com/app/</code> (with a trailing slash at the end).
+</p>
+
+<p>
+By default, this request returns <code>200 OK</code> with the <code>application/x-directory</code>
+content type and an empty body.
+</p>
+
+<p>
+The Lambda function adds <code>index.html</code> to these requests (so the request
+becomes <code>www.myapp.com/app/index.html</code>).
+</p>
+
+<p>
+The Lambda function code (<a href="https://aws.amazon.com/blogs/compute/implementing-default-directory-indexes-in-amazon-s3-backed-amazon-cloudfront-origins-using-lambdaedge/">source</a>):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><code><span class="org-string">'use strict'</span>;
+
+<span class="org-comment-delimiter">// </span><span class="org-comment">Source: https://aws.amazon.com/blogs/compute/implementing-default-directory-indexes-in-amazon-s3-backed-amazon-cloudfront-origins-using-lambdaedge/
+</span><span class="org-comment-delimiter">//</span><span class="org-comment">
+</span><span class="org-comment-delimiter">// </span><span class="org-comment">Handles requests like www.myapp.com/app/ (with trailing slash) and adds index.html to them
+</span><span class="org-comment-delimiter">// </span><span class="org-comment">By default this request returns 200 OK with application/x-directory content type
+</span>exports.handler = (event, context, callback) =&gt; {
+    <span class="org-comment-delimiter">// </span><span class="org-comment">Extract the request from the CloudFront event that is sent to Lambda@Edge
+</span>    <span class="org-keyword">var</span> <span class="org-variable-name">request</span> = event.Records[0].cf.request;
+
+    <span class="org-comment-delimiter">// </span><span class="org-comment">Extract the URI from the request
+</span>    <span class="org-keyword">var</span> <span class="org-variable-name">olduri</span> = request.uri;
+
+    <span class="org-comment-delimiter">// </span><span class="org-comment">Match any '/' that occurs at the end of a URI. Replace it with a default index
+</span>    <span class="org-keyword">var</span> <span class="org-variable-name">newuri</span> = olduri.replace(<span class="org-string">/\/$/</span>, <span class="org-string">'\/index.html'</span>);
+
+    <span class="org-comment-delimiter">// </span><span class="org-comment">Log the URI as received by CloudFront and the new URI to be used to fetch from origin
+</span>    console.log(<span class="org-string">"Old URI: "</span> + olduri);
+    console.log(<span class="org-string">"New URI: "</span> + newuri);
+
+    <span class="org-comment-delimiter">// </span><span class="org-comment">Replace the received URI with the URI that includes the index page
+</span>    request.uri = newuri;
+
+    <span class="org-comment-delimiter">// </span><span class="org-comment">Return to CloudFront
+</span>    <span class="org-keyword">return</span> callback(<span class="org-constant">null</span>, request);
+};
+</code></pre>
+</div>
+</div>
+</div>
+<div id="outline-container-lambda-code-cloudfrontredirectapp" class="outline-2">
+<h2 id="lambda-code-cloudfrontredirectapp">Lambda Code: CloudFrontRedirectApp</h2>
+<div class="outline-text-2" id="text-lambda-code-cloudfrontredirectapp">
+<p>
+This function can be useful to transfer the application from
+a single-origin setup to a multi-origin one. In this case, the <code>app.myapp.com</code>
+requests should be forwarded to <code>www.myapp.com/app</code>.
+</p>
+
+<p>
+Note: in the next section there is another solution for the same
+problem, based on the S3 static website hosting feature.
+</p>
+
+<p>
+With a Lambda function, the redirect can be done by attaching a function
+to the old CloudFront distribution behavior, the "Viewer Request" event:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><code><span class="org-keyword">const</span> <span class="org-variable-name">path</span> = require(<span class="org-string">'path'</span>);
+exports.handler = <span class="org-keyword">async</span> (event) =&gt; {
+  <span class="org-keyword">const</span> { request } = event.Records[0].cf;
+  <span class="org-keyword">const</span> { uri } = request;
+  <span class="org-keyword">const</span> <span class="org-variable-name">newUri</span> = <span class="org-string">`https://www.myapp.com/app${uri}`</span>;
+  console.log(<span class="org-string">`Rewriting ${uri} to ${newUri}...`</span>);
+
+  <span class="org-keyword">let</span> <span class="org-variable-name">responseHeaders</span> = {
+      location: [{
+          key: <span class="org-string">'Location'</span>,
+          value: newUri,
+      }],
+  }
+  <span class="org-comment-delimiter">// </span><span class="org-comment">Debug headers to see the original requested URL vs the index file request.
+</span>  responseHeaders[<span class="org-string">'x-lambda-request-uri'</span>] = [{value: request.uri}]
+  responseHeaders[<span class="org-string">'x-lambda-redirect-url'</span>] = [{value: newUri}]
+
+  <span class="org-comment-delimiter">/*</span><span class="org-comment">
+   * Generate HTTP redirect response with 302 status code and Location header.
+</span><span class="org-comment-delimiter">   */</span>
+  <span class="org-keyword">const</span> <span class="org-variable-name">response</span> = {
+      status: <span class="org-string">'302'</span>,
+      statusDescription: <span class="org-string">'Found'</span>,
+      headers: responseHeaders,
+  };
+  <span class="org-keyword">return</span> response;
+};
+</code></pre>
+</div>
+</div>
+<div id="outline-container-another-way-to-redirect-requests-to-the-new-location-with-s3-static-website" class="outline-3">
+<h3 id="another-way-to-redirect-requests-to-the-new-location-with-s3-static-website">Another Way to Redirect Requests to the New Location with S3 Static Website</h3>
+<div class="outline-text-3" id="text-another-way-to-redirect-requests-to-the-new-location-with-s3-static-website">
+<p>
+This is another solution to the problem described above: redirect
+requests from the old location (such as from <code>app.myapp.com</code> to the new
+<code>www.myapp.com/app</code>).
+</p>
+
+<p>
+This method is described in <a href="https://web.archive.org/web/20190622021740/https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/tutorial-redirecting-dns-queries.html">AWS docs</a>.
+</p>
+
+<p>
+The initial setup is this:
+</p>
+
+<ul class="org-ul">
+<li><code>app.myapp.com</code> points to an S3 bucket (root), and there is a CloudFront
+distribution using it as the origin</li>
+<li><code>www.myapp.com/app</code> points to an S3 bucket (<code>/app</code> subfolder), and there
+is (another) CloudFront distribution using it as the origin</li>
+</ul>
+
+<p>
+The redirect can be configured like this:
+</p>
+
+<ul class="org-ul">
+<li>Create the S3 bucket <code>app.myapp.com-old.app</code> (can be empty)</li>
+<li>Enable static website hosting for this bucket</li>
+<li>Select the "Redirect requests" option</li>
+<li>Set "Target bucket or domain" to <code>www.myapp.com/app</code></li>
+<li>Set "Protocol" to <code>https</code></li>
+<li>Copy the public URL for the bucket
+(app.myapp.com-old.app.s3-website-us-east-1.amazonaws.com)</li>
+<li>Edit the CloudFront distribution for <code>app.myapp.com</code>, change the origin
+source to the public URL of the new bucket</li>
+</ul>
+
+<p>
+Now all requests to <code>app.myapp.com</code> should be redirected to
+<code>www.myapp.com/app</code>.
+</p>
+</div>
+</div>
+</div>
+<p class="post-tags">Tags: <a href="/tags/aws/">aws</a></p>
+</main>
+<div class="sidebar">
+<nav class="sidebar-toc" role="doc-toc">
+<h2>Table of Contents</h2>
+<div role="doc-toc">
+<ul>
+<li><a href="#cloudfront-setup-structure">CloudFront Setup Structure</a></li>
+<li><a href="#multi-origin-cloudfront-setup">Multi-Origin CloudFront Setup</a></li>
+<li><a href="#single-page-app-setup">Single-Page App Setup</a></li>
+<li><a href="#wordpress-setup">WordPress Setup</a>
+<ul>
+<li><a href="#elastic-beanstalk-setup-for-php-app">Elastic Beanstalk Setup for PHP App</a></li>
+</ul>
+</li>
+<li><a href="#unbounce-setup">Unbounce Setup</a></li>
+<li><a href="#lambda-code-cloudfrontdefaultindexfororigin">Lambda Code: CloudFrontDefaultIndexForOrigin</a></li>
+<li><a href="#lambda-code-cloudfrontredirecttotrailingslash">Lambda Code: CloudFrontRedirectToTrailingSlash</a></li>
+<li><a href="#lambda-code-cloudfrontsubdirectoryindex">Lambda Code: CloudFrontSubdirectoryIndex</a></li>
+<li><a href="#lambda-code-cloudfrontredirectapp">Lambda Code: CloudFrontRedirectApp</a>
+<ul>
+<li><a href="#another-way-to-redirect-requests-to-the-new-location-with-s3-static-website">Another Way to Redirect Requests to the New Location with S3 Static Website</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+<nav class="sidebar-menu" aria-label="Post lists">
+  <a href="/">All Posts</a>
+  <a href="/archive.html">Archive</a>
+</nav>
+<aside class="sidebar-tags" aria-labelledby="sidebar-tags">
+<h2 id="sidebar-tags" class="sidebar-title"><a href="/tags/">Tags</a></h2>
+<ul class="tag-cloud">
+<li><a href="/tags/android/" style="font-size: 1.00em" title="1 post">android</a></li>
+<li><a href="/tags/aws/" style="font-size: 1.82em" title="19 posts">aws</a></li>
+<li><a href="/tags/docker/" style="font-size: 1.00em" title="1 post">docker</a></li>
+<li><a href="/tags/git/" style="font-size: 1.95em" title="22 posts">git</a></li>
+<li><a href="/tags/jquery/" style="font-size: 1.00em" title="1 post">jquery</a></li>
+<li><a href="/tags/js/" style="font-size: 1.45em" title="11 posts">js</a></li>
+<li><a href="/tags/kbd/" style="font-size: 1.14em" title="4 posts">kbd</a></li>
+<li><a href="/tags/mac/" style="font-size: 1.09em" title="3 posts">mac</a></li>
+<li><a href="/tags/mysql/" style="font-size: 1.05em" title="2 posts">mysql</a></li>
+<li><a href="/tags/npm/" style="font-size: 1.00em" title="1 post">npm</a></li>
+<li><a href="/tags/oauth/" style="font-size: 1.00em" title="1 post">oauth</a></li>
+<li><a href="/tags/obs/" style="font-size: 1.00em" title="1 post">obs</a></li>
+<li><a href="/tags/oop/" style="font-size: 1.00em" title="1 post">oop</a></li>
+<li><a href="/tags/org/" style="font-size: 1.00em" title="1 post">org</a></li>
+<li><a href="/tags/php/" style="font-size: 1.14em" title="4 posts">php</a></li>
+<li><a href="/tags/python/" style="font-size: 1.09em" title="3 posts">python</a></li>
+<li><a href="/tags/rds/" style="font-size: 1.00em" title="1 post">rds</a></li>
+<li><a href="/tags/shell/" style="font-size: 1.18em" title="5 posts">shell</a></li>
+<li><a href="/tags/ssh/" style="font-size: 1.00em" title="1 post">ssh</a></li>
+<li><a href="/tags/tts/" style="font-size: 1.00em" title="1 post">tts</a></li>
+<li><a href="/tags/vim/" style="font-size: 1.18em" title="5 posts">vim</a></li>
+<li><a href="/tags/vr/" style="font-size: 1.00em" title="1 post">vr</a></li>
+<li><a href="/tags/vue/" style="font-size: 1.09em" title="3 posts">vue</a></li>
+<li><a href="/tags/web/" style="font-size: 1.36em" title="9 posts">web</a></li>
+<li><a href="/tags/yii/" style="font-size: 1.14em" title="4 posts">yii</a></li>
+</ul>
+</aside>
+</div>
+<footer id="postamble" class="status">
+<nav class="site-contacts" aria-label="Contacts">
+  <a href="/">Posts</a>
+  <a href="/archive.html">Archive</a>
+  <span class="divider">&nbsp;|&nbsp;</span>
+  <a href="https://github.com/serebrov">GitHub</a>
+  <a href="https://stackoverflow.com/users/4612064/borys-serebrov?tab=summary">StackOverflow</a>
+  <a href="https://x.com/serebrov">Twitter</a>
+</nav>
+<p class="copyright">&copy; 2020-2026 Borys Serebrov</p>
+</footer>
+</body>
+</html>

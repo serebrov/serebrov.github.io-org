@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2026-11-04 Wed 21:10 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Org mode demo</title>
+<meta name="author" content="Boris" />
+<meta name="description" content="A sample post: folding sections, code, images, video, and tables." />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="/static/org_css/normalize.css">
+<link rel="stylesheet" href="/static/org_css/htmlize.css">
+<link rel="stylesheet" href="/static/org_css/org.css">
+<link rel="stylesheet" href="/static/blog.css">
+<script defer src="/static/blog.js"></script>
+<script defer src="/static/config-preview.js"></script>
+</head>
+<body>
+<header id="preamble" class="status">
+<a class="site-logo" href="/"><img loading="lazy" src="/html/images/logo.jpg" alt="" width="128" height="128"></a>
+<div class="site-info">
+  <a class="site-title" href="/">vim, git, aws and other three-letter words</a>
+  <p class="site-desc">Software Development Notes</p>
+</div>
+<nav class="site-menu" aria-label="Main menu">
+  <a href="/" data-section="posts" aria-current="true">Posts</a>
+  <a href="/archive.html" data-section="archive">Archive</a>
+  <a href="/tags/" data-section="tags">Tags</a>
+</nav>
+</header>
+<main id="content" class="content">
+<header>
+<h1 class="title">Org mode demo</h1>
+<p class="subtitle" role="doc-subtitle">Demo to show how various Org mode blocks are rendered.</p>
+</header><nav id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#code-blocks">Code blocks</a></li>
+<li><a href="#images">Images</a></li>
+<li><a href="#video">Video</a></li>
+<li><a href="#a-section-can-be-initially-folded">A section can be initially folded&nbsp;&nbsp;&nbsp<span class="tag"><span class="folded">folded</span></span></a>
+<ul>
+<li><a href="#nested-section">Nested section</a></li>
+</ul>
+</li>
+<li><a href="#tables-and-quotes">Tables and quotes</a></li>
+<li><a href="#config-preview-custom">Config preview (custom)</a></li>
+<li><a href="#html-export">HTML Export</a></li>
+</ul>
+</div>
+</nav>
+<p>
+This test post shows the blog and Org mode features.
+</p>
+<div id="outline-container-code-blocks" class="outline-2">
+<h2 id="code-blocks">Code blocks</h2>
+<div class="outline-text-2" id="text-code-blocks">
+<p>
+Source highlighting is done by Emacs at build time (with <code>htmlize</code>). Move the mouse over a block to see the copy button.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">from</span> pathlib <span class="org-keyword">import</span> Path
+
+<span class="org-keyword">for</span> post <span class="org-keyword">in</span> <span class="org-builtin">sorted</span>(Path(<span class="org-string">"posts"</span>).glob(<span class="org-string">"*.org"</span>)):
+    <span class="org-builtin">print</span>(post.stem)
+</code></pre>
+</div>
+
+<pre class="example">
+2026-09-25-hello
+</pre>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">defun</span> <span class="org-function-name">blog-hello</span> (name)
+  <span class="org-doc">"Return a greeting for NAME."</span>
+  (format <span class="org-string">"Hello, %s!"</span> name))
+</code></pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-shell"><code>make serve
+</code></pre>
+</div>
+
+<p>
+Inline code also works: <code>make rebuild</code>.
+</p>
+</div>
+</div>
+<div id="outline-container-images" class="outline-2">
+<h2 id="images">Images</h2>
+<div class="outline-text-2" id="text-images">
+<p>
+Links to local image files are rendered as images on the page.
+</p>
+
+
+<figure id="org6c8669c">
+<img loading="lazy" src="images/pipeline.svg" alt="pipeline.svg" class="org-svg">
+
+<figcaption><span class="figure-number">Figure 1: </span>The build pipeline.</figcaption>
+</figure>
+</div>
+</div>
+<div id="outline-container-video" class="outline-2">
+<h2 id="video">Video</h2>
+<div class="outline-text-2" id="text-video">
+<p>
+A <code>video:</code> link is rendered as an HTML5 video player. The path can be a local file or a URL.
+</p>
+
+<p>
+<video controls preload="metadata" src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"></video>
+</p>
+</div>
+</div>
+<div id="outline-container-a-section-can-be-initially-folded" class="outline-2">
+<h2 id="a-section-can-be-initially-folded">A section can be initially folded&nbsp;&nbsp;&nbsp<span class="tag"><span class="folded">folded</span></span></h2>
+<div class="outline-text-2" id="text-a-section-can-be-initially-folded">
+<p>
+The <code>:folded:</code> tag on the heading makes the section folded on page load.
+A link to a heading inside this section opens it: <a href="#nested-section">go to the nested section</a>.
+</p>
+</div>
+<div id="outline-container-nested-section" class="outline-3">
+<h3 id="nested-section">Nested section</h3>
+<div class="outline-text-3" id="text-nested-section">
+<p>
+Nested sections fold too.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-tables-and-quotes" class="outline-2">
+<h2 id="tables-and-quotes">Tables and quotes</h2>
+<div class="outline-text-2" id="text-tables-and-quotes">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Feature</th>
+<th scope="col" class="org-left">Where it is implemented</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Folding</td>
+<td class="org-left"><code>static/blog.js</code></td>
+</tr>
+
+<tr>
+<td class="org-left">Code</td>
+<td class="org-left">htmlize</td>
+</tr>
+
+<tr>
+<td class="org-left">Video</td>
+<td class="org-left"><code>publish.el</code></td>
+</tr>
+</tbody>
+</table>
+
+<blockquote>
+<p>
+Everything is text, and that is powerful.
+</p>
+</blockquote>
+</div>
+</div>
+<div id="outline-container-config-preview-custom" class="outline-2">
+<h2 id="config-preview-custom">Config preview (custom)</h2>
+<div class="outline-text-2" id="text-config-preview-custom">
+<p>
+The custom popup is implemented in a separate JavaScript file that can be included like this:
+</p>
+
+<pre class="example" id="orge08b73d">
+#+HTML_HEAD_EXTRA: &lt;script defer src="/static/config-preview.js"&gt;&lt;/script&gt;
+
+[[file:files/cwl-setup.config][cwl-setup.config, click to preview in popup]]
+</pre>
+
+<p>
+Here is a live example:
+<a href="files/cwl-setup.config">cwl-setup.config, click to preview in popup</a>
+</p>
+
+<p>
+The file can also be displayed in the HTML <code>&lt;details&gt;</code> tag:
+</p>
+
+<details id="org48ea675">
+<summary id="orga6a8f4a">
+<p>
+cwl-setup.config (<a href="files/cwl-setup.config">download</a>)
+</p>
+</summary>
+<div class="org-src-container">
+<pre class="src src-yaml"><code>########################################################################
+##
+########################################################################
+
+Conditions:
+  SNSTopicExists : { "Fn::Not" : [{ "Fn::Equals" : [ "", {"Fn::FindInMap" : ["AWSEBOptions", "options", "EBSNSTopicArn"]}]}]}    
+
+Outputs:
+  ElasticBeanstalkSNSTopicArn:
+    Description: "The SNS Topic ARN for Elastic Beanstalk event notifications. Empty string if none specified."
+    Value: { "Fn::FindInMap": ["AWSEBOptions", "options", "EBSNSTopicArn"] }
+
+
+Resources:
+  AWSEBAutoScalingGroup:
+    Metadata:
+      "AWS::CloudFormation::Init":
+        configSets:
+          "_OnInstanceBoot":
+            "CmpFn::Insert":
+              values:
+                - CWLogsAgentClearConfig
+                - CWLogsAgentConfigSetup
+                - CWLogsAgentUpdaterInstallation
+                - CWLogsAgentInstallation
+          "CWLogsAgentInstallation":
+            - CWLogsAgentClearConfig
+            - CWLogsAgentConfigSetup
+            - CWLogsAgentUpdaterInstallation
+            - CWLogsAgentInstallation
+          "CWLogsAgentConfigUpdate":
+            - CWLogsAgentClearConfig
+            - CWLogsAgentConfigSetup
+            - CWLogsAgentUpdateConfig
+        CWLogsAgentClearConfig:
+          commands:
+            01-clear-agent-config:
+              command: rm -rf /tmp/cwlogs/conf.d
+        CWLogsAgentConfigSetup:
+          files:
+            "/tmp/cwlogs/conf.d/general.conf":
+              content : |
+                [general]
+                state_file = /var/awslogs/state/agent-state
+              mode  : "000400"
+              owner : root
+              group : root
+          commands:
+            01-setup-agent-config:
+              ## Every .conf file in /tmp/cwlogs/conf.d/ will be concatenated together to form the cwl agent config file
+              command: |
+                cat /tmp/cwlogs/conf.d/*.conf &gt; /tmp/cwlogs/cwlogs-config.conf
+        CWLogsAgentInstallation:
+          files:
+            "/tmp/cwlogs/awslogs-agent-setup.py" :
+              source : "https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py"
+              mode  : "000700"
+              owner : root
+              group : root
+          commands:
+            01-setup-cwlogs-agent:
+              ## Install the cwlogs agent - this will also install the cli it needs (in a virtualenv)
+              command: |
+                setsid /tmp/cwlogs/awslogs-agent-setup.py -n -r `{"Ref" : "AWS::Region" }` -c /tmp/cwlogs/cwlogs-config.conf &amp;&amp; exit 0;
+
+        ## Configuration deployment command - update agent if needed
+        CWLogsAgentUpdaterInstallation:
+          files:
+            "/opt/elasticbeanstalk/hooks/configdeploy/enact/00_update_cwlogs_agent.sh":
+              content: |
+                #!/bin/bash
+                . /etc/elasticbeanstalk/.aws-eb-stack.properties
+                /opt/aws/bin/cfn-init -v -s "$stack_name" -r "$resource" --region "$region" --configsets CWLogsAgentConfigUpdate &gt; /var/log/eb-cfn-init-call.log 2&gt;&amp;1
+              mode  : "000700"
+              owner : root
+              group : root
+        CWLogsAgentUpdateConfig:
+          files:
+            "/tmp/cwlogs/bin/cwlogs-update.sh":
+              content: |
+                #!/bin/bash
+                log() {
+                   echo [$(date -u +"%Y-%m-%d %TZ")] $1
+                }
+                log "Executing cwlogs agent configuration update"
+
+                if cmp /var/awslogs/etc/awslogs.conf /tmp/cwlogs/cwlogs-config.conf &gt; /dev/null 2&gt;&amp;1; then
+                   log "Configuration has not changed - not updating"
+                   exit 0;
+                fi
+                
+                log "Copying new cwlogs config to /var/awslogs/etc/awslogs.conf"
+                cp /tmp/cwlogs/cwlogs-config.conf /var/awslogs/etc/awslogs.conf;
+                log "Restarting awslogs service"
+                service awslogs restart;
+                log "awslogs service restart complete"
+                log "Completed cwlogs agent configuration update"
+                exit 0;
+              mode  : "000700"
+              owner : root
+              group : root
+          commands:
+            01-update-agent-config:
+              command: "/tmp/cwlogs/bin/cwlogs-update.sh &gt;&gt; /var/log/eb-cwlogs.log 2&gt;&amp;1"
+
+
+## Version deployment command - ensure agent is installed
+files:
+  "/tmp/cwlogs/bin/cwlogs-install.sh":
+    content: |
+      #!/bin/bash
+      log() {
+         echo [$(date -u +"%Y-%m-%d %TZ")] $1
+      }
+
+      log "Initiating cwlogs agent installation/update"
+      . /etc/elasticbeanstalk/.aws-eb-stack.properties
+      CONFIG_SET=CWLogsAgentInstallation
+
+      ## just do an update if we think it's already installed
+      if [ -f "/var/awslogs/etc/awslogs.conf" ]; then   
+        CONFIG_SET=CWLogsAgentConfigUpdate
+        log "Running agent configuration update"
+      else
+        log "Running agent installation"
+      fi
+
+      /opt/aws/bin/cfn-init -v -s "$stack_name" -r "$resource" --region "$region" --configsets $CONFIG_SET;
+      log "Completed cwlogs agent installation/update"
+      exit 0;
+    mode  : "000700"
+    owner : root
+    group : root
+    
+commands:
+  01-ensure-agent-installation:
+    command:  "/tmp/cwlogs/bin/cwlogs-install.sh &gt;&gt; /var/log/eb-cwlogs.log 2&gt;&amp;1"
+</code></pre>
+</div>
+</details>
+</div>
+</div>
+<div id="outline-container-html-export" class="outline-2">
+<h2 id="html-export">HTML Export</h2>
+<div class="outline-text-2" id="text-html-export">
+<p>
+The <code>#+begin_export html</code> and <code>#+end_export</code> lines allow inserting HTML snippets that
+will be added to the HTML after org export:
+</p>
+
+<pre class="example" id="org6f8794a">
+#+begin_export html
+&lt;div class="demo-popup"&gt;
+    &lt;div class="close"&gt;close&lt;/div&gt;
+    &lt;div class="download"&gt;&lt;a href=""&gt;Download (&lt;span class="name"&gt;&lt;/span&gt;)&lt;/a&gt;&lt;/div&gt;
+    &lt;div class="popup-content"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;style type="text/css"&gt;
+  .demo-popup { display: none; }
+&lt;/style&gt;
+
+&lt;script type="text/javascript"&gt;
+    document.addEventListener("DOMContentLoaded", () =&gt; {
+        console.log("The DOM is fully parsed and ready!");
+        // document.addEventListener("click", () =&gt; {
+        //    document.querySelector('.demo-popup').style.display = 'block'
+        // });
+    });
+&lt;/script&gt;
+#+end_export
+</pre>
+</div>
+</div>
+<p class="post-tags">Tags: <a href="/tags/org/">org</a></p>
+</main>
+<div class="sidebar">
+<nav class="sidebar-toc" role="doc-toc">
+<h2>Table of Contents</h2>
+<div role="doc-toc">
+<ul>
+<li><a href="#code-blocks">Code blocks</a></li>
+<li><a href="#images">Images</a></li>
+<li><a href="#video">Video</a></li>
+<li><a href="#a-section-can-be-initially-folded">A section can be initially folded&nbsp;&nbsp;&nbsp<span class="tag"><span class="folded">folded</span></span></a>
+<ul>
+<li><a href="#nested-section">Nested section</a></li>
+</ul>
+</li>
+<li><a href="#tables-and-quotes">Tables and quotes</a></li>
+<li><a href="#config-preview-custom">Config preview (custom)</a></li>
+<li><a href="#html-export">HTML Export</a></li>
+</ul>
+</div>
+</nav>
+<nav class="sidebar-menu" aria-label="Post lists">
+  <a href="/">All Posts</a>
+  <a href="/archive.html">Archive</a>
+</nav>
+<aside class="sidebar-tags" aria-labelledby="sidebar-tags">
+<h2 id="sidebar-tags" class="sidebar-title"><a href="/tags/">Tags</a></h2>
+<ul class="tag-cloud">
+<li><a href="/tags/android/" style="font-size: 1.00em" title="1 post">android</a></li>
+<li><a href="/tags/aws/" style="font-size: 1.82em" title="19 posts">aws</a></li>
+<li><a href="/tags/docker/" style="font-size: 1.00em" title="1 post">docker</a></li>
+<li><a href="/tags/git/" style="font-size: 1.95em" title="22 posts">git</a></li>
+<li><a href="/tags/jquery/" style="font-size: 1.00em" title="1 post">jquery</a></li>
+<li><a href="/tags/js/" style="font-size: 1.45em" title="11 posts">js</a></li>
+<li><a href="/tags/kbd/" style="font-size: 1.14em" title="4 posts">kbd</a></li>
+<li><a href="/tags/mac/" style="font-size: 1.09em" title="3 posts">mac</a></li>
+<li><a href="/tags/mysql/" style="font-size: 1.05em" title="2 posts">mysql</a></li>
+<li><a href="/tags/npm/" style="font-size: 1.00em" title="1 post">npm</a></li>
+<li><a href="/tags/oauth/" style="font-size: 1.00em" title="1 post">oauth</a></li>
+<li><a href="/tags/obs/" style="font-size: 1.00em" title="1 post">obs</a></li>
+<li><a href="/tags/oop/" style="font-size: 1.00em" title="1 post">oop</a></li>
+<li><a href="/tags/org/" style="font-size: 1.00em" title="1 post">org</a></li>
+<li><a href="/tags/php/" style="font-size: 1.14em" title="4 posts">php</a></li>
+<li><a href="/tags/python/" style="font-size: 1.09em" title="3 posts">python</a></li>
+<li><a href="/tags/rds/" style="font-size: 1.00em" title="1 post">rds</a></li>
+<li><a href="/tags/shell/" style="font-size: 1.18em" title="5 posts">shell</a></li>
+<li><a href="/tags/ssh/" style="font-size: 1.00em" title="1 post">ssh</a></li>
+<li><a href="/tags/tts/" style="font-size: 1.00em" title="1 post">tts</a></li>
+<li><a href="/tags/vim/" style="font-size: 1.18em" title="5 posts">vim</a></li>
+<li><a href="/tags/vr/" style="font-size: 1.00em" title="1 post">vr</a></li>
+<li><a href="/tags/vue/" style="font-size: 1.09em" title="3 posts">vue</a></li>
+<li><a href="/tags/web/" style="font-size: 1.36em" title="9 posts">web</a></li>
+<li><a href="/tags/yii/" style="font-size: 1.14em" title="4 posts">yii</a></li>
+</ul>
+</aside>
+</div>
+<footer id="postamble" class="status">
+<nav class="site-contacts" aria-label="Contacts">
+  <a href="/">Posts</a>
+  <a href="/archive.html">Archive</a>
+  <span class="divider">&nbsp;|&nbsp;</span>
+  <a href="https://github.com/serebrov">GitHub</a>
+  <a href="https://stackoverflow.com/users/4612064/borys-serebrov?tab=summary">StackOverflow</a>
+  <a href="https://x.com/serebrov">Twitter</a>
+</nav>
+<p class="copyright">&copy; 2020-2026 Borys Serebrov</p>
+</footer>
+</body>
+</html>

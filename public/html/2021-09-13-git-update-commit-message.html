@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2026-11-04 Wed 21:10 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>git: update commit message</title>
+<meta name="author" content="Boris" />
+<meta name="description" content="Git: Some ways to update the commit message" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="/static/org_css/normalize.css">
+<link rel="stylesheet" href="/static/org_css/htmlize.css">
+<link rel="stylesheet" href="/static/org_css/org.css">
+<link rel="stylesheet" href="/static/blog.css">
+<script defer src="/static/blog.js"></script>
+</head>
+<body>
+<header id="preamble" class="status">
+<a class="site-logo" href="/"><img loading="lazy" src="/html/images/logo.jpg" alt="" width="128" height="128"></a>
+<div class="site-info">
+  <a class="site-title" href="/">vim, git, aws and other three-letter words</a>
+  <p class="site-desc">Software Development Notes</p>
+</div>
+<nav class="site-menu" aria-label="Main menu">
+  <a href="/" data-section="posts" aria-current="true">Posts</a>
+  <a href="/archive.html" data-section="archive">Archive</a>
+  <a href="/tags/" data-section="tags">Tags</a>
+</nav>
+</header>
+<main id="content" class="content">
+<header>
+<h1 class="title">git: update commit message</h1>
+</header><nav id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#simple-change-last-commit-message">Simple: Change Last Commit Message</a></li>
+<li><a href="#advanced-change-any-commit-message-or-multiple-commit-messages">Advanced: Change Any Commit Message or Multiple Commit Messages</a></li>
+<li><a href="#alternative-cherry-pick-commits-and-update-messages">Alternative: Cherry-Pick Commits and Update Messages</a></li>
+</ul>
+</div>
+</nav>
+<div id="outline-container-simple-change-last-commit-message" class="outline-2">
+<h2 id="simple-change-last-commit-message">Simple: Change Last Commit Message</h2>
+<div class="outline-text-2" id="text-simple-change-last-commit-message">
+<p>
+To change the last commit message, use <code>commit</code> with the <code>--amend</code> flag:
+</p>
+
+<blockquote>
+<p>
+Careful: <code>commit --amend</code> will rewrite history; do not use it on public branches.
+</p>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-shell"><code>git commit --amend
+</code></pre>
+</div>
+
+<p>
+It will open an editor to change the commit message. The changes will be
+applied after saving the file and closing the editor.
+</p>
+</div>
+</div>
+<div id="outline-container-advanced-change-any-commit-message-or-multiple-commit-messages" class="outline-2">
+<h2 id="advanced-change-any-commit-message-or-multiple-commit-messages">Advanced: Change Any Commit Message or Multiple Commit Messages</h2>
+<div class="outline-text-2" id="text-advanced-change-any-commit-message-or-multiple-commit-messages">
+<p>
+Besides other things, interactive rebase allows editing commit messages:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><code>git rebase -i HEAD~3
+</code></pre>
+</div>
+
+<pre class="example" id="org9288947">
+pick SHA-A commit message
+pick SHA-B commit message
+pick SHA-C commit message
+</pre>
+
+<p>
+Do not change commit messages just yet, only change <code>pick</code> in the first
+column to <code>r</code> (or the full <code>reword</code>):
+</p>
+
+<pre class="example" id="orgaffb8b7">
+pick SHA-A commit message
+r SHA-B commit message
+r SHA-C commit message
+</pre>
+
+<p>
+Here we schedule a commit message update for the <code>SHA-B</code> and <code>SHA-C</code> commits.
+After the file is saved, git will open the editor once more for each of
+the marked commits, where we can edit the commit message.
+</p>
+</div>
+</div>
+<div id="outline-container-alternative-cherry-pick-commits-and-update-messages" class="outline-2">
+<h2 id="alternative-cherry-pick-commits-and-update-messages">Alternative: Cherry-Pick Commits and Update Messages</h2>
+<div class="outline-text-2" id="text-alternative-cherry-pick-commits-and-update-messages">
+<p>
+This might be useful if we want to pick some commits from the branch and
+update commit messages:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><code><span class="org-comment-delimiter"># </span><span class="org-comment">create the new branch
+</span>git checkout -b new-branch
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">for every commit to pick
+</span>git cherry-pick commit-sha
+git commit --amend
+</code></pre>
+</div>
+
+<p>
+So we cherry-pick the needed commits and then edit commit messages with
+<code>commit --amend</code>.
+</p>
+</div>
+</div>
+<p class="post-tags">Tags: <a href="/tags/git/">git</a></p>
+</main>
+<div class="sidebar">
+<nav class="sidebar-toc" role="doc-toc">
+<h2>Table of Contents</h2>
+<div role="doc-toc">
+<ul>
+<li><a href="#simple-change-last-commit-message">Simple: Change Last Commit Message</a></li>
+<li><a href="#advanced-change-any-commit-message-or-multiple-commit-messages">Advanced: Change Any Commit Message or Multiple Commit Messages</a></li>
+<li><a href="#alternative-cherry-pick-commits-and-update-messages">Alternative: Cherry-Pick Commits and Update Messages</a></li>
+</ul>
+</div>
+</nav>
+<nav class="sidebar-menu" aria-label="Post lists">
+  <a href="/">All Posts</a>
+  <a href="/archive.html">Archive</a>
+</nav>
+<aside class="sidebar-tags" aria-labelledby="sidebar-tags">
+<h2 id="sidebar-tags" class="sidebar-title"><a href="/tags/">Tags</a></h2>
+<ul class="tag-cloud">
+<li><a href="/tags/android/" style="font-size: 1.00em" title="1 post">android</a></li>
+<li><a href="/tags/aws/" style="font-size: 1.82em" title="19 posts">aws</a></li>
+<li><a href="/tags/docker/" style="font-size: 1.00em" title="1 post">docker</a></li>
+<li><a href="/tags/git/" style="font-size: 1.95em" title="22 posts">git</a></li>
+<li><a href="/tags/jquery/" style="font-size: 1.00em" title="1 post">jquery</a></li>
+<li><a href="/tags/js/" style="font-size: 1.45em" title="11 posts">js</a></li>
+<li><a href="/tags/kbd/" style="font-size: 1.14em" title="4 posts">kbd</a></li>
+<li><a href="/tags/mac/" style="font-size: 1.09em" title="3 posts">mac</a></li>
+<li><a href="/tags/mysql/" style="font-size: 1.05em" title="2 posts">mysql</a></li>
+<li><a href="/tags/npm/" style="font-size: 1.00em" title="1 post">npm</a></li>
+<li><a href="/tags/oauth/" style="font-size: 1.00em" title="1 post">oauth</a></li>
+<li><a href="/tags/obs/" style="font-size: 1.00em" title="1 post">obs</a></li>
+<li><a href="/tags/oop/" style="font-size: 1.00em" title="1 post">oop</a></li>
+<li><a href="/tags/org/" style="font-size: 1.00em" title="1 post">org</a></li>
+<li><a href="/tags/php/" style="font-size: 1.14em" title="4 posts">php</a></li>
+<li><a href="/tags/python/" style="font-size: 1.09em" title="3 posts">python</a></li>
+<li><a href="/tags/rds/" style="font-size: 1.00em" title="1 post">rds</a></li>
+<li><a href="/tags/shell/" style="font-size: 1.18em" title="5 posts">shell</a></li>
+<li><a href="/tags/ssh/" style="font-size: 1.00em" title="1 post">ssh</a></li>
+<li><a href="/tags/tts/" style="font-size: 1.00em" title="1 post">tts</a></li>
+<li><a href="/tags/vim/" style="font-size: 1.18em" title="5 posts">vim</a></li>
+<li><a href="/tags/vr/" style="font-size: 1.00em" title="1 post">vr</a></li>
+<li><a href="/tags/vue/" style="font-size: 1.09em" title="3 posts">vue</a></li>
+<li><a href="/tags/web/" style="font-size: 1.36em" title="9 posts">web</a></li>
+<li><a href="/tags/yii/" style="font-size: 1.14em" title="4 posts">yii</a></li>
+</ul>
+</aside>
+</div>
+<footer id="postamble" class="status">
+<nav class="site-contacts" aria-label="Contacts">
+  <a href="/">Posts</a>
+  <a href="/archive.html">Archive</a>
+  <span class="divider">&nbsp;|&nbsp;</span>
+  <a href="https://github.com/serebrov">GitHub</a>
+  <a href="https://stackoverflow.com/users/4612064/borys-serebrov?tab=summary">StackOverflow</a>
+  <a href="https://x.com/serebrov">Twitter</a>
+</nav>
+<p class="copyright">&copy; 2020-2026 Borys Serebrov</p>
+</footer>
+</body>
+</html>

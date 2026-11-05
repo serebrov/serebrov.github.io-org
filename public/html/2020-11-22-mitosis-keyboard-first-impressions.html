@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2026-11-04 Wed 21:10 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mitosis Keyboard First Impressions</title>
+<meta name="author" content="Boris" />
+<meta name="description" content="First impressions using the Mitosis (split, custom) keyboard." />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="/static/org_css/normalize.css">
+<link rel="stylesheet" href="/static/org_css/htmlize.css">
+<link rel="stylesheet" href="/static/org_css/org.css">
+<link rel="stylesheet" href="/static/blog.css">
+<script defer src="/static/blog.js"></script>
+</head>
+<body>
+<header id="preamble" class="status">
+<a class="site-logo" href="/"><img loading="lazy" src="/html/images/logo.jpg" alt="" width="128" height="128"></a>
+<div class="site-info">
+  <a class="site-title" href="/">vim, git, aws and other three-letter words</a>
+  <p class="site-desc">Software Development Notes</p>
+</div>
+<nav class="site-menu" aria-label="Main menu">
+  <a href="/" data-section="posts" aria-current="true">Posts</a>
+  <a href="/archive.html" data-section="archive">Archive</a>
+  <a href="/tags/" data-section="tags">Tags</a>
+</nav>
+</header>
+<main id="content" class="content">
+<header>
+<h1 class="title">Mitosis Keyboard First Impressions</h1>
+</header><p>
+I received my <a href="https://flashquark.com/product/gb-mitosis-wireless-split-ergonomic-keyboard-w-acrylic-case/">Mitosis</a> a few days ago, and I like it a lot so far:
+</p>
+<ul class="org-ul">
+<li>The size: perfect for the 36-key layout I use</li>
+<li>The shape: very comfortable, lowered outer columns feel great for pinkies</li>
+<li>I wish the inner column for the index finger were not shifted up as it is: it causes a bit of extension to use Y and T (not a big deal though)</li>
+<li>I also think the bottom thumb row is too far, so I am using the top row, with the bottom one left without keycaps, so it doesn't get in the way</li>
+<li>Wireless: this was probably one of the main reasons to get it. It is really nice to freely move both halves without having to care about wires</li>
+<li>An interesting decision here is to use the radio channel instead of Bluetooth, which gives a much longer battery life</li>
+<li>It requires a receiver to be connected to the computer, but that is not a big deal. Also, it is cool to realize that your keyboard (QMK) is actually running inside that small board</li>
+<li>Layout: I am not sure which layout was there initially. It was QWERTY, while
+the <a href="https://config.qmk.fm/#/mitosis/LAYOUT">default layout in the QMK configurator</a> is Maltron (I think). Anyway,
+I changed it to my layout, similar to <a href="https://configure.zsa.io/moonlander/layouts/MJvlL/latest/0">what I have on my Moonlander</a></li>
+<li>Open source: here is the <a href="https://www.reddit.com/r/MechanicalKeyboards/comments/66588f/wireless_split_qmk_mitosis/">announcement post</a>, <a href="https://github.com/reversebias/mitosis-hardware">hardware</a>, <a href="https://github.com/reversebias/mitosis">receiver firmware</a> and <a href="https://github.com/qmk/qmk_firmware/tree/master/keyboards/mitosis">keyboard firmware, QMK</a></li>
+</ul>
+
+<p>
+How it <a href="images/Mitosis.jpg">looks</a>:
+</p>
+
+
+<figure id="org5aeece6">
+<img loading="lazy" src="images/Mitosis.jpg" alt="Mitosis.jpg">
+
+<figcaption><span class="figure-number">Figure 1: </span>Mitosis.jpg</figcaption>
+</figure>
+
+<p>
+and <a href="images/Mitosis.Receiver.jpg">the receiver</a>:
+</p>
+
+
+<figure id="orgfee6be6">
+<img loading="lazy" src="images/Mitosis.Receiver.jpg" alt="Mitosis.Receiver.jpg">
+
+<figcaption><span class="figure-number">Figure 2: </span>Mitosis.Receiver.jpg</figcaption>
+</figure>
+
+<p>
+Getting it to work didn't take much time, although I first had an issue
+with the cable (the first one I tried didn't work; it was probably just
+not a data cable), and then I had the batteries upside down and one of them
+didn't stay in place.
+</p>
+
+<p>
+I wish there were a quick start guide, something like this:
+</p>
+<ul class="org-ul">
+<li>Unscrew the PCBs from the case (inner screws)</li>
+<li>Put the batteries into the left and right halves. They go between the top and bottom plates, in the bottom right corner of the right half and the bottom left corner of the left half</li>
+<li>Note that the battery position is different in the left and right halves</li>
+<li>Don't screw the PCBs back yet. First, make sure it works</li>
+<li>Find a micro-USB to USB-A/USB-C cable. It should be a data cable (so some cables may not work)</li>
+<li>Connect the receiver to a computer</li>
+<li>Try pressing keys on both halves. It should already work</li>
+<li>Screw the PCBs back into the case</li>
+<li>Put on the keycaps (it ships without keycaps)</li>
+</ul>
+
+<p>
+If it doesn't work:
+</p>
+<ul class="org-ul">
+<li>Make sure to use a data cable for the receiver</li>
+<li>Make sure the batteries are inserted with the correct polarity</li>
+<li>There are <code>+</code> and <code>-</code> markings, although I had to put my batteries upside down
+(<code>+</code> battery side facing <code>-</code> marking). I am not sure if the markings are
+misplaced or I am interpreting them incorrectly</li>
+</ul>
+
+<p>
+Flashing:
+</p>
+<ul class="org-ul">
+<li>Go to the <a href="https://config.qmk.fm/#/mitosis/LAYOUT">QMK configurator</a>, change the layout as you like</li>
+<li>Download the JSON keymap (at least as a backup, so it can be loaded back later)</li>
+<li>Compile and download the firmware (there are buttons in the configurator) and then flash it with the <a href="https://github.com/qmk/qmk_toolbox/releases">QMK Toolbox</a></li>
+<li>Press the button with <code>R</code> near it on the receiver to reset it and enter the flashing mode</li>
+</ul>
+
+<p>
+Alternatively, clone QMK and flash from the command line. The setup guide is
+<a href="https://docs.qmk.fm/newbs_getting_started">here</a>. After everything is set up, new firmware can be compiled and flashed with
+<code>qmk flash -kb mitosis -km mitosis_mini</code> (where <code>mitosis_mini</code> is the
+custom keymap name, and there are also several <a href="https://github.com/qmk/qmk_firmware/tree/master/keyboards/mitosis">alternative keymaps in the QMK source</a>).
+</p>
+
+<p>
+The keymap itself can remain in JSON format. Here is
+<a href="https://github.com/serebrov/qmk_firmware/tree/custom/keyboards/mitosis/keymaps/mitosis_mini">what I have so far</a>:
+</p>
+<ul class="org-ul">
+<li><code>config.h</code> - defines the auto shift timeout and enables tapping force hold</li>
+<li><code>custom.c</code> - LED colors for layers (although I have a problem with the green light)</li>
+<li><code>keymap.json</code> - the keymap made with the QMK configurator</li>
+<li><code>rules.mk</code> - enables auto shift</li>
+</ul>
+
+<p>
+Compared to the <a href="https://configure.zsa.io/">ZSA configurator</a>, the QMK configurator provides fewer features,
+so I had to switch to the source code to enable auto shift.
+</p>
+
+<p>
+I still have a few questions. Maybe someone could answer them for me:
+</p>
+
+<ol class="org-ol">
+<li>The battery didn't stay in place in the right half, so I put aluminum foil under it to keep it in place.
+It seems to work well now, but is it safe to keep it like this in the long term? Maybe there is a better way to fix this?
+Here is how <a href="images/Mitosis.Battery.jpg">the battery with foil looks</a>.</li>
+
+<li>There are + / - markers on the PCB, but I had to put the batteries
+upside down to make it work (so the battery's plus is facing the plate
+marked with minus). It is the same on both sides. Am I interpreting these
+markings wrong? (It works, so it is not very important; I am just curious.)</li>
+
+<li>The green light doesn't seem to work in the indicator LED. Is this a
+defective LED or a soldering defect? How can I "debug" it? The blue and
+red lights work separately and together, producing magenta, but the
+green doesn't work on its own or when combined with red or blue; it
+just stays off.</li>
+
+<li>What do I do with several boards that I like a lot? I now have
+an ErgoDox EZ, a Moonlander and a Mitosis. Should I cycle between them daily
+or weekly?</li>
+</ol>
+<p class="post-tags">Tags: <a href="/tags/kbd/">kbd</a></p>
+</main>
+<div class="sidebar">
+
+<nav class="sidebar-menu" aria-label="Post lists">
+  <a href="/">All Posts</a>
+  <a href="/archive.html">Archive</a>
+</nav>
+<aside class="sidebar-tags" aria-labelledby="sidebar-tags">
+<h2 id="sidebar-tags" class="sidebar-title"><a href="/tags/">Tags</a></h2>
+<ul class="tag-cloud">
+<li><a href="/tags/android/" style="font-size: 1.00em" title="1 post">android</a></li>
+<li><a href="/tags/aws/" style="font-size: 1.82em" title="19 posts">aws</a></li>
+<li><a href="/tags/docker/" style="font-size: 1.00em" title="1 post">docker</a></li>
+<li><a href="/tags/git/" style="font-size: 1.95em" title="22 posts">git</a></li>
+<li><a href="/tags/jquery/" style="font-size: 1.00em" title="1 post">jquery</a></li>
+<li><a href="/tags/js/" style="font-size: 1.45em" title="11 posts">js</a></li>
+<li><a href="/tags/kbd/" style="font-size: 1.14em" title="4 posts">kbd</a></li>
+<li><a href="/tags/mac/" style="font-size: 1.09em" title="3 posts">mac</a></li>
+<li><a href="/tags/mysql/" style="font-size: 1.05em" title="2 posts">mysql</a></li>
+<li><a href="/tags/npm/" style="font-size: 1.00em" title="1 post">npm</a></li>
+<li><a href="/tags/oauth/" style="font-size: 1.00em" title="1 post">oauth</a></li>
+<li><a href="/tags/obs/" style="font-size: 1.00em" title="1 post">obs</a></li>
+<li><a href="/tags/oop/" style="font-size: 1.00em" title="1 post">oop</a></li>
+<li><a href="/tags/org/" style="font-size: 1.00em" title="1 post">org</a></li>
+<li><a href="/tags/php/" style="font-size: 1.14em" title="4 posts">php</a></li>
+<li><a href="/tags/python/" style="font-size: 1.09em" title="3 posts">python</a></li>
+<li><a href="/tags/rds/" style="font-size: 1.00em" title="1 post">rds</a></li>
+<li><a href="/tags/shell/" style="font-size: 1.18em" title="5 posts">shell</a></li>
+<li><a href="/tags/ssh/" style="font-size: 1.00em" title="1 post">ssh</a></li>
+<li><a href="/tags/tts/" style="font-size: 1.00em" title="1 post">tts</a></li>
+<li><a href="/tags/vim/" style="font-size: 1.18em" title="5 posts">vim</a></li>
+<li><a href="/tags/vr/" style="font-size: 1.00em" title="1 post">vr</a></li>
+<li><a href="/tags/vue/" style="font-size: 1.09em" title="3 posts">vue</a></li>
+<li><a href="/tags/web/" style="font-size: 1.36em" title="9 posts">web</a></li>
+<li><a href="/tags/yii/" style="font-size: 1.14em" title="4 posts">yii</a></li>
+</ul>
+</aside>
+</div>
+<footer id="postamble" class="status">
+<nav class="site-contacts" aria-label="Contacts">
+  <a href="/">Posts</a>
+  <a href="/archive.html">Archive</a>
+  <span class="divider">&nbsp;|&nbsp;</span>
+  <a href="https://github.com/serebrov">GitHub</a>
+  <a href="https://stackoverflow.com/users/4612064/borys-serebrov?tab=summary">StackOverflow</a>
+  <a href="https://x.com/serebrov">Twitter</a>
+</nav>
+<p class="copyright">&copy; 2020-2026 Borys Serebrov</p>
+</footer>
+</body>
+</html>

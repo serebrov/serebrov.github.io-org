@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2026-11-04 Wed 21:10 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vim: better ways to handle macros</title>
+<meta name="author" content="Boris" />
+<meta name="description" content="Vim usage tip, how to manage macros in a more convenient way." />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="/static/org_css/normalize.css">
+<link rel="stylesheet" href="/static/org_css/htmlize.css">
+<link rel="stylesheet" href="/static/org_css/org.css">
+<link rel="stylesheet" href="/static/blog.css">
+<script defer src="/static/blog.js"></script>
+</head>
+<body>
+<header id="preamble" class="status">
+<a class="site-logo" href="/"><img loading="lazy" src="/html/images/logo.jpg" alt="" width="128" height="128"></a>
+<div class="site-info">
+  <a class="site-title" href="/">vim, git, aws and other three-letter words</a>
+  <p class="site-desc">Software Development Notes</p>
+</div>
+<nav class="site-menu" aria-label="Main menu">
+  <a href="/" data-section="posts" aria-current="true">Posts</a>
+  <a href="/archive.html" data-section="archive">Archive</a>
+  <a href="/tags/" data-section="tags">Tags</a>
+</nav>
+</header>
+<main id="content" class="content">
+<header>
+<h1 class="title">Vim: better ways to handle macros</h1>
+</header><nav id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#the-command">The <code>@</code> command</a></li>
+<li><a href="#manage-macros-in-a-regular-buffer">Manage macros in a regular buffer</a></li>
+<li><a href="#the-norm-command">The <code>norm</code> command</a></li>
+<li><a href="#using-globals-with-norm">Using globals with <code>norm</code></a></li>
+</ul>
+</div>
+</nav>
+<div id="outline-container-the-command" class="outline-2">
+<h2 id="the-command">The <code>@</code> command</h2>
+<div class="outline-text-2" id="text-the-command">
+<p>
+The <code>@</code> command is better known as a command to execute macros. But it is more generic, and it can execute Vim commands from any Vim register.
+</p>
+
+<p>
+Here is what the help says:
+</p>
+
+<blockquote>
+<p>
+							<b>@</b>
+@{0-9a-z".=*+}		Execute the contents of register {0-9a-z".=*+} [count]
+			times.  Note that register '%' (name of the current
+			file) and '#' (name of the alternate file) cannot be
+			used.
+</p>
+</blockquote>
+
+<p>
+And a good quote about what <code>@</code> can do from the <a href="https://stackoverflow.com/questions/1218390/what-is-your-most-productive-shortcut-with-vim">Stack Overflow post</a>:
+</p>
+
+<blockquote>
+<p>
+The @ command is probably the most obscure vi command.
+</p>
+
+<p>
+@ executes the contents of a register as if it were a vi or ex command.
+</p>
+
+<p>
+Example: I often use: :r!locate &hellip; to find some file on my system and
+read its name into my document. From there I delete any extraneous hits,
+leaving only the full path to the file I'm interested in.
+</p>
+
+<p>
+Rather than laboriously Tab-ing through each component of the path
+(or worse, if I happen to be stuck on a machine without Tab completion
+support in its copy of vi) I just use:
+</p>
+<ul class="org-ul">
+<li>0i:r (to turn the current line into a valid :r command),
+it becomes something like :r /path/to/file</li>
+<li>"cdd (to delete the line into the "c" register) and</li>
+<li>@c execute that command.</li>
+</ul>
+</blockquote>
+
+<p>
+So we execute the <code>:r /path/to/file</code> command with <code>@c</code> and the file content
+is inserted into the current buffer.
+</p>
+
+<p>
+It is interesting that instead of using the file name completion in the minibuffer,
+we build the file name in the regular Vim buffer and then use that file name to
+read the file content.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-vimscript"><code>:r!locate *.org
+</code></pre>
+</div>
+</div>
+</div>
+<div id="outline-container-manage-macros-in-a-regular-buffer" class="outline-2">
+<h2 id="manage-macros-in-a-regular-buffer">Manage macros in a regular buffer</h2>
+<div class="outline-text-2" id="text-manage-macros-in-a-regular-buffer">
+<p>
+In practice, it allows using the regular Vim buffer to edit and execute commands.
+The command buffer <code>:</code> is limited and less convenient, so instead you can
+prepare the command in one buffer and run it in another (or prepare, delete to
+the register and run in the same buffer).
+</p>
+
+<p>
+For example: do <code>"cdd</code> or <code>"cyy</code> on the line below and then <code>@c</code> to add <code>//</code> to all lines.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-vimscript"><code>:% norm I//
+</code></pre>
+</div>
+
+<p>
+This also means that instead of recording a macro, you can type it out and then execute it.
+Or you can record it, paste and edit it, then execute it.
+</p>
+
+<p>
+For example:
+</p>
+<ul class="org-ul">
+<li><code>qa</code> - start recording into register <code>a</code></li>
+<li><code>q</code> - stop recording</li>
+<li><code>"ap</code> - paste the macro, edit it</li>
+<li><code>"ayy</code> - yank it back into register <code>a</code></li>
+<li><code>@a</code> - execute</li>
+</ul>
+
+<p>
+The contents of the register can also be inserted with <code>Ctrl-R [a-z]</code> in
+insert mode (<code>Ctrl-R a</code> in the example above).
+</p>
+</div>
+</div>
+<div id="outline-container-the-norm-command" class="outline-2">
+<h2 id="the-norm-command">The <code>norm</code> command</h2>
+<div class="outline-text-2" id="text-the-norm-command">
+<p>
+Note that the <code>:norm</code> command is often a good alternative to macros
+(or the more recent Neovim multicursors).
+</p>
+
+<p>
+For example, as shown above, the <code>:% norm I//</code> command adds <code>//</code> at the beginning of
+each line and <code>:% norm A!</code> appends <code>!</code> to each line.
+</p>
+
+<p>
+Combined with globals (<code>:g</code> and <code>:v</code>), this becomes a fast and flexible way
+to apply similar edits in the file.
+</p>
+</div>
+</div>
+<div id="outline-container-using-globals-with-norm" class="outline-2">
+<h2 id="using-globals-with-norm">Using globals with <code>norm</code></h2>
+<div class="outline-text-2" id="text-using-globals-with-norm">
+<p>
+For example, <code>:g/^For/norm A!</code> adds <code>!</code> at the end of each line that starts with <code>For</code>:
+</p>
+<ul class="org-ul">
+<li><code>:g</code> - the <code>global</code> command</li>
+<li><code>/^For/</code> - find all lines that start (the <code>^</code> in Vim is the start of the line) with <code>For</code></li>
+<li><code>norm A!</code> - execute <code>A!</code> on matching lines
+<ul class="org-ul">
+<li><code>A</code> means "append": it starts insert mode at the end of the line</li>
+<li><code>!</code> inserts the "!"</li>
+</ul></li>
+</ul>
+
+<p>
+Similarly, <code>:v</code> can be used to apply commands to lines that do not match the pattern.
+For example, <code>:v/^For/norm A!</code> adds <code>!</code> at the end of each line that does not start with <code>For</code>.
+</p>
+</div>
+</div>
+<p class="post-tags">Tags: <a href="/tags/vim/">vim</a></p>
+</main>
+<div class="sidebar">
+<nav class="sidebar-toc" role="doc-toc">
+<h2>Table of Contents</h2>
+<div role="doc-toc">
+<ul>
+<li><a href="#the-command">The <code>@</code> command</a></li>
+<li><a href="#manage-macros-in-a-regular-buffer">Manage macros in a regular buffer</a></li>
+<li><a href="#the-norm-command">The <code>norm</code> command</a></li>
+<li><a href="#using-globals-with-norm">Using globals with <code>norm</code></a></li>
+</ul>
+</div>
+</nav>
+<nav class="sidebar-menu" aria-label="Post lists">
+  <a href="/">All Posts</a>
+  <a href="/archive.html">Archive</a>
+</nav>
+<aside class="sidebar-tags" aria-labelledby="sidebar-tags">
+<h2 id="sidebar-tags" class="sidebar-title"><a href="/tags/">Tags</a></h2>
+<ul class="tag-cloud">
+<li><a href="/tags/android/" style="font-size: 1.00em" title="1 post">android</a></li>
+<li><a href="/tags/aws/" style="font-size: 1.82em" title="19 posts">aws</a></li>
+<li><a href="/tags/docker/" style="font-size: 1.00em" title="1 post">docker</a></li>
+<li><a href="/tags/git/" style="font-size: 1.95em" title="22 posts">git</a></li>
+<li><a href="/tags/jquery/" style="font-size: 1.00em" title="1 post">jquery</a></li>
+<li><a href="/tags/js/" style="font-size: 1.45em" title="11 posts">js</a></li>
+<li><a href="/tags/kbd/" style="font-size: 1.14em" title="4 posts">kbd</a></li>
+<li><a href="/tags/mac/" style="font-size: 1.09em" title="3 posts">mac</a></li>
+<li><a href="/tags/mysql/" style="font-size: 1.05em" title="2 posts">mysql</a></li>
+<li><a href="/tags/npm/" style="font-size: 1.00em" title="1 post">npm</a></li>
+<li><a href="/tags/oauth/" style="font-size: 1.00em" title="1 post">oauth</a></li>
+<li><a href="/tags/obs/" style="font-size: 1.00em" title="1 post">obs</a></li>
+<li><a href="/tags/oop/" style="font-size: 1.00em" title="1 post">oop</a></li>
+<li><a href="/tags/org/" style="font-size: 1.00em" title="1 post">org</a></li>
+<li><a href="/tags/php/" style="font-size: 1.14em" title="4 posts">php</a></li>
+<li><a href="/tags/python/" style="font-size: 1.09em" title="3 posts">python</a></li>
+<li><a href="/tags/rds/" style="font-size: 1.00em" title="1 post">rds</a></li>
+<li><a href="/tags/shell/" style="font-size: 1.18em" title="5 posts">shell</a></li>
+<li><a href="/tags/ssh/" style="font-size: 1.00em" title="1 post">ssh</a></li>
+<li><a href="/tags/tts/" style="font-size: 1.00em" title="1 post">tts</a></li>
+<li><a href="/tags/vim/" style="font-size: 1.18em" title="5 posts">vim</a></li>
+<li><a href="/tags/vr/" style="font-size: 1.00em" title="1 post">vr</a></li>
+<li><a href="/tags/vue/" style="font-size: 1.09em" title="3 posts">vue</a></li>
+<li><a href="/tags/web/" style="font-size: 1.36em" title="9 posts">web</a></li>
+<li><a href="/tags/yii/" style="font-size: 1.14em" title="4 posts">yii</a></li>
+</ul>
+</aside>
+</div>
+<footer id="postamble" class="status">
+<nav class="site-contacts" aria-label="Contacts">
+  <a href="/">Posts</a>
+  <a href="/archive.html">Archive</a>
+  <span class="divider">&nbsp;|&nbsp;</span>
+  <a href="https://github.com/serebrov">GitHub</a>
+  <a href="https://stackoverflow.com/users/4612064/borys-serebrov?tab=summary">StackOverflow</a>
+  <a href="https://x.com/serebrov">Twitter</a>
+</nav>
+<p class="copyright">&copy; 2020-2026 Borys Serebrov</p>
+</footer>
+</body>
+</html>

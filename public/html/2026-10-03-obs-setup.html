@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2026-11-04 Wed 21:10 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OBS Setup for macOS</title>
+<meta name="author" content="Boris" />
+<meta name="description" content="OBS setup for macOS to manage audio and record Google Meet / Zoom meetings." />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="/static/org_css/normalize.css">
+<link rel="stylesheet" href="/static/org_css/htmlize.css">
+<link rel="stylesheet" href="/static/org_css/org.css">
+<link rel="stylesheet" href="/static/blog.css">
+<script defer src="/static/blog.js"></script>
+</head>
+<body>
+<header id="preamble" class="status">
+<a class="site-logo" href="/"><img loading="lazy" src="/html/images/logo.jpg" alt="" width="128" height="128"></a>
+<div class="site-info">
+  <a class="site-title" href="/">vim, git, aws and other three-letter words</a>
+  <p class="site-desc">Software Development Notes</p>
+</div>
+<nav class="site-menu" aria-label="Main menu">
+  <a href="/" data-section="posts" aria-current="true">Posts</a>
+  <a href="/archive.html" data-section="archive">Archive</a>
+  <a href="/tags/" data-section="tags">Tags</a>
+</nav>
+</header>
+<main id="content" class="content">
+<header>
+<h1 class="title">OBS Setup for macOS</h1>
+</header><nav id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#purpose">Purpose</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#setup">Setup</a></li>
+<li><a href="#install-vb-cable-or-blackhole">Install VB-Cable or BlackHole</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+</nav>
+<div id="outline-container-purpose" class="outline-2">
+<h2 id="purpose">Purpose</h2>
+<div class="outline-text-2" id="text-purpose">
+<p>
+Have OBS working with Google Meet and Zoom to be able to:
+</p>
+<ul class="org-ul">
+<li>Record the meeting</li>
+<li>Share both microphone audio and desktop audio in the meeting</li>
+<li>Apply OBS filters to the microphone audio to reduce noise</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-prerequisites" class="outline-2">
+<h2 id="prerequisites">Prerequisites</h2>
+<div class="outline-text-2" id="text-prerequisites">
+<ul class="org-ul">
+<li>Download and install OBS: <a href="https://obsproject.com/">https://obsproject.com/</a></li>
+<li>Download and install <a href="https://github.com/existentialaudio/blackhole">BlackHole</a> or <a href="https://vb-audio.com/Cable/index.htm">VB-Cable</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-setup" class="outline-2">
+<h2 id="setup">Setup</h2>
+<div class="outline-text-2" id="text-setup">
+<p>
+How it works for audio:
+</p>
+
+<pre class="example" id="orgb725f3c">
+Input (microphone, desktop) -&gt; OBS
+-&gt; (sends audio to) -&gt; BlackHole (monitoring device)
+-&gt; (used as input) Google Meet, Zoom, etc.
+</pre>
+
+<p>
+For video, it is simpler: just click "Start Virtual Camera" in OBS and use it as a video input in Google Meet.
+</p>
+
+<p>
+On the OBS side:
+</p>
+
+<ul class="org-ul">
+<li>Add an audio source (for example, an external microphone)</li>
+</ul>
+
+
+<figure id="org83968ba">
+<img loading="lazy" src="images/clipboard-20261003T192236.png" alt="clipboard-20261003T192236.png">
+
+</figure>
+
+
+<figure id="org0eccdb6">
+<img loading="lazy" src="images/clipboard-20261003T192418.png" alt="clipboard-20261003T192418.png">
+
+</figure>
+
+<ul class="org-ul">
+<li>Add filters for the audio input</li>
+</ul>
+
+
+<figure id="org251b385">
+<img loading="lazy" src="images/clipboard-20261003T192446.png" alt="clipboard-20261003T192446.png">
+
+</figure>
+
+<p>
+Add more audio sources if needed. For example, add desktop audio to play music
+or show apps with sound on your desktop. This source can be muted/unmuted dynamically in OBS.
+</p>
+</div>
+</div>
+<div id="outline-container-install-vb-cable-or-blackhole" class="outline-2">
+<h2 id="install-vb-cable-or-blackhole">Install VB-Cable or BlackHole</h2>
+<div class="outline-text-2" id="text-install-vb-cable-or-blackhole">
+<p>
+Configure OBS to send audio to BlackHole:
+</p>
+<ul class="org-ul">
+<li>OBS (in the system top menu) -&gt; Preferences -&gt; Audio -&gt; Monitoring Device</li>
+<li>Set "Monitoring Device" to "BlackHole" or "VB-Cable"</li>
+</ul>
+
+
+<figure id="orgf0ae8cd">
+<img loading="lazy" src="images/clipboard-20261003T192526.png" alt="clipboard-20261003T192526.png">
+
+</figure>
+
+<p>
+Change the mode for audio inputs to "Monitor and Output":
+</p>
+<ul class="org-ul">
+<li>Click the gear button at the bottom of the "Audio Mixer" block
+<ul class="org-ul">
+<li>or click the three dots near any input in the "Audio Mixer" and select "Advanced Audio Properties"</li>
+</ul></li>
+<li>Change "Audio Monitoring" to "Monitor and Output"</li>
+</ul>
+
+
+<figure id="org24f7154">
+<img loading="lazy" src="images/clipboard-20261003T192546.png" alt="clipboard-20261003T192546.png">
+
+</figure>
+
+<p>
+Current UI: the "monitor" button (the headphones icon) is under each channel, in the bottom right corner.
+The dialog above is also available.
+</p>
+
+
+<figure id="org7f38249">
+<img loading="lazy" src="images/clipboard-20261003T192603.png" alt="clipboard-20261003T192603.png">
+
+</figure>
+
+<p>
+Note: if you don't want to record macOS audio (such as music playing in the background),
+turn off monitoring for the source such as "macOS Audio Capture" (set to "Monitor Off"
+in the dialog or click the headphones icon in the audio mixer pane to deactivate it).
+</p>
+
+<p>
+In Google Meet: use "BlackHole" as the audio input:
+</p>
+
+
+<figure id="org8dd856c">
+<img loading="lazy" src="images/clipboard-20261003T192623.png" alt="clipboard-20261003T192623.png">
+
+</figure>
+
+<p>
+Noise cancellation settings:
+</p>
+<ul class="org-ul">
+<li>I am using a Boya mini 2 as the microphone, with its noise cancellation on (it does not filter out everything)</li>
+<li>OBS noise filter takes care of most of the remaining background noise</li>
+<li>Google Meet noise cancellation is off</li>
+</ul>
+
+<p>
+OBS settings:
+</p>
+<ul class="org-ul">
+<li>Select the "Audio Input Capture" in the "Sources" pane</li>
+<li>Click "Filters" in the toolbar above</li>
+<li>Add "Noise Gate"
+<ul class="org-ul">
+<li>Close Threshold = -72 dB</li>
+<li>Open Threshold = -66 dB</li>
+<li>Attack Time = 25 ms</li>
+<li>Hold Time = 200 ms</li>
+<li>Release Time = 150 ms</li>
+</ul></li>
+<li>Add "Noise Suppression"
+<ul class="org-ul">
+<li>Method = RNNoise (good quality, more CPU usage)</li>
+</ul></li>
+</ul>
+
+
+<figure id="orgea2992d">
+<img loading="lazy" src="images/clipboard-20261003T192651.png" alt="clipboard-20261003T192651.png">
+
+</figure>
+
+
+<figure id="orga7b5d7a">
+<img loading="lazy" src="images/clipboard-20261003T192710.png" alt="clipboard-20261003T192710.png">
+
+</figure>
+
+<p>
+How to test the setup:
+</p>
+
+<ul class="org-ul">
+<li>Start a Google Meet call on macOS</li>
+<li>It is good to have some external voice source near the microphone, such as an audiobook playing out loud on another device</li>
+<li>Copy the link and open it on yet another device
+<ul class="org-ul">
+<li>Use headphones here, so you can hear clearly what's going on on the other side (the one we test)</li>
+<li>A phone or tablet is good here, since you can walk around</li>
+</ul></li>
+<li>Now the Mac transmits sound, and you can listen to it on another device. Make sure that the audio source near the microphone sounds good and that no external noises are picked up</li>
+<li>You (or someone else) can walk around and actually make some noises (for example, bang a cup on a table or a fork on a plate).</li>
+<li>If everything is working well, you should not hear these noises in your headphones.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-references" class="outline-2">
+<h2 id="references">References</h2>
+<div class="outline-text-2" id="text-references">
+<ul class="org-ul">
+<li><a href="https://jshingler.github.io/blog/2021/01/31/obs-virtual-cables/">OBS Virtual Cables</a></li>
+<li><a href="https://www.youtube.com/watch?v=G5S4VNsr0Gs">YouTube: How to Add Live Effects to Your Mic for Discord, Zoom, etc. (USING OBS)</a>
+<ul class="org-ul">
+<li>Explains more about "how it works".</li>
+</ul></li>
+<li><a href="https://www.reddit.com/r/obs/comments/fvj2y4/output_obs_audio_so_that_zoom_can_use_it_as_input/">Reddit: Output OBS audio so that Zoom can use it as input</a>
+<ul class="org-ul">
+<li>How to send OBS filtered sound to Google Meet?</li>
+<li>Install VAC or VB - Audio Virtual Cable</li>
+<li>In obs settings/audio set monitor to Line 1 (virtual audio cable) or VB if you're using that instead.</li>
+<li>On OBS main screen where it says Audio Mixer click the gear icon and go to advanced audio properties.</li>
+<li>On your mic you want to use with zoom or whatever select monitor only (mute output)</li>
+<li>Now anything being sent to monitor in OBS goes through your virtual audio cable. You could also add obs virtual cam and use OBS as a webcam as well so everything you're broadcasting in OBS (video wise) is displayed as your webcam.</li>
+<li>In your video chat program, whatever you decide to use.</li>
+<li>Find your audio settings and make sure your Mic or Input is set to Line 1 (virtual audio cable) or VB if you're using that</li>
+<li>There's a lot more you can do with OBS and chat software. Any questions just message me here. i'll try and check more often</li>
+</ul></li>
+<li><a href="https://www.reddit.com/r/podcasting/comments/1c93pul/good_noise_suppression_software_for_microphones/">Reddit: Good noise suppression software for microphones</a></li>
+<li><a href="https://www.reddit.com/r/obs/comments/l6yt0c/best_obs_mic_settings_for_any_mic_obs_filters/">Reddit: BEST OBS Mic Settings - For ANY Mic (OBS Filters: Noise Suppression, Compressor, Noise Gate)</a></li>
+<li><a href="https://obsproject.com/forum/threads/mac-audio-routing-virtual-cable-ez-solution.124415/">OBS Forum: Mac Audio Routing Virtual Cable EZ solution</a></li>
+<li><a href="https://www.reddit.com/r/obs/comments/13nqyov/noise_suppression_mic_filter_is_a_lifesaver_how/">Reddit: Noise Suppression mic filter is a lifesaver, how can I constantly have this on my PC?</a></li>
+</ul>
+
+<p>
+Note on aggregate devices: some guides use aggregate devices, but that is not necessary.
+It is possible to create an aggregate device (that is, BlackHole + headphones) and then use it as the monitoring device in OBS, but I haven't noticed any difference.
+</p>
+
+<p>
+Q: How exactly do aggregate devices work?
+</p>
+<ul class="org-ul">
+<li>What happens when I use a BlackHole aggregate device to record Google Meet?</li>
+<li>Related: <a href="https://www.youtube.com/watch?v=vpegwQvQJMc">YouTube: Record Your Mac's Audio for Free (QuickTime Hack)</a></li>
+</ul>
+
+<p>
+Q: OBS Studio has the "Mic/Aux" channel by default; is it necessary to add an audio source explicitly?
+</p>
+<ul class="org-ul">
+<li>I was not able to actually get anything from Mic/Aux, and also I can't add filters for it, so maybe this is something separate.</li>
+</ul>
+
+<p>
+Related: <a href="https://www.reddit.com/r/Twitch/comments/14lx1ea/comment/jpyr6re/">Reddit comment</a>
+</p>
+<ul class="org-ul">
+<li>This is a really tough situation and one I share with my wife, who is sitting four-ish feet away from me.</li>
+<li>Here are the things I did to reduce my voice on her end:
+<ul class="org-ul">
+<li>1. Get a <a href="https://www.reddit.com/search/?q=Dynamic+Microphone+Twitch+streaming&amp;cId=6a950a59-7215-45b4-b00b-dc2faf27d459&amp;iId=6f99a407-de88-4329-b410-047887371872">Dynamic Microphone</a> and mount it to your desk using a boom arm so that the speaking side (usually the top) is pointing to you and away from your BF. I bought her the <a href="https://www.tonormic.com/products/td510-usb-xlr-dynamic-microphone">Tonor TD510 USB/XLR Mic</a> and it is SURPRISINGLY good for the $60 price point.
+<ul class="org-ul">
+<li>1b) Make sure the microphone is close to you, and with close I mean for a Dynamic Microphone you should be able to practically kiss it (4-6 inches) and for a condenser mic (which you have now) you should have it about 8-10 inches away at the most. Closer <b>is</b> better.</li>
+<li>1c) With your microphone so close you are probably a LOT louder, So turn your Gain (the knob on the Wave or the buttons on the Tonor) right down until your normal streaming voice hits the top of the green or right in the yellow. (-15 to 10dB)</li>
+</ul></li>
+<li>2) In OBS it is time to set up some filters, starting with <a href="https://www.reddit.com/search/?q=Noise+Suppression+OBS+Twitch&amp;cId=8b43aecd-7135-4090-b437-2c90d37a2b99&amp;iId=3631a29b-afa9-4385-9794-bf6592368272">Noise Suppression</a>. Pick the filter you think works best - I prefer RNN Noise over RTX for example - such that your voice stays clear and unmuddied while removing as much noise from your BF as possible.</li>
+<li>3) After noise suppression, get your BF to play a game and be loud about it. Look at what levels on your microphone he hits. If this is -45dB or lower this is great, because that means that you -should- be able to top that with your own voice.
+<ul class="org-ul">
+<li>3b) Speak as loud as you normally do into your mic, then pretend you have a little intimate moment with your viewers and give them a whisper. Check what the lowest is you get while you whisper. If that is under -20dB you may want to add a little Gain filter and just up it 3-5dB, but make sure it is <b>below</b> your Noise Suppression. Suppress first, then add gain.</li>
+<li>3c) If that is well clear of your BF then you -could- add a Noise Gate on top of the noise suppression to just remove your BF entirely -unless- you are speaking too.</li>
+</ul></li>
+<li>4) Now it is time to test your highs: Talk as if you are normally streaming - and really check the dB on this one - , then get excited, get scared, scream for a bit. It will probably be WAY too loud (peaking or high reds). Now we are going to add a compression filter. Set the ratio to 4:1 and set the attentuation to 3-5dB <b>under</b> your normal speaking voice dB.
+<ul class="org-ul">
+<li>4b) Now speak again at your normal volume and use the make-up gain slider to -just- hit the yellow if you need to. Just make sure not to push it too far (don't add anything more than 6dB).</li>
+</ul></li>
+<li>5) Add one last filter: A Limiter. Set it to -3dB. This will cut you off completely if you are about to peak. It is a really good idea to have because it is great for your viewers if you don't make their ears bleed.</li>
+</ul></li>
+<li>And that's it. Give it another test: Whisper, Talk, Scream. You should never hit below -20dB while whispering and never clip (fill the whole dB bar) when screaming. If you have any questions, feel free to drop them below.</li>
+</ul>
+</div>
+</div>
+<p class="post-tags">Tags: <a href="/tags/obs/">obs</a> <a href="/tags/mac/">mac</a></p>
+</main>
+<div class="sidebar">
+<nav class="sidebar-toc" role="doc-toc">
+<h2>Table of Contents</h2>
+<div role="doc-toc">
+<ul>
+<li><a href="#purpose">Purpose</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#setup">Setup</a></li>
+<li><a href="#install-vb-cable-or-blackhole">Install VB-Cable or BlackHole</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+</nav>
+<nav class="sidebar-menu" aria-label="Post lists">
+  <a href="/">All Posts</a>
+  <a href="/archive.html">Archive</a>
+</nav>
+<aside class="sidebar-tags" aria-labelledby="sidebar-tags">
+<h2 id="sidebar-tags" class="sidebar-title"><a href="/tags/">Tags</a></h2>
+<ul class="tag-cloud">
+<li><a href="/tags/android/" style="font-size: 1.00em" title="1 post">android</a></li>
+<li><a href="/tags/aws/" style="font-size: 1.82em" title="19 posts">aws</a></li>
+<li><a href="/tags/docker/" style="font-size: 1.00em" title="1 post">docker</a></li>
+<li><a href="/tags/git/" style="font-size: 1.95em" title="22 posts">git</a></li>
+<li><a href="/tags/jquery/" style="font-size: 1.00em" title="1 post">jquery</a></li>
+<li><a href="/tags/js/" style="font-size: 1.45em" title="11 posts">js</a></li>
+<li><a href="/tags/kbd/" style="font-size: 1.14em" title="4 posts">kbd</a></li>
+<li><a href="/tags/mac/" style="font-size: 1.09em" title="3 posts">mac</a></li>
+<li><a href="/tags/mysql/" style="font-size: 1.05em" title="2 posts">mysql</a></li>
+<li><a href="/tags/npm/" style="font-size: 1.00em" title="1 post">npm</a></li>
+<li><a href="/tags/oauth/" style="font-size: 1.00em" title="1 post">oauth</a></li>
+<li><a href="/tags/obs/" style="font-size: 1.00em" title="1 post">obs</a></li>
+<li><a href="/tags/oop/" style="font-size: 1.00em" title="1 post">oop</a></li>
+<li><a href="/tags/org/" style="font-size: 1.00em" title="1 post">org</a></li>
+<li><a href="/tags/php/" style="font-size: 1.14em" title="4 posts">php</a></li>
+<li><a href="/tags/python/" style="font-size: 1.09em" title="3 posts">python</a></li>
+<li><a href="/tags/rds/" style="font-size: 1.00em" title="1 post">rds</a></li>
+<li><a href="/tags/shell/" style="font-size: 1.18em" title="5 posts">shell</a></li>
+<li><a href="/tags/ssh/" style="font-size: 1.00em" title="1 post">ssh</a></li>
+<li><a href="/tags/tts/" style="font-size: 1.00em" title="1 post">tts</a></li>
+<li><a href="/tags/vim/" style="font-size: 1.18em" title="5 posts">vim</a></li>
+<li><a href="/tags/vr/" style="font-size: 1.00em" title="1 post">vr</a></li>
+<li><a href="/tags/vue/" style="font-size: 1.09em" title="3 posts">vue</a></li>
+<li><a href="/tags/web/" style="font-size: 1.36em" title="9 posts">web</a></li>
+<li><a href="/tags/yii/" style="font-size: 1.14em" title="4 posts">yii</a></li>
+</ul>
+</aside>
+</div>
+<footer id="postamble" class="status">
+<nav class="site-contacts" aria-label="Contacts">
+  <a href="/">Posts</a>
+  <a href="/archive.html">Archive</a>
+  <span class="divider">&nbsp;|&nbsp;</span>
+  <a href="https://github.com/serebrov">GitHub</a>
+  <a href="https://stackoverflow.com/users/4612064/borys-serebrov?tab=summary">StackOverflow</a>
+  <a href="https://x.com/serebrov">Twitter</a>
+</nav>
+<p class="copyright">&copy; 2020-2026 Borys Serebrov</p>
+</footer>
+</body>
+</html>
